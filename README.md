@@ -14,7 +14,7 @@ Additionally, many of the existing features are subject to change.
 ## TODO
 The following tasks should be completed in the near future:
 - [ ] The Lex phase should produce a stream of parse.Tokens rather than Nodes.
-- [ ] Fix the double-wrapping behavior occuring when building the AST.
+- [x] Fix the double-wrapping behavior occuring when building the AST.
 - [ ] Seperate Expr and Stmt ast.builders to make building if, call, and other nodes more robust.
 
 The following tasks are still in progress:
