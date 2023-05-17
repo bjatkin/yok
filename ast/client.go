@@ -30,7 +30,6 @@ func NewClient(table *sym.Table) *Client {
 	}
 }
 
-// TODO: return error here?
 func (c *Client) Build(tree parse.Node) Root {
 	ret := Root{}
 
@@ -51,35 +50,23 @@ func (c *Client) Build(tree parse.Node) Root {
 	return ret
 }
 
-func (c *Client) Yok(tree Root) ([]byte, error) {
+func (c *Client) Yok(tree Root) []byte {
 	var raw []string
-	err := tree.Walk(func(s Stmt) error {
-		raw = append(raw, s.Yok()...)
-		return nil
-	})
-	if err != nil {
-		return nil, err
+	for _, stmt := range tree.Stmts {
+		raw = append(raw, stmt.Yok()...)
 	}
 
-	return []byte(strings.Join(raw, "\n")), nil
+	return []byte(strings.Join(raw, "\n") + "\n")
 }
 
 type builder func(*sym.Table, []Stmt, parse.Node) []Stmt
 
-type WalkFunc func(Stmt) error
-
-type Walker interface {
-	walk(WalkFunc) error
-}
-
 type Stmt interface {
 	stmt()
-	// TODO: remove this and favor the walk function
 	Yok() []string
 }
 
 type Expr interface {
 	expr()
-	// TODO: remove this and favor the walk function
 	Yok() []string
 }

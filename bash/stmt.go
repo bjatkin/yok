@@ -13,23 +13,23 @@ type Root struct {
 	Stmts []Stmt
 }
 
-func (r Root) Walk(fn WalkFunc) error {
-	for _, stmt := range r.Stmts {
-		if walker, ok := stmt.(Walker); ok {
-			err := walker.walk(fn)
-			if err != nil {
-				return err
-			}
-		}
+// func (r Root) Walk(fn WalkFunc) error {
+// 	for _, stmt := range r.Stmts {
+// 		if walker, ok := stmt.(Walker); ok {
+// 			err := walker.walk(fn)
+// 			if err != nil {
+// 				return err
+// 			}
+// 		}
 
-		err := fn(stmt)
-		if err != nil {
-			return err
-		}
-	}
+// 		err := fn(stmt)
+// 		if err != nil {
+// 			return err
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (r Root) Bash() []string {
 	var lines []string

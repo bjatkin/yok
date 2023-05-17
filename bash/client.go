@@ -53,28 +53,16 @@ func (c *Client) Build(tree ast.Stmt) Root {
 	return ret
 }
 
-func (c *Client) Bash(tree Root) ([]byte, error) {
-	var raw []string
-	err := tree.Walk(func(s Stmt) error {
-		raw = append(raw, s.Bash()...)
-		return nil
-	})
-	if err != nil {
-		return nil, err
+func (c *Client) Bash(tree Root) []byte {
+	raw := []string{"#!/bin/bash", ""}
+	for _, stmt := range tree.Stmts {
+		raw = append(raw, stmt.Bash()...)
 	}
 
-	raw = append([]string{"#!/bin/bash", ""}, raw...)
-	return []byte(strings.Join(raw, "\n")), nil
+	return []byte(strings.Join(raw, "\n") + "\n")
 }
 
-// TODO: this really seems like more of a converter or a transposer
 type builder func(*sym.Table, []Stmt, ast.Stmt) []Stmt
-
-type WalkFunc func(Stmt) error
-
-type Walker interface {
-	walk(WalkFunc) error
-}
 
 type Stmt interface {
 	stmt()

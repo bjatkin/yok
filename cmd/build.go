@@ -33,9 +33,7 @@ func buildSource(src, dest string) error {
 	}
 
 	// code must always be newline terminated in order to be lexed correctly
-	if code[len(code)-1] != '\n' {
-		code = append(code, '\n')
-	}
+	code = append(code, '\n')
 
 	table := sym.NewTable()
 	client := parse.NewClient(table)
@@ -52,17 +50,10 @@ func buildSource(src, dest string) error {
 	astClient := ast.NewClient(table)
 	yokAST := astClient.Build(parseTree)
 
-	// TODO: how to resolve this double wrap
-	yokAST = yokAST.Stmts[0].(ast.Root)
-	// TODO: how to resolve this douple wrap
-
 	bashClient := bash.NewClient(table)
 	bashAST := bashClient.Build(yokAST)
 
-	rawBash, err := bashClient.Bash(bashAST)
-	if err != nil {
-		return fmt.Errorf("failed to create raw bash %w", err)
-	}
+	rawBash := bashClient.Bash(bashAST)
 
 	err = os.WriteFile(dest, rawBash, 0o0775)
 	if err != nil {

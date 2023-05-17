@@ -19,7 +19,6 @@ var fmtCmd = &cobra.Command{
 	Short: "format and re-write the source file",
 	Args:  cobra.ExactArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
-		// TODO: fmt the code
 		src := args[0]
 		dest := args[1]
 		return fmtSource(src, dest)
@@ -32,9 +31,8 @@ func fmtSource(src, dest string) error {
 		return fmt.Errorf("failed to open src file %w", err)
 	}
 
-	if code[len(code)-1] != '\n' {
-		code = append(code, '\n')
-	}
+	// code must always be newline terminated in order to be lexed correctly
+	code = append(code, '\n')
 
 	table := sym.NewTable()
 	client := parse.NewClient(table)
@@ -51,10 +49,7 @@ func fmtSource(src, dest string) error {
 	astClient := ast.NewClient(table)
 	ast := astClient.Build(parseTree)
 
-	rawYok, err := astClient.Yok(ast)
-	if err != nil {
-		return fmt.Errorf("failed to create raw yok %w", err)
-	}
+	rawYok := astClient.Yok(ast)
 
 	err = os.WriteFile(dest, rawYok, 0o0665)
 	if err != nil {
