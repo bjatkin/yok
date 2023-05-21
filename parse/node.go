@@ -37,6 +37,7 @@ const (
 	CloseIndex   = NodeType("closeindex")
 	Identifyer   = NodeType("identifyer")
 	Assign       = NodeType("assign")
+	Decl         = NodeType("decl")
 	Call         = NodeType("call")
 	Comma        = NodeType("comma")
 	Dot          = NodeType("dot")
@@ -47,7 +48,10 @@ const (
 type Node struct {
 	ID       sym.ID
 	NodeType NodeType
-	Nodes    []Node
+	// TODO: set this form the lex token
+	// then get rid of all the symbole table stuff that is being used to get this
+	Value string
+	Nodes []Node
 }
 
 func (n Node) Clone() Node {
@@ -59,6 +63,7 @@ func (n Node) Clone() Node {
 	return Node{
 		ID:       n.ID,
 		NodeType: n.NodeType,
+		Value:    n.Value,
 		Nodes:    nodes,
 	}
 }
@@ -70,10 +75,10 @@ func (n Node) String() string {
 	}
 
 	if len(sub) > 0 {
-		return fmt.Sprintf("%s(%d) [ %s ]", n.NodeType, n.ID, strings.Join(sub, ", "))
+		return fmt.Sprintf("%s(%s) [ %s ]", n.NodeType, n.Value, strings.Join(sub, ", "))
 	}
 
-	return fmt.Sprintf("%s(%d)", n.NodeType, n.ID)
+	return fmt.Sprintf("%s(%s)", n.NodeType, n.Value)
 }
 
 func CloneNodes(nodes []Node) []Node {

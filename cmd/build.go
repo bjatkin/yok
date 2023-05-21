@@ -50,6 +50,11 @@ func buildSource(src, dest string) error {
 	astClient := ast.NewClient(table)
 	yokAST := astClient.Build(parseTree)
 
+	err = astClient.Validate(yokAST)
+	if err != nil {
+		return fmt.Errorf("validation failure: %w", err)
+	}
+
 	bashClient := bash.NewClient(table)
 	bashAST := bashClient.Build(yokAST)
 

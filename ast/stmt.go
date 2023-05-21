@@ -14,24 +14,6 @@ type Root struct {
 	Stmts []Stmt
 }
 
-// func (r Root) Walk(fn WalkFunc) error {
-// 	for _, stmt := range r.Stmts {
-// 		if walker, ok := stmt.(Walker); ok {
-// 			err := walker.walk(fn)
-// 			if err != nil {
-// 				return err
-// 			}
-// 		}
-
-// 		err := fn(stmt)
-// 		if err != nil {
-// 			return err
-// 		}
-// 	}
-
-// 	return nil
-// }
-
 func (r Root) Yok() []string {
 	var lines []string
 	for _, stmt := range r.Stmts {
@@ -144,6 +126,8 @@ type Import struct {
 	Alias   string
 }
 
+// TODO: this should maybe be folded into the Use Yok() method since it dosen't
+// really follow the convention of returning lines of code
 func (i Import) Yok() []string {
 	switch {
 	case i.CmdName != "" && i.Alias != "":
@@ -200,10 +184,15 @@ type Assign struct {
 	ID         sym.ID
 	Identifyer string
 	SetTo      Expr
+	IsDecl     bool
 }
 
 func (a Assign) Yok() []string {
-	return []string{a.Identifyer + " = " + strings.Join(a.SetTo.Yok(), "")}
+	if a.IsDecl {
+		value := strings.Join(a.SetTo.Yok(), "")
+		return []string{fmt.Sprintf("let %s %s", a.Identifyer, sym.TypeFromValue(value))}
+	}
+	return []string{fmt.Sprintf("%s = %s", a.Identifyer, strings.Join(a.SetTo.Yok(), ""))}
 }
 
 func buildAssign(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
@@ -219,23 +208,51 @@ func buildAssign(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 
 	ret := Assign{
 		ID:         node.Nodes[0].ID,
-		Identifyer: table.MustGetSymbol(node.Nodes[0].ID).Value,
+		Identifyer: node.Nodes[0].Value,
 	}
 
 	switch {
 	case node.Nodes[2].NodeType == parse.Value:
 		ret.SetTo = Value{
 			ID:  node.Nodes[2].ID,
-			Raw: table.MustGetSymbol(node.Nodes[2].ID).Value,
+			Raw: node.Nodes[2].Value,
 		}
+
 	case node.Nodes[2].NodeType == parse.Identifyer:
 		ret.SetTo = Identifyer{
 			ID:   node.Nodes[2].ID,
-			Name: table.MustGetSymbol(node.Nodes[2].ID).Value,
+			Name: node.Nodes[2].Value,
 		}
 	}
 
 	return []Stmt{ret}
+}
+
+func buildDecl(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
+	if node.NodeType != parse.Decl {
+		return nil
+	}
+	if len(node.Nodes) < 3 {
+		return nil
+	}
+	if node.Nodes[0].NodeType != parse.LetKeyword {
+		return nil
+	}
+	if node.Nodes[1].NodeType != parse.Identifyer {
+		return nil
+	}
+	if node.Nodes[2].NodeType != parse.TypeKeyword {
+		return nil
+	}
+
+	yokType := sym.StrToType(node.Nodes[2].Value)
+
+	return []Stmt{Assign{
+		ID:         node.Nodes[1].ID,
+		Identifyer: node.Nodes[1].Value,
+		SetTo:      Value{Raw: sym.DefaultValue(yokType)},
+		IsDecl:     true,
+	}}
 }
 
 type Comment struct {

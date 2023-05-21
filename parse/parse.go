@@ -142,6 +142,8 @@ var parseAssign = tree(Node{NodeType: Assign},
 	),
 )
 
+var parseDecl = tree(Node{NodeType: Decl}, typeSequence(LetKeyword, Identifyer, TypeKeyword))
+
 var parseEnv = typeTree(EnvKeyword, typeSequence(OpenIndex, Value, CloseIndex, NewLine))
 
 var parseComment = typeSequence(Comment)

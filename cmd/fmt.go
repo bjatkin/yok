@@ -51,6 +51,7 @@ func fmtSource(src, dest string) error {
 
 	rawYok := astClient.Yok(ast)
 
+	fmt.Printf("writing to dest %s\n", dest)
 	err = os.WriteFile(dest, rawYok, 0o0665)
 	if err != nil {
 		return fmt.Errorf("failed to write dest file %w", err)

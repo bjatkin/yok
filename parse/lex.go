@@ -44,6 +44,7 @@ func (c *Client) Lex(file string, code []byte) ([]Node, error) {
 				tokens = append(tokens, Node{
 					ID:       id,
 					NodeType: match.nodeType,
+					Value:    string(value),
 				})
 				break
 			}

@@ -48,6 +48,7 @@ func NewClient(table *sym.Table) *Client {
 			stringValuePat{},
 		},
 		parsers: []parser{
+			parseDecl,
 			parseAssign,
 			parseEnv,
 			parseComment,
@@ -68,7 +69,7 @@ func (c *Client) Parse(tokens []Node) (Node, error) {
 		return match.nodes[0], nil
 	}
 
-	return Node{}, fmt.Errorf("failed to build parse tree: uknown token sequence %v", itter.All())
+	return Node{}, fmt.Errorf("failed to build parse tree")
 }
 
 func (c *Client) parse(itter slice.Itter[Node]) parseMatch {

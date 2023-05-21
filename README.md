@@ -18,12 +18,12 @@ The following tasks should be completed in the near future:
 - [ ] Seperate Expr and Stmt ast.builders to make building if, call, and other nodes more robust.
 
 The following tasks are still in progress:
-- [ ] Add a yok run command to complie and then run yok scripts in the same step.
-- [ ] Add a validation phase to the AST.
+- [x] Add a yok run command to complie and then run yok scripts in the same step.
+- [x] Add a validation phase to the AST.
 - [ ] Design a sutable error package.
     - [ ] How should internal complier errors be handled.
     - [ ] How should user facing errors be displayed (hoping to borrow from rust for this).
-- [ ] Add in the basics of the type system.
+- [x] Add in the basics of the type system.
 - [ ] Add support arrays.
 - [ ] Add support tables (associative arrasy in bash).
 - [ ] Add support for looping constructs.

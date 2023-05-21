@@ -10,8 +10,9 @@ import (
 const indent = "    "
 
 type Client struct {
-	table    *sym.Table
-	builders []builder
+	table      *sym.Table
+	builders   []builder
+	validators []validator
 }
 
 func NewClient(table *sym.Table) *Client {
@@ -21,11 +22,15 @@ func NewClient(table *sym.Table) *Client {
 			buildRoot,
 			buildUseImport,
 			buildAssign,
+			buildDecl,
 			buildComment,
 			buildCommandCall,
 			buildNewLine,
 			buildEnv,
 			buildIf,
+		},
+		validators: []validator{
+			NewValidateIdentifyer(),
 		},
 	}
 }
@@ -57,6 +62,34 @@ func (c *Client) Yok(tree Root) []byte {
 	}
 
 	return []byte(strings.Join(raw, "\n") + "\n")
+}
+
+func (c *Client) Validate(stmt Stmt) error {
+	switch v := stmt.(type) {
+	case Root:
+		for _, stmt := range v.Stmts {
+			err := c.Validate(stmt)
+			if err != nil {
+				return err
+			}
+		}
+	case If:
+		for _, stmt := range v.Root.Stmts {
+			err := c.Validate(stmt)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	for _, validator := range c.validators {
+		err := validator.check(stmt)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 type builder func(*sym.Table, []Stmt, parse.Node) []Stmt
