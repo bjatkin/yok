@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/bjatkin/yok/parse"
+	"github.com/bjatkin/yok/source"
 	"github.com/bjatkin/yok/sym"
 )
 
@@ -14,13 +15,13 @@ type Root struct {
 	Stmts []Stmt
 }
 
-func (r Root) Yok() []string {
-	var lines []string
+func (r Root) Yok() fmt.Stringer {
+	var ret source.Block
 	for _, stmt := range r.Stmts {
-		lines = append(lines, stmt.Yok()...)
+		ret.Lines = append(ret.Lines, stmt.Yok())
 	}
 
-	return lines
+	return ret
 }
 
 func buildRoot(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
@@ -38,8 +39,8 @@ type NewLine struct {
 	ID sym.ID
 }
 
-func (n NewLine) Yok() []string {
-	return []string{""}
+func (n NewLine) Yok() fmt.Stringer {
+	return source.NewLine{}
 }
 
 func buildNewLine(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
@@ -55,45 +56,37 @@ type Use struct {
 	Imports []Import
 }
 
-func (u Use) Yok() []string {
+func (u Use) Yok() fmt.Stringer {
 	var maxLen int
-	var imports int
+	var imports []source.Import
 	for _, imp := range u.Imports {
-		if yok := imp.Yok(); len(yok) > 0 {
-			if len(yok[0]) > maxLen {
-				maxLen = len(yok[0])
-			}
-
-			imports++
-		}
-	}
-
-	var lines []string
-	for _, imp := range u.Imports {
-		yok := imp.Yok()
-		if len(yok) != 2 {
+		yok, ok := imp.Yok().(source.Import)
+		if !ok {
 			continue
 		}
 
-		for len(yok[1]) > 0 && len(yok[0]) < maxLen {
-			yok[0] += " "
+		if len(yok.Name) > maxLen {
+			maxLen = len(yok.Name)
 		}
 
-		if imports == 1 {
-			lines = append(lines, yok[0]+yok[1])
-			continue
-		}
-
-		lines = append(lines, indent+yok[0]+yok[1])
-	}
-	lines = append(lines, "}")
-
-	if len(lines) == 2 {
-		return []string{fmt.Sprintf("use { %s }", lines[0])}
+		imports = append(imports, yok)
 	}
 
-	lines = append([]string{"use {"}, lines...)
-	return lines
+	if len(imports) == 1 {
+		return source.Linef("use { %s }", imports[0].String())
+	}
+
+	ret := source.PrefixBlock{
+		Prefix: source.Line("use {"),
+		Suffix: source.Line("}"),
+	}
+
+	for _, imp := range imports {
+		imp.MaxNameLen = maxLen
+		ret.Block.Lines = append(ret.Block.Lines, imp)
+	}
+
+	return ret
 }
 
 func buildUseImport(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
@@ -126,20 +119,14 @@ type Import struct {
 	Alias   string
 }
 
-// TODO: this should maybe be folded into the Use Yok() method since it dosen't
-// really follow the convention of returning lines of code
-func (i Import) Yok() []string {
-	switch {
-	case i.CmdName != "" && i.Alias != "":
-		return []string{i.CmdName, " as " + i.Alias}
-	case i.Path != "" && i.Alias != "":
-		return []string{i.Path, " as " + i.Alias}
-	case i.CmdName != "":
-		return []string{i.CmdName, ""}
-	case i.Path != "":
-		return []string{i.Path, ""}
-	default:
-		return []string{"", ""}
+func (i Import) Yok() fmt.Stringer {
+	name := i.CmdName
+	if name == "" {
+		name = i.Path
+	}
+	return source.Import{
+		Name:  name,
+		Alias: i.Alias,
 	}
 }
 
@@ -187,12 +174,12 @@ type Assign struct {
 	IsDecl     bool
 }
 
-func (a Assign) Yok() []string {
+func (a Assign) Yok() fmt.Stringer {
 	if a.IsDecl {
-		value := strings.Join(a.SetTo.Yok(), "")
-		return []string{fmt.Sprintf("let %s %s", a.Identifyer, sym.TypeFromValue(value))}
+		value := a.SetTo.Yok().String()
+		return source.Linef("let %s %s", a.Identifyer, sym.TypeFromValue(value))
 	}
-	return []string{fmt.Sprintf("%s = %s", a.Identifyer, strings.Join(a.SetTo.Yok(), ""))}
+	return source.Linef("%s = %s", a.Identifyer, a.SetTo.Yok())
 }
 
 func buildAssign(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
@@ -261,8 +248,8 @@ type Comment struct {
 	Raw string
 }
 
-func (c Comment) Yok() []string {
-	return []string{"# " + c.Raw}
+func (c Comment) Yok() fmt.Stringer {
+	return source.Linef("# %s", c.Raw)
 }
 
 func buildComment(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
@@ -286,34 +273,17 @@ type If struct {
 	Root  Root
 }
 
-func (i If) Yok() []string {
-	var body []string
-	for _, line := range i.Root.Yok() {
-		if line == "" {
-			body = append(body, line)
-			continue
-		}
-		body = append(body, indent+line)
-	}
-	body = append(body, "}")
-
-	var lines []string
-	check := i.Check.Yok()
-	for i, line := range check {
-		if i == 0 {
-			line = "if " + line
-		}
-		if i == len(check)-1 {
-			line += " {"
-		}
-		if i > 0 {
-			line = indent + line
-		}
-		lines = append(lines, line)
+func (i If) Yok() fmt.Stringer {
+	block, ok := i.Root.Yok().(source.Block)
+	if !ok {
+		return source.Linef("if %s { }", i.Check.Yok())
 	}
 
-	lines = append(lines, body...)
-	return lines
+	return source.PrefixBlock{
+		Prefix: source.Line(fmt.Sprintf("if %s {", i.Check.Yok())),
+		Block:  block,
+		Suffix: source.Line("}"),
+	}
 }
 
 func buildIf(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {

@@ -2,9 +2,9 @@ package bash
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/bjatkin/yok/ast"
+	"github.com/bjatkin/yok/source"
 	"github.com/bjatkin/yok/sym"
 )
 
@@ -13,13 +13,13 @@ type Root struct {
 	Stmts []Stmt
 }
 
-func (r Root) Bash() []string {
-	var lines []string
+func (r Root) Bash() fmt.Stringer {
+	var ret source.Block
 	for _, stmt := range r.Stmts {
-		lines = append(lines, stmt.Bash()...)
+		ret.Lines = append(ret.Lines, stmt.Bash())
 	}
 
-	return lines
+	return ret
 }
 
 func buildRoot(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
@@ -37,8 +37,8 @@ type NewLine struct {
 	ID sym.ID
 }
 
-func (n NewLine) Bash() []string {
-	return []string{""}
+func (n NewLine) Bash() fmt.Stringer {
+	return source.NewLine{}
 }
 
 func buildNewLine(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
@@ -56,16 +56,16 @@ type Use struct {
 	Imports []If
 }
 
-func (u Use) Bash() []string {
-	var lines []string
+func (u Use) Bash() fmt.Stringer {
+	var ret source.Block
 	for i, imp := range u.Imports {
-		lines = append(lines, imp.Bash()...)
+		ret.Lines = append(ret.Lines, imp.Bash())
 		if i < len(u.Imports)-1 {
-			lines = append(lines, "") // add a newline between each import
+			ret.Lines = append(ret.Lines, source.NewLine{}) // add a newline between each import
 		}
 	}
 
-	return lines
+	return ret
 }
 
 func buildUseImport(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
@@ -162,8 +162,8 @@ type Comment struct {
 	Raw string
 }
 
-func (c Comment) Bash() []string {
-	return []string{"# " + c.Raw}
+func (c Comment) Bash() fmt.Stringer {
+	return source.Linef("# %s", c.Raw)
 }
 
 func buildComment(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
@@ -185,8 +185,8 @@ type Assign struct {
 	SetTo      Expr
 }
 
-func (a Assign) Bash() []string {
-	return []string{a.Identifyer.Name + "=" + strings.Join(a.SetTo.Bash(), "")}
+func (a Assign) Bash() fmt.Stringer {
+	return source.Linef("%s=%s", a.Identifyer.Name, a.SetTo.Bash())
 }
 
 func buildAssign(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
@@ -233,18 +233,17 @@ type If struct {
 	Root  Root
 }
 
-func (i If) Bash() []string {
-	lines := []string{fmt.Sprintf("if %s; then", strings.Join(i.Check.Bash(), ""))}
-	for _, line := range i.Root.Bash() {
-		if line == "" {
-			lines = append(lines, line)
-			continue
-		}
-		lines = append(lines, indent+line)
+func (i If) Bash() fmt.Stringer {
+	ret := source.PrefixBlock{
+		Prefix: source.Linef("if %s; then", i.Check.Bash()),
+		Suffix: source.Line("fi"),
 	}
-	lines = append(lines, "fi")
 
-	return lines
+	for _, stmt := range i.Root.Stmts {
+		ret.Block.Lines = append(ret.Block.Lines, stmt.Bash())
+	}
+
+	return ret
 }
 
 func buildIf(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {

@@ -1,13 +1,12 @@
 package ast
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/bjatkin/yok/parse"
 	"github.com/bjatkin/yok/sym"
 )
-
-const indent = "    "
 
 type Client struct {
 	table      *sym.Table
@@ -58,7 +57,7 @@ func (c *Client) Build(tree parse.Node) Root {
 func (c *Client) Yok(tree Root) []byte {
 	var raw []string
 	for _, stmt := range tree.Stmts {
-		raw = append(raw, stmt.Yok()...)
+		raw = append(raw, stmt.Yok().String())
 	}
 
 	return []byte(strings.Join(raw, "\n") + "\n")
@@ -94,12 +93,16 @@ func (c *Client) Validate(stmt Stmt) error {
 
 type builder func(*sym.Table, []Stmt, parse.Node) []Stmt
 
+type Node interface {
+	Yok() fmt.Stringer
+}
+
 type Stmt interface {
+	Node
 	stmt()
-	Yok() []string
 }
 
 type Expr interface {
+	Node
 	expr()
-	Yok() []string
 }

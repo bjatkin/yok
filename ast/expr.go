@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/bjatkin/yok/parse"
+	"github.com/bjatkin/yok/source"
 	"github.com/bjatkin/yok/sym"
 )
 
@@ -15,8 +16,8 @@ type Value struct {
 	Raw string
 }
 
-func (v Value) Yok() []string {
-	return []string{v.Raw}
+func (v Value) Yok() fmt.Stringer {
+	return source.Line(v.Raw)
 }
 
 type Identifyer struct {
@@ -26,8 +27,8 @@ type Identifyer struct {
 	Name string
 }
 
-func (i Identifyer) Yok() []string {
-	return []string{i.Name}
+func (i Identifyer) Yok() fmt.Stringer {
+	return source.Line(i.Name)
 }
 
 type Command struct {
@@ -39,30 +40,29 @@ type Command struct {
 	Args       []Expr
 }
 
-func (c Command) Yok() []string {
+func (c Command) Yok() fmt.Stringer {
 	var subCommands []string
 	for _, sub := range c.SubCommand {
-		subCommands = append(subCommands, sub.Yok()...)
+		subCommands = append(subCommands, sub.Yok().String())
 	}
 
 	var args []string
 	for _, arg := range c.Args {
-		args = append(args, arg.Yok()...)
+		args = append(args, arg.Yok().String())
 	}
 
 	if len(subCommands) > 0 {
-		return []string{fmt.Sprintf("%s.%s(%s)",
+		return source.Line(fmt.Sprintf("%s.%s(%s)",
 			c.Identifyer,
 			strings.Join(subCommands, "."),
 			strings.Join(args, ", "),
-		)}
-
+		))
 	}
 
-	return []string{fmt.Sprintf("%s(%s)",
+	return source.Line(fmt.Sprintf("%s(%s)",
 		c.Identifyer,
 		strings.Join(args, ", "),
-	)}
+	))
 }
 
 func buildCommandCall(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
@@ -120,8 +120,8 @@ type Env struct {
 	Name string
 }
 
-func (e Env) Yok() []string {
-	return []string{fmt.Sprintf("env[%s]", e.Name)}
+func (e Env) Yok() fmt.Stringer {
+	return source.Line(fmt.Sprintf("env[%s]", e.Name))
 }
 
 func buildEnv(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {

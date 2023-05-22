@@ -65,8 +65,6 @@ func (v *validateIdentifyers) PopScope() {
 
 // TODO: get this working (the validator probably needs to be a full struct an not just a function)
 func (v *validateIdentifyers) check(stmt Stmt) error {
-	fmt.Println("validing: ", stmt)
-
 	switch s := stmt.(type) {
 	case Assign:
 		var setType sym.YokType

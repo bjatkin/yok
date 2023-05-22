@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/bjatkin/yok/ast"
+	"github.com/bjatkin/yok/source"
 	"github.com/bjatkin/yok/sym"
 )
 
@@ -15,8 +16,8 @@ type Identifyer struct {
 	Name string
 }
 
-func (v Identifyer) Bash() []string {
-	return []string{"$" + v.Name}
+func (v Identifyer) Bash() fmt.Stringer {
+	return source.Linef("$%s", v.Name)
 }
 
 func buildEnv(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
@@ -38,8 +39,8 @@ type Value struct {
 	Raw string
 }
 
-func (v Value) Bash() []string {
-	return []string{v.Raw}
+func (v Value) Bash() fmt.Stringer {
+	return source.Line(v.Raw)
 }
 
 type Test struct {
@@ -47,13 +48,13 @@ type Test struct {
 	Exprs []Expr
 }
 
-func (t Test) Bash() []string {
+func (t Test) Bash() fmt.Stringer {
 	var exprs []string
 	for _, expr := range t.Exprs {
-		exprs = append(exprs, expr.Bash()...)
+		exprs = append(exprs, expr.Bash().String())
 	}
 
-	return []string{fmt.Sprintf("[[ %s ]]", strings.Join(exprs, "; "))}
+	return source.Linef("[[ %s ]]", strings.Join(exprs, "; "))
 }
 
 type Math struct {
@@ -61,13 +62,13 @@ type Math struct {
 	Exprs []Expr
 }
 
-func (m Math) Bash() []string {
+func (m Math) Bash() fmt.Stringer {
 	var exprs []string
 	for _, expr := range m.Exprs {
-		exprs = append(exprs, expr.Bash()...)
+		exprs = append(exprs, expr.Bash().String())
 	}
 
-	return []string{fmt.Sprintf("(( %s ))", strings.Join(exprs, "; "))}
+	return source.Linef("(( %s ))", strings.Join(exprs, "; "))
 }
 
 type BinaryExpr struct {
@@ -78,8 +79,8 @@ type BinaryExpr struct {
 	Right Expr
 }
 
-func (b BinaryExpr) Bash() []string {
-	return []string{fmt.Sprintf("%s %s %s", strings.Join(b.Left.Bash(), ""), b.Op, strings.Join(b.Right.Bash(), ""))}
+func (b BinaryExpr) Bash() fmt.Stringer {
+	return source.Linef("%s %s %s", b.Left.Bash().String(), b.Op, b.Right.Bash().String())
 }
 
 type Command struct {
@@ -90,16 +91,16 @@ type Command struct {
 	Args       []Expr
 }
 
-func (c Command) Bash() []string {
+func (c Command) Bash() fmt.Stringer {
 	var args []string
 	for _, arg := range c.Args {
-		args = append(args, arg.Bash()...)
+		args = append(args, arg.Bash().String())
 	}
 
-	return []string{fmt.Sprintf("%s %s",
+	return source.Linef("%s %s",
 		c.Identifyer,
 		strings.Join(args, " "),
-	)}
+	)
 }
 
 func buildCommandCall(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
@@ -145,10 +146,8 @@ type FileExpr struct {
 	Check Expr
 }
 
-func (b FileExpr) Bash() []string {
-	// TODO: this pattern of strings.Join(somthing.Bash, "") pops up alot to safely select the first
-	// element of the bash list. I should probably not do it this way.
-	return []string{b.Flag + " " + strings.Join(b.Check.Bash(), "")}
+func (b FileExpr) Bash() fmt.Stringer {
+	return source.Linef("%s %s", b.Flag, b.Check.Bash())
 }
 
 type SubShell struct {
@@ -157,6 +156,6 @@ type SubShell struct {
 	Root Root
 }
 
-func (b SubShell) Bash() []string {
-	return []string{fmt.Sprintf("\"$(%s)\"", strings.Join(b.Root.Bash(), "; "))}
+func (b SubShell) Bash() fmt.Stringer {
+	return source.Linef("\"$(%s)\"", b.Root.Bash())
 }

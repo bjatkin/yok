@@ -16,6 +16,9 @@ The following tasks should be completed in the near future:
 - [ ] The Lex phase should produce a stream of parse.Tokens rather than Nodes.
 - [x] Fix the double-wrapping behavior occuring when building the AST.
 - [ ] Seperate Expr and Stmt ast.builders to make building if, call, and other nodes more robust.
+- [ ] Add support for numerical computation (+ - / *).
+- [ ] Add support for string computation (+).
+- [ ] Add support for binary expressions (== != > >= < <= && ||)
 
 The following tasks are still in progress:
 - [x] Add a yok run command to complie and then run yok scripts in the same step.
