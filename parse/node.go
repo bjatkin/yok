@@ -3,8 +3,6 @@ package parse
 import (
 	"fmt"
 	"strings"
-
-	"github.com/bjatkin/yok/sym"
 )
 
 // TODO: this should probably be an int but it makes debugging a pain.
@@ -46,27 +44,24 @@ const (
 )
 
 type Node struct {
-	ID       sym.ID
+	Token    Token
 	NodeType NodeType
-	// TODO: set this form the lex token
-	// then get rid of all the symbole table stuff that is being used to get this
-	Value string
-	Nodes []Node
+	Nodes    []Node
 }
 
-func (n Node) Clone() Node {
-	var nodes []Node
-	for _, n := range n.Nodes {
-		nodes = append(nodes, n.Clone())
-	}
+// func (n Node) Clone() Node {
+// 	var nodes []Node
+// 	for _, n := range n.Nodes {
+// 		nodes = append(nodes, n.Clone())
+// 	}
 
-	return Node{
-		ID:       n.ID,
-		NodeType: n.NodeType,
-		Value:    n.Value,
-		Nodes:    nodes,
-	}
-}
+// 	return Node{
+// 		ID:       n.ID,
+// 		NodeType: n.NodeType,
+// 		Value:    n.Value,
+// 		Nodes:    nodes,
+// 	}
+// }
 
 func (n Node) String() string {
 	var sub []string
@@ -75,16 +70,16 @@ func (n Node) String() string {
 	}
 
 	if len(sub) > 0 {
-		return fmt.Sprintf("%s(%s) [ %s ]", n.NodeType, n.Value, strings.Join(sub, ", "))
+		return fmt.Sprintf("%s(%s) [ %s ]", n.NodeType, n.Token.Value, strings.Join(sub, ", "))
 	}
 
-	return fmt.Sprintf("%s(%s)", n.NodeType, n.Value)
+	return fmt.Sprintf("%s(%s)", n.NodeType, n.Token.Value)
 }
 
-func CloneNodes(nodes []Node) []Node {
-	var ret []Node
-	for _, node := range nodes {
-		ret = append(ret, node.Clone())
-	}
-	return ret
-}
+// func CloneNodes(nodes []Node) []Node {
+// 	var ret []Node
+// 	for _, node := range nodes {
+// 		ret = append(ret, node.Clone())
+// 	}
+// 	return ret
+// }

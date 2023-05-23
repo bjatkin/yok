@@ -9,13 +9,19 @@ import (
 	"github.com/bjatkin/yok/sym"
 )
 
+type Token struct {
+	ID       sym.ID
+	NodeType NodeType
+	Value    string
+}
+
 // TODO: we should consider lexing to an token rather than directly into a stream of nodes.
 // Doing this means we have to do a lot of node cloning to prevent possible pointer cycles in the
 // final tree structure we build.
 // Converting from a token into a node would be a simple way to ensure those cycles don't occure
 // and prevent situations were a node is cloned multiple times
-func (c *Client) Lex(file string, code []byte) ([]Node, error) {
-	var tokens []Node
+func (c *Client) Lex(file string, code []byte) ([]Token, error) {
+	var tokens []Token
 	itter := slice.NewIttr([]rune(string(code)))
 	var line, col int
 
@@ -41,7 +47,7 @@ func (c *Client) Lex(file string, code []byte) ([]Node, error) {
 					Line:  line,
 				})
 
-				tokens = append(tokens, Node{
+				tokens = append(tokens, Token{
 					ID:       id,
 					NodeType: match.nodeType,
 					Value:    string(value),

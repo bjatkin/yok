@@ -15,7 +15,6 @@ Additionally, many of the existing features are subject to change.
 The following tasks should be completed in the near future:
 - [ ] Add support for string computation (+).
 - [ ] Add support for binary expressions (== != > >= < <= && ||)
-- [ ] The Lex phase should produce a stream of parse.Tokens rather than Nodes.
 - [ ] Seperate Expr and Stmt ast.builders to make building if, call, and other nodes more robust.
 
 The following tasks are still in progress:
@@ -33,6 +32,7 @@ The following tasks are still in progress:
 - [ ] Design a testing system so that itteration on scripts can move faster.
 
 ## DONE
+- [x] The Lex phase should produce a stream of parse.Tokens rather than Nodes.
 - [x] Add support for numerical computation (+ - / *).
 - [x] Fix the double-wrapping behavior occuring when building the AST.
 - [x] Add a yok run command to complie and then run yok scripts in the same step.

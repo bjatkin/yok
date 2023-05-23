@@ -77,8 +77,8 @@ func buildCommandCall(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 	}
 
 	ret := Command{
-		ID:         node.Nodes[0].ID,
-		Identifyer: table.MustGetSymbol(node.Nodes[0].ID).Value,
+		ID:         node.Nodes[0].Token.ID,
+		Identifyer: table.MustGetSymbol(node.Nodes[0].Token.ID).Value,
 	}
 	for _, n := range node.Nodes {
 		if n.NodeType != parse.Arg {
@@ -89,22 +89,22 @@ func buildCommandCall(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 		case len(n.Nodes) > 1 && n.Nodes[0].NodeType == parse.Dot && n.Nodes[1].NodeType == parse.Identifyer:
 			ret.SubCommand = append(ret.SubCommand,
 				Identifyer{
-					ID:   n.Nodes[1].ID,
-					Name: table.MustGetSymbol(n.Nodes[1].ID).Value,
+					ID:   n.Nodes[1].Token.ID,
+					Name: table.MustGetSymbol(n.Nodes[1].Token.ID).Value,
 				},
 			)
 		case len(n.Nodes) > 0 && n.Nodes[0].NodeType == parse.Identifyer:
 			ret.Args = append(ret.Args,
 				Identifyer{
-					ID:   n.Nodes[0].ID,
-					Name: table.MustGetSymbol(n.Nodes[0].ID).Value,
+					ID:   n.Nodes[0].Token.ID,
+					Name: table.MustGetSymbol(n.Nodes[0].Token.ID).Value,
 				},
 			)
 		case len(n.Nodes) > 0 && n.Nodes[0].NodeType == parse.Value:
 			ret.Args = append(ret.Args,
 				Value{
-					ID:  n.Nodes[0].ID,
-					Raw: table.MustGetSymbol(n.Nodes[0].ID).Value,
+					ID:  n.Nodes[0].Token.ID,
+					Raw: table.MustGetSymbol(n.Nodes[0].Token.ID).Value,
 				},
 			)
 		}
@@ -136,8 +136,8 @@ func buildEnv(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 	}
 
 	return []Stmt{Env{
-		ID:   node.Nodes[1].ID,
-		Name: table.MustGetSymbol(node.Nodes[1].ID).Value,
+		ID:   node.Nodes[1].Token.ID,
+		Name: table.MustGetSymbol(node.Nodes[1].Token.ID).Value,
 	}}
 }
 
@@ -167,30 +167,30 @@ func buildBinaryExpr(table *sym.Table, stmts []Stmt, node parse.Node) Expr {
 	left := node.Nodes[0]
 	right := node.Nodes[2]
 	ret := BinaryExpr{
-		Op: node.Nodes[1].Value,
+		Op: node.Nodes[1].Token.Value,
 	}
 	if left.NodeType == parse.Identifyer {
 		ret.Left = Identifyer{
-			ID:   left.ID,
-			Name: left.Value,
+			ID:   left.Token.ID,
+			Name: left.Token.Value,
 		}
 	}
 	if left.NodeType == parse.Value {
 		ret.Left = Value{
-			ID:  left.ID,
-			Raw: left.Value,
+			ID:  left.Token.ID,
+			Raw: left.Token.Value,
 		}
 	}
 	if right.NodeType == parse.Identifyer {
 		ret.Right = Identifyer{
-			ID:   right.ID,
-			Name: right.Value,
+			ID:   right.Token.ID,
+			Name: right.Token.Value,
 		}
 	}
 	if right.NodeType == parse.Value {
 		ret.Right = Value{
-			ID:  right.ID,
-			Raw: right.Value,
+			ID:  right.Token.ID,
+			Raw: right.Token.Value,
 		}
 	}
 	if right.NodeType == parse.Expr {

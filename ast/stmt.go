@@ -45,7 +45,7 @@ func (n NewLine) Yok() fmt.Stringer {
 
 func buildNewLine(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 	if node.NodeType == parse.NewLineGroup {
-		return []Stmt{NewLine{ID: node.Nodes[0].ID}}
+		return []Stmt{NewLine{ID: node.Nodes[0].Token.ID}}
 	}
 	return nil
 }
@@ -100,7 +100,7 @@ func buildUseImport(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 		return nil
 	}
 
-	ret := Use{ID: node.ID}
+	ret := Use{ID: node.Token.ID}
 	for _, n := range node.Nodes {
 		imp := subUseImport(table, stmts, n)
 		if imp != nil {
@@ -138,28 +138,28 @@ func subUseImport(table *sym.Table, stmts []Stmt, node parse.Node) *Import {
 		return nil
 	}
 
-	ret := &Import{ID: node.Nodes[0].ID}
+	ret := &Import{ID: node.Nodes[0].Token.ID}
 	n := node.Nodes[0]
 	switch {
 	case n.NodeType == parse.Identifyer && len(node.Nodes) > 2 && node.Nodes[1].NodeType == parse.AsKeyword:
-		cmdName := table.MustGetSymbol(n.ID)
+		cmdName := table.MustGetSymbol(n.Token.ID)
 		ret.CmdName = cmdName.Value
-		alias := table.MustGetSymbol(node.Nodes[2].ID).Value
+		alias := table.MustGetSymbol(node.Nodes[2].Token.ID).Value
 		cmdName.Alias = alias
 		ret.Alias = alias
 
 	case n.NodeType == parse.Value && len(node.Nodes) > 2 && node.Nodes[1].NodeType == parse.AsKeyword:
-		path := table.MustGetSymbol(n.ID)
+		path := table.MustGetSymbol(n.Token.ID)
 		ret.Path = path.Value
-		alias := table.MustGetSymbol(node.Nodes[2].ID).Value
+		alias := table.MustGetSymbol(node.Nodes[2].Token.ID).Value
 		path.Alias = alias
 		ret.Alias = alias
 
 	case n.NodeType == parse.Identifyer:
-		ret.CmdName = table.MustGetSymbol(n.ID).Value
+		ret.CmdName = table.MustGetSymbol(n.Token.ID).Value
 
 	case n.NodeType == parse.Value:
-		ret.Path = table.MustGetSymbol(n.ID).Value
+		ret.Path = table.MustGetSymbol(n.Token.ID).Value
 
 	}
 
@@ -194,21 +194,21 @@ func buildAssign(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 	}
 
 	ret := Assign{
-		ID:         node.Nodes[0].ID,
-		Identifyer: node.Nodes[0].Value,
+		ID:         node.Nodes[0].Token.ID,
+		Identifyer: node.Nodes[0].Token.Value,
 	}
 
 	switch node.Nodes[2].NodeType {
 	case parse.Value:
 		ret.SetTo = Value{
-			ID:  node.Nodes[2].ID,
-			Raw: node.Nodes[2].Value,
+			ID:  node.Nodes[2].Token.ID,
+			Raw: node.Nodes[2].Token.Value,
 		}
 
 	case parse.Identifyer:
 		ret.SetTo = Identifyer{
-			ID:   node.Nodes[2].ID,
-			Name: node.Nodes[2].Value,
+			ID:   node.Nodes[2].Token.ID,
+			Name: node.Nodes[2].Token.Value,
 		}
 	case parse.Expr:
 		ret.SetTo = buildBinaryExpr(table, nil, node.Nodes[2])
@@ -236,11 +236,11 @@ func buildDecl(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 		return nil
 	}
 
-	yokType := sym.StrToType(node.Nodes[2].Value)
+	yokType := sym.StrToType(node.Nodes[2].Token.Value)
 
 	return []Stmt{Assign{
-		ID:         node.Nodes[1].ID,
-		Identifyer: node.Nodes[1].Value,
+		ID:         node.Nodes[1].Token.ID,
+		Identifyer: node.Nodes[1].Token.Value,
 		SetTo:      Value{Raw: sym.DefaultValue(yokType)},
 		IsDecl:     true,
 	}}
@@ -261,11 +261,11 @@ func buildComment(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 		return nil
 	}
 
-	symbol := table.MustGetSymbol(node.ID)
+	symbol := table.MustGetSymbol(node.Token.ID)
 	symbol.Value = strings.Trim(symbol.Value, "# \t\r\n")
 
 	return []Stmt{Comment{
-		ID:  node.ID,
+		ID:  node.Token.ID,
 		Raw: symbol.Value,
 	}}
 }
@@ -302,7 +302,7 @@ func buildIf(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 	}
 
 	ret := If{
-		ID: node.ID,
+		ID: node.Token.ID,
 	}
 
 	// TODO: make a top level set of matchers that just match expressions
@@ -311,13 +311,13 @@ func buildIf(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 	switch {
 	case len(expr.Nodes) > 0 && expr.Nodes[0].NodeType == parse.Identifyer:
 		ret.Check = Identifyer{
-			ID:   expr.Nodes[0].ID,
-			Name: table.MustGetSymbol(expr.Nodes[0].ID).Value,
+			ID:   expr.Nodes[0].Token.ID,
+			Name: table.MustGetSymbol(expr.Nodes[0].Token.ID).Value,
 		}
 	case len(expr.Nodes) > 0 && expr.Nodes[0].NodeType == parse.Value:
 		ret.Check = Value{
-			ID:  expr.Nodes[0].ID,
-			Raw: table.MustGetSymbol(expr.Nodes[0].ID).Value,
+			ID:  expr.Nodes[0].Token.ID,
+			Raw: table.MustGetSymbol(expr.Nodes[0].Token.ID).Value,
 		}
 	}
 

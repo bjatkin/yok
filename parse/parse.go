@@ -5,7 +5,7 @@ import (
 )
 
 func oneOf(parsers ...parser) parser {
-	return func(itter slice.Itter[Node]) parseMatch {
+	return func(itter slice.Itter[Token]) parseMatch {
 		for _, p := range parsers {
 			match := p(itter)
 			if match.count > 0 {
@@ -17,7 +17,7 @@ func oneOf(parsers ...parser) parser {
 }
 
 func repeat(p parser) parser {
-	return func(itter slice.Itter[Node]) parseMatch {
+	return func(itter slice.Itter[Token]) parseMatch {
 		ret := parseMatch{}
 		for itter.Continue() {
 			match := p(itter)
@@ -26,14 +26,14 @@ func repeat(p parser) parser {
 			}
 			ret.count += match.count
 			itter.Pop(match.count)
-			ret.nodes = append(ret.nodes, CloneNodes(match.nodes)...)
+			ret.nodes = append(ret.nodes, match.nodes...)
 		}
 		return ret
 	}
 }
 
 func nest(p parser) parser {
-	return func(itter slice.Itter[Node]) parseMatch {
+	return func(itter slice.Itter[Token]) parseMatch {
 		ret := parseMatch{}
 		match := p(itter)
 		if match.count == 0 {
@@ -41,7 +41,7 @@ func nest(p parser) parser {
 		}
 		ret.count += match.count
 		itter.Pop(match.count)
-		ret.nodes = append(ret.nodes, CloneNodes(match.nodes)...)
+		ret.nodes = append(ret.nodes, match.nodes...)
 
 		current := &ret.nodes[len(ret.nodes)-1]
 		for itter.Continue() {
@@ -51,7 +51,7 @@ func nest(p parser) parser {
 			}
 			ret.count += match.count
 			itter.Pop(match.count)
-			current.Nodes = append(current.Nodes, CloneNodes(match.nodes)...)
+			current.Nodes = append(current.Nodes, match.nodes...)
 			current = &current.Nodes[len(current.Nodes)-1]
 		}
 		return ret
@@ -59,7 +59,7 @@ func nest(p parser) parser {
 }
 
 func typeSequence(seq ...NodeType) parser {
-	return func(itter slice.Itter[Node]) parseMatch {
+	return func(itter slice.Itter[Token]) parseMatch {
 		ret := parseMatch{}
 
 		// reset the itterator so the loop works correctly
@@ -69,7 +69,7 @@ func typeSequence(seq ...NodeType) parser {
 				return parseMatch{}
 			}
 			ret.count++
-			ret.nodes = append(ret.nodes, itter.Item().Clone())
+			ret.nodes = append(ret.nodes, Node{Token: itter.Item(), NodeType: itter.Item().NodeType})
 		}
 
 		return ret
@@ -77,7 +77,7 @@ func typeSequence(seq ...NodeType) parser {
 }
 
 func sequence(parsers ...parser) parser {
-	return func(itter slice.Itter[Node]) parseMatch {
+	return func(itter slice.Itter[Token]) parseMatch {
 		ret := parseMatch{}
 		for _, p := range parsers {
 			match := p(itter)
@@ -86,21 +86,21 @@ func sequence(parsers ...parser) parser {
 			}
 
 			ret.count += match.count
-			ret.nodes = append(ret.nodes, CloneNodes(match.nodes)...)
+			ret.nodes = append(ret.nodes, match.nodes...)
 			itter.Pop(match.count)
 		}
 		return ret
 	}
 }
 
-func tree(root Node, p parser) parser {
-	return func(itter slice.Itter[Node]) parseMatch {
+func tree(root NodeType, p parser) parser {
+	return func(itter slice.Itter[Token]) parseMatch {
 		match := p(itter)
 		if match.count == 0 {
 			return parseMatch{}
 		}
-		clone := root.Clone()
-		clone.Nodes = append(clone.Nodes, CloneNodes(match.nodes)...)
+		clone := Node{NodeType: root}
+		clone.Nodes = append(clone.Nodes, match.nodes...)
 
 		return parseMatch{
 			count: match.count,
@@ -110,7 +110,7 @@ func tree(root Node, p parser) parser {
 }
 
 func typeTree(root NodeType, p parser) parser {
-	return func(itter slice.Itter[Node]) parseMatch {
+	return func(itter slice.Itter[Token]) parseMatch {
 		if itter.Item().NodeType != root {
 			return parseMatch{}
 		}
@@ -119,13 +119,13 @@ func typeTree(root NodeType, p parser) parser {
 		if len(n) == 0 {
 			return parseMatch{}
 		}
-		root := n[0].Clone()
+		root := Node{Token: n[0], NodeType: n[0].NodeType}
 
 		match := p(itter)
 		if match.count == 0 {
 			return parseMatch{}
 		}
-		root.Nodes = CloneNodes(match.nodes)
+		root.Nodes = match.nodes
 
 		return parseMatch{
 			count: 1 + match.count,
@@ -135,7 +135,7 @@ func typeTree(root NodeType, p parser) parser {
 }
 
 func typeUntil(t NodeType) parser {
-	return func(itter slice.Itter[Node]) parseMatch {
+	return func(itter slice.Itter[Token]) parseMatch {
 		ret := parseMatch{}
 
 		// reset the itterator so the loop works correctly
@@ -146,7 +146,7 @@ func typeUntil(t NodeType) parser {
 			}
 
 			ret.count++
-			ret.nodes = append(ret.nodes, itter.Item().Clone())
+			ret.nodes = append(ret.nodes, Node{Token: itter.Item(), NodeType: itter.Item().NodeType})
 		}
 		return ret
 	}
@@ -157,11 +157,11 @@ type parseMatch struct {
 	nodes []Node
 }
 
-var parseNewLine = tree(Node{NodeType: NewLineGroup},
+var parseNewLine = tree(NewLineGroup,
 	repeat(typeSequence(NewLine)),
 )
 
-var parseAssign = tree(Node{NodeType: Assign},
+var parseAssign = tree(Assign,
 	sequence(
 		typeSequence(Identifyer, SetOp),
 		nest(parseExpr),
@@ -169,7 +169,7 @@ var parseAssign = tree(Node{NodeType: Assign},
 	),
 )
 
-var parseDecl = tree(Node{NodeType: Decl}, typeSequence(LetKeyword, Identifyer, TypeKeyword))
+var parseDecl = tree(Decl, typeSequence(LetKeyword, Identifyer, TypeKeyword))
 
 var parseEnv = typeTree(EnvKeyword, typeSequence(OpenIndex, Value, CloseIndex, NewLine))
 
@@ -185,7 +185,7 @@ var parseUseBlock = typeTree(UseKeyword,
 
 		// actual imports
 		repeat(
-			tree(Node{NodeType: ImportExpr},
+			tree(ImportExpr,
 				oneOf(
 					typeSequence(Identifyer, NewLine),
 					typeSequence(Identifyer, AsKeyword, Identifyer, NewLine),
@@ -200,14 +200,14 @@ var parseUseBlock = typeTree(UseKeyword,
 	),
 )
 
-var parseCall = tree(Node{NodeType: Call},
+var parseCall = tree(Call,
 	oneOf(
 		sequence(
 			parseCallPrefix,
 
 			// get all the normal arguments
 			repeat(
-				tree(Node{NodeType: Arg},
+				tree(Arg,
 					oneOf(
 						typeSequence(Value, Comma, NewLine),
 						typeSequence(Identifyer, Comma, NewLine),
@@ -244,7 +244,7 @@ var parseCallPrefix = oneOf(
 	sequence(
 		typeSequence(Identifyer),
 		repeat(
-			tree(Node{NodeType: Arg},
+			tree(Arg,
 				oneOf(
 					typeSequence(Dot, NewLine, Identifyer),
 					typeSequence(Dot, Identifyer),
@@ -258,22 +258,20 @@ var parseCallPrefix = oneOf(
 	),
 )
 
-func parseExpr(itter slice.Itter[Node]) parseMatch {
-	return oneOf(
-		tree(Node{NodeType: Expr}, oneOf(
-			typeSequence(Identifyer, BinaryOp),
-			typeSequence(Value, BinaryOp),
-		)),
-		typeSequence(Identifyer),
-		typeSequence(Value),
-	)(itter)
-}
+var parseExpr = oneOf(
+	tree(Expr, oneOf(
+		typeSequence(Identifyer, BinaryOp),
+		typeSequence(Value, BinaryOp),
+	)),
+	typeSequence(Identifyer),
+	typeSequence(Value),
+)
 
-func parseIfBlock(itter slice.Itter[Node]) parseMatch {
+func parseIfBlock(itter slice.Itter[Token]) parseMatch {
 	// this has to be a function so that initialization cycles dont occure
 	return typeTree(IfKeyword,
 		sequence(
-			tree(Node{NodeType: Expr},
+			tree(Expr,
 				typeUntil(OpenBlock),
 			),
 			parseBlock,
@@ -283,7 +281,7 @@ func parseIfBlock(itter slice.Itter[Node]) parseMatch {
 
 // TODO: I feel like I should be able to simplify this a little
 // especially now that the .parse function is available on the parse client
-func parseBlock(itter slice.Itter[Node]) parseMatch {
+func parseBlock(itter slice.Itter[Token]) parseMatch {
 	prefix := typeSequence(OpenBlock, NewLine)(itter)
 	if prefix.count == 0 {
 		return parseMatch{}
@@ -291,16 +289,15 @@ func parseBlock(itter slice.Itter[Node]) parseMatch {
 	itter.Pop(prefix.count)
 	count := prefix.count
 
-	var block []Node
+	var block []Token
 	var indent int
 	for itter.Continue() {
 
 		match := typeSequence(OpenBlock, NewLine)(itter)
 		if match.count > 0 {
 			indent++
-			block = append(block, CloneNodes(match.nodes)...)
 			count += match.count
-			itter.Pop(match.count)
+			block = append(block, itter.Pop(match.count)...)
 			continue
 		}
 
@@ -310,14 +307,13 @@ func parseBlock(itter slice.Itter[Node]) parseMatch {
 				break
 			}
 			indent--
-			block = append(block, CloneNodes(match.nodes)...)
 			count += match.count
-			itter.Pop(match.count)
+			block = append(block, itter.Pop(match.count)...)
 			continue
 		}
 
 		count++
-		block = append(block, itter.Item().Clone())
+		block = append(block, itter.Item())
 		itter.Pop(1)
 	}
 	suffix := typeSequence(CloseBlock, NewLine)(itter)

@@ -60,9 +60,9 @@ func NewClient(table *sym.Table) *Client {
 	}
 }
 
-type parser func(slice.Itter[Node]) parseMatch
+type parser func(slice.Itter[Token]) parseMatch
 
-func (c *Client) Parse(tokens []Node) (Node, error) {
+func (c *Client) Parse(tokens []Token) (Node, error) {
 	itter := slice.NewIttr(tokens)
 	match := c.parse(itter)
 	if len(match.nodes) > 0 {
@@ -72,7 +72,7 @@ func (c *Client) Parse(tokens []Node) (Node, error) {
 	return Node{}, fmt.Errorf("failed to build parse tree")
 }
 
-func (c *Client) parse(itter slice.Itter[Node]) parseMatch {
+func (c *Client) parse(itter slice.Itter[Token]) parseMatch {
 	root := Node{NodeType: Root}
 
 	for itter.Continue() {
