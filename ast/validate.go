@@ -6,6 +6,9 @@ import (
 	"github.com/bjatkin/yok/sym"
 )
 
+// TODO: the pattern that I'm moving towards is visiting every node, returning structured information
+// and then handing that structure at the call site. I should apply that pattern here as well.
+
 type validator interface {
 	check(Stmt) error
 }
@@ -63,19 +66,27 @@ func (v *validateIdentifyers) PopScope() {
 	v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
 }
 
-// TODO: get this working (the validator probably needs to be a full struct an not just a function)
 func (v *validateIdentifyers) check(stmt Stmt) error {
 	switch s := stmt.(type) {
 	case Assign:
 		var setType sym.YokType
-		if value, ok := s.SetTo.(Value); ok {
-			setType = sym.TypeFromValue(value.Raw)
-		}
-		if ident, ok := s.SetTo.(Identifyer); ok {
-			setType, ok = v.GetType(ident.Name)
+		switch t := s.SetTo.(type) {
+		case Value:
+			setType = sym.TypeFromValue(t.Raw)
+		case Identifyer:
+			var ok bool
+			setType, ok = v.GetType(t.Name)
 			if !ok {
-				return fmt.Errorf("identifyer '%s' has unknown type", ident.Name)
+				return fmt.Errorf("identifyer '%s' has unknown type", t.Name)
 			}
+		case BinaryExpr:
+			var ok bool
+			setType, ok = v.getBinaryExprType(t)
+			if !ok {
+				return fmt.Errorf("expression '%s' has unknown type", t.Yok())
+			}
+		default:
+			return fmt.Errorf("invalid set to type: %T", t)
 		}
 
 		return v.Scope().Add(s.Identifyer, setType)
@@ -93,4 +104,46 @@ func (v *validateIdentifyers) check(stmt Stmt) error {
 	}
 
 	return nil
+}
+
+func (v *validateIdentifyers) getBinaryExprType(expr BinaryExpr) (sym.YokType, bool) {
+	var leftType sym.YokType
+	switch t := expr.Left.(type) {
+	case Identifyer:
+		var ok bool
+		leftType, ok = v.GetType(t.Name)
+		if !ok {
+			return "", false
+		}
+	case Value:
+		leftType = sym.TypeFromValue(t.Raw)
+	default:
+		panic("unknown left type")
+	}
+
+	var rightType sym.YokType
+	switch t := expr.Right.(type) {
+	case Identifyer:
+		var ok bool
+		rightType, ok = v.GetType(t.Name)
+		if !ok {
+			return "", false
+		}
+	case Value:
+		rightType = sym.TypeFromValue(t.Raw)
+	case BinaryExpr:
+		var ok bool
+		rightType, ok = v.getBinaryExprType(t)
+		if !ok {
+			return "", false
+		}
+	default:
+		panic("unknown right type")
+	}
+
+	if leftType != rightType {
+		return "", false
+	}
+
+	return leftType, true
 }

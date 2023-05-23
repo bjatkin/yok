@@ -85,6 +85,7 @@ func (c *Client) parse(itter slice.Itter[Node]) parseMatch {
 			}
 		}
 		if match.count == 0 {
+			fmt.Println("unknown sequence: ", itter.All())
 			return parseMatch{}
 		}
 	}

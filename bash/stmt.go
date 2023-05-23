@@ -220,9 +220,22 @@ func buildAssign(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
 				Raw: v.Raw,
 			},
 		}}
+	case ast.BinaryExpr:
+		stmt := buildBinaryExpr(table, nil, v)[0]
+		expr, ok := stmt.(Expr)
+		if !ok {
+			panic("build binary expr returned a stmt not an expr")
+		}
+		return []Stmt{Assign{
+			ID: assign.ID,
+			Identifyer: Identifyer{
+				ID:   assign.ID,
+				Name: assign.Identifyer,
+			},
+			SetTo: Math{Exprs: []Expr{expr}},
+		}}
 	default:
-		// TODO: this should probably be an error
-		return nil
+		panic(fmt.Sprintf("unknonwn set to type %T", v))
 	}
 }
 

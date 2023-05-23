@@ -68,11 +68,12 @@ func (m Math) Bash() fmt.Stringer {
 		exprs = append(exprs, expr.Bash().String())
 	}
 
-	return source.Linef("(( %s ))", strings.Join(exprs, "; "))
+	return source.Linef("$(( %s ))", strings.Join(exprs, "; "))
 }
 
 type BinaryExpr struct {
 	Expr
+	Stmt
 	Left Expr
 	// TODO: make this more strict than just an abitrary string
 	Op    string
@@ -81,6 +82,43 @@ type BinaryExpr struct {
 
 func (b BinaryExpr) Bash() fmt.Stringer {
 	return source.Linef("%s %s %s", b.Left.Bash().String(), b.Op, b.Right.Bash().String())
+}
+
+func buildBinaryExpr(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
+	expr, ok := stmt.(ast.BinaryExpr)
+	if !ok {
+		return nil
+	}
+
+	// TODO: would be nice to have a general build exprs thing here
+	ret := BinaryExpr{
+		Op: expr.Op,
+	}
+	switch v := expr.Left.(type) {
+	case ast.Identifyer:
+		ret.Left = Identifyer{ID: v.ID, Name: v.Name}
+	case ast.Value:
+		ret.Left = Value{ID: v.ID, Raw: v.Raw}
+	default:
+		panic("unknown left type in bash binary expression")
+	}
+
+	switch v := expr.Right.(type) {
+	case ast.Identifyer:
+		ret.Right = Identifyer{ID: v.ID, Name: v.Name}
+	case ast.Value:
+		ret.Right = Value{ID: v.ID, Raw: v.Raw}
+	case ast.BinaryExpr:
+		// TODO: this is really messy, clean this up
+		stmt := buildBinaryExpr(table, nil, v)[0]
+		if expr, ok := stmt.(Expr); ok {
+			ret.Right = expr
+		}
+	default:
+		panic("unknown left type in bash binary expression")
+	}
+
+	return []Stmt{ret}
 }
 
 type Command struct {

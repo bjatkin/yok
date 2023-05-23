@@ -140,3 +140,62 @@ func buildEnv(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 		Name: table.MustGetSymbol(node.Nodes[1].ID).Value,
 	}}
 }
+
+type BinaryExpr struct {
+	Expr
+	Stmt
+	Left  Expr
+	Op    string
+	Right Expr
+}
+
+func (b BinaryExpr) Yok() fmt.Stringer {
+	return source.Linef("%s %s %s", b.Left.Yok(), b.Op, b.Right.Yok())
+}
+
+func buildBinaryExpr(table *sym.Table, stmts []Stmt, node parse.Node) Expr {
+	if node.NodeType != parse.Expr {
+		return nil
+	}
+	if len(node.Nodes) < 3 {
+		return nil
+	}
+	if node.Nodes[1].NodeType != parse.BinaryOp {
+		return nil
+	}
+
+	left := node.Nodes[0]
+	right := node.Nodes[2]
+	ret := BinaryExpr{
+		Op: node.Nodes[1].Value,
+	}
+	if left.NodeType == parse.Identifyer {
+		ret.Left = Identifyer{
+			ID:   left.ID,
+			Name: left.Value,
+		}
+	}
+	if left.NodeType == parse.Value {
+		ret.Left = Value{
+			ID:  left.ID,
+			Raw: left.Value,
+		}
+	}
+	if right.NodeType == parse.Identifyer {
+		ret.Right = Identifyer{
+			ID:   right.ID,
+			Name: right.Value,
+		}
+	}
+	if right.NodeType == parse.Value {
+		ret.Right = Value{
+			ID:  right.ID,
+			Raw: right.Value,
+		}
+	}
+	if right.NodeType == parse.Expr {
+		ret.Right = buildBinaryExpr(table, nil, right)
+	}
+
+	return ret
+}

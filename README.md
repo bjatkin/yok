@@ -13,20 +13,15 @@ Additionally, many of the existing features are subject to change.
 
 ## TODO
 The following tasks should be completed in the near future:
-- [ ] The Lex phase should produce a stream of parse.Tokens rather than Nodes.
-- [x] Fix the double-wrapping behavior occuring when building the AST.
-- [ ] Seperate Expr and Stmt ast.builders to make building if, call, and other nodes more robust.
-- [ ] Add support for numerical computation (+ - / *).
 - [ ] Add support for string computation (+).
 - [ ] Add support for binary expressions (== != > >= < <= && ||)
+- [ ] The Lex phase should produce a stream of parse.Tokens rather than Nodes.
+- [ ] Seperate Expr and Stmt ast.builders to make building if, call, and other nodes more robust.
 
 The following tasks are still in progress:
-- [x] Add a yok run command to complie and then run yok scripts in the same step.
-- [x] Add a validation phase to the AST.
 - [ ] Design a sutable error package.
     - [ ] How should internal complier errors be handled.
     - [ ] How should user facing errors be displayed (hoping to borrow from rust for this).
-- [x] Add in the basics of the type system.
 - [ ] Add support arrays.
 - [ ] Add support tables (associative arrasy in bash).
 - [ ] Add support for looping constructs.
@@ -36,3 +31,10 @@ The following tasks are still in progress:
 - [ ] Build a language reference.
 - [ ] Add the 'source' keyword for brining in external files.
 - [ ] Design a testing system so that itteration on scripts can move faster.
+
+## DONE
+- [x] Add support for numerical computation (+ - / *).
+- [x] Fix the double-wrapping behavior occuring when building the AST.
+- [x] Add a yok run command to complie and then run yok scripts in the same step.
+- [x] Add a validation phase to the AST.
+- [x] Add in the basics of the type system.

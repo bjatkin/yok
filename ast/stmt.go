@@ -198,18 +198,22 @@ func buildAssign(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 		Identifyer: node.Nodes[0].Value,
 	}
 
-	switch {
-	case node.Nodes[2].NodeType == parse.Value:
+	switch node.Nodes[2].NodeType {
+	case parse.Value:
 		ret.SetTo = Value{
 			ID:  node.Nodes[2].ID,
 			Raw: node.Nodes[2].Value,
 		}
 
-	case node.Nodes[2].NodeType == parse.Identifyer:
+	case parse.Identifyer:
 		ret.SetTo = Identifyer{
 			ID:   node.Nodes[2].ID,
 			Name: node.Nodes[2].Value,
 		}
+	case parse.Expr:
+		ret.SetTo = buildBinaryExpr(table, nil, node.Nodes[2])
+	default:
+		panic("unknown type in assign: " + node.Nodes[2].NodeType)
 	}
 
 	return []Stmt{ret}

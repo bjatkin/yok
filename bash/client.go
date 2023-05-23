@@ -23,6 +23,7 @@ func NewClient(table *sym.Table) *Client {
 			buildUseImport,
 			buildEnv,
 			buildRoot,
+			buildBinaryExpr,
 			buildCommandCall,
 			buildIf,
 		},

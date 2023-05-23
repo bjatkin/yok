@@ -32,6 +32,32 @@ func repeat(p parser) parser {
 	}
 }
 
+func nest(p parser) parser {
+	return func(itter slice.Itter[Node]) parseMatch {
+		ret := parseMatch{}
+		match := p(itter)
+		if match.count == 0 {
+			return ret
+		}
+		ret.count += match.count
+		itter.Pop(match.count)
+		ret.nodes = append(ret.nodes, CloneNodes(match.nodes)...)
+
+		current := &ret.nodes[len(ret.nodes)-1]
+		for itter.Continue() {
+			match := p(itter)
+			if match.count == 0 {
+				break
+			}
+			ret.count += match.count
+			itter.Pop(match.count)
+			current.Nodes = append(current.Nodes, CloneNodes(match.nodes)...)
+			current = &current.Nodes[len(current.Nodes)-1]
+		}
+		return ret
+	}
+}
+
 func typeSequence(seq ...NodeType) parser {
 	return func(itter slice.Itter[Node]) parseMatch {
 		ret := parseMatch{}
@@ -136,9 +162,10 @@ var parseNewLine = tree(Node{NodeType: NewLineGroup},
 )
 
 var parseAssign = tree(Node{NodeType: Assign},
-	oneOf(
-		typeSequence(Identifyer, SetOp, Identifyer, NewLine),
-		typeSequence(Identifyer, SetOp, Value, NewLine),
+	sequence(
+		typeSequence(Identifyer, SetOp),
+		nest(parseExpr),
+		typeSequence(NewLine),
 	),
 )
 
@@ -230,6 +257,17 @@ var parseCallPrefix = oneOf(
 		),
 	),
 )
+
+func parseExpr(itter slice.Itter[Node]) parseMatch {
+	return oneOf(
+		tree(Node{NodeType: Expr}, oneOf(
+			typeSequence(Identifyer, BinaryOp),
+			typeSequence(Value, BinaryOp),
+		)),
+		typeSequence(Identifyer),
+		typeSequence(Value),
+	)(itter)
+}
 
 func parseIfBlock(itter slice.Itter[Node]) parseMatch {
 	// this has to be a function so that initialization cycles dont occure
