@@ -20,13 +20,13 @@ func (v Value) Yok() fmt.Stringer {
 }
 
 func buildValue(table *sym.Table, stmts []Stmt, node parse.Node) []Expr {
-	if node.NodeType != parse.Value {
+	if node.Type != parse.Value {
 		return nil
 	}
 
 	return []Expr{Value{
-		ID:  node.Token.ID,
-		Raw: node.Token.Value,
+		ID:  node.ID,
+		Raw: node.Value,
 	}}
 }
 
@@ -41,13 +41,13 @@ func (i Identifyer) Yok() fmt.Stringer {
 }
 
 func buildIdentifyer(table *sym.Table, stmts []Stmt, node parse.Node) []Expr {
-	if node.NodeType != parse.Identifyer {
+	if node.Type != parse.Identifyer {
 		return nil
 	}
 
 	return []Expr{Identifyer{
-		ID:   node.Token.ID,
-		Name: node.Token.Value,
+		ID:   node.ID,
+		Name: node.Value,
 	}}
 }
 
@@ -85,32 +85,32 @@ func (c Command) Yok() fmt.Stringer {
 }
 
 func buildCommandCall(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
-	if node.NodeType != parse.Call {
+	if node.Type != parse.Call {
 		return nil
 	}
 	if len(node.Nodes) < 1 {
 		return nil
 	}
-	if node.Nodes[0].NodeType != parse.Identifyer {
+	if node.Nodes[0].Type != parse.Identifyer {
 		return nil
 	}
 
 	ret := Command{
-		ID:         node.Nodes[0].Token.ID,
-		Identifyer: table.MustGetSymbol(node.Nodes[0].Token.ID).Value,
+		ID:         node.Nodes[0].ID,
+		Identifyer: table.MustGetSymbol(node.Nodes[0].ID).Value,
 	}
 
 	client := NewClient(table)
 	for _, n := range node.Nodes {
-		if n.NodeType != parse.Arg {
+		if n.Type != parse.Arg {
 			continue
 		}
 
-		if len(n.Nodes) > 1 && n.Nodes[0].NodeType == parse.Dot && n.Nodes[1].NodeType == parse.Identifyer {
+		if len(n.Nodes) > 1 && n.Nodes[0].Type == parse.Dot && n.Nodes[1].Type == parse.Identifyer {
 			ret.SubCommand = append(ret.SubCommand,
 				Identifyer{
-					ID:   n.Nodes[1].Token.ID,
-					Name: table.MustGetSymbol(n.Nodes[1].Token.ID).Value,
+					ID:   n.Nodes[1].ID,
+					Name: table.MustGetSymbol(n.Nodes[1].ID).Value,
 				},
 			)
 			continue
@@ -138,19 +138,19 @@ func (e Env) Yok() fmt.Stringer {
 }
 
 func buildEnv(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
-	if node.NodeType != parse.EnvKeyword {
+	if node.Type != parse.EnvKeyword {
 		return nil
 	}
 	if len(node.Nodes) < 2 {
 		return nil
 	}
-	if node.Nodes[1].NodeType != parse.Value {
+	if node.Nodes[1].Type != parse.Value {
 		return nil
 	}
 
 	return []Stmt{Env{
-		ID:   node.Nodes[1].Token.ID,
-		Name: table.MustGetSymbol(node.Nodes[1].Token.ID).Value,
+		ID:   node.Nodes[1].ID,
+		Name: table.MustGetSymbol(node.Nodes[1].ID).Value,
 	}}
 }
 
@@ -166,46 +166,46 @@ func (b BinaryExpr) Yok() fmt.Stringer {
 }
 
 func buildBinaryExpr(table *sym.Table, stmts []Stmt, node parse.Node) []Expr {
-	if node.NodeType != parse.Expr {
+	if node.Type != parse.Expr {
 		return nil
 	}
 	if len(node.Nodes) < 3 {
 		return nil
 	}
-	if node.Nodes[1].NodeType != parse.BinaryOp {
+	if node.Nodes[1].Type != parse.BinaryOp {
 		return nil
 	}
 
 	left := node.Nodes[0]
 	right := node.Nodes[2]
 	ret := BinaryExpr{
-		Op: node.Nodes[1].Token.Value,
+		Op: node.Nodes[1].Value,
 	}
-	if left.NodeType == parse.Identifyer {
+	if left.Type == parse.Identifyer {
 		ret.Left = Identifyer{
-			ID:   left.Token.ID,
-			Name: left.Token.Value,
+			ID:   left.ID,
+			Name: left.Value,
 		}
 	}
-	if left.NodeType == parse.Value {
+	if left.Type == parse.Value {
 		ret.Left = Value{
-			ID:  left.Token.ID,
-			Raw: left.Token.Value,
+			ID:  left.ID,
+			Raw: left.Value,
 		}
 	}
-	if right.NodeType == parse.Identifyer {
+	if right.Type == parse.Identifyer {
 		ret.Right = Identifyer{
-			ID:   right.Token.ID,
-			Name: right.Token.Value,
+			ID:   right.ID,
+			Name: right.Value,
 		}
 	}
-	if right.NodeType == parse.Value {
+	if right.Type == parse.Value {
 		ret.Right = Value{
-			ID:  right.Token.ID,
-			Raw: right.Token.Value,
+			ID:  right.ID,
+			Raw: right.Value,
 		}
 	}
-	if right.NodeType == parse.Expr {
+	if right.Type == parse.Expr {
 		ret.Right = buildBinaryExpr(table, nil, right)[0]
 	}
 

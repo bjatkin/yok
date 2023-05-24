@@ -10,9 +10,9 @@ import (
 )
 
 type Token struct {
-	ID       sym.ID
-	NodeType NodeType
-	Value    string
+	ID    sym.ID
+	Type  Type
+	Value string
 }
 
 // TODO: we should consider lexing to an token rather than directly into a stream of nodes.
@@ -36,7 +36,7 @@ func (c *Client) Lex(file string, code []byte) ([]Token, error) {
 					line++
 				}
 
-				if match.nodeType == WhiteSpace {
+				if match.matchType == WhiteSpace {
 					break
 				}
 
@@ -48,9 +48,9 @@ func (c *Client) Lex(file string, code []byte) ([]Token, error) {
 				})
 
 				tokens = append(tokens, Token{
-					ID:       id,
-					NodeType: match.nodeType,
-					Value:    string(value),
+					ID:    id,
+					Type:  match.matchType,
+					Value: string(value),
 				})
 				break
 			}
@@ -63,9 +63,9 @@ func (c *Client) Lex(file string, code []byte) ([]Token, error) {
 }
 
 type lexMatch struct {
-	ok       bool
-	nodeType NodeType
-	count    int
+	ok        bool
+	matchType Type
+	count     int
 }
 
 type pat interface {
@@ -73,14 +73,14 @@ type pat interface {
 }
 
 type sPat struct {
-	pat      string
-	nodeType NodeType
+	pat       string
+	matchType Type
 }
 
-func newSPat(pat string, nodeType NodeType) pat {
+func newSPat(pat string, matchType Type) pat {
 	return &sPat{
-		pat:      pat,
-		nodeType: nodeType,
+		pat:       pat,
+		matchType: matchType,
 	}
 }
 
@@ -88,36 +88,36 @@ func (s *sPat) lex(itter slice.Itter[rune]) lexMatch {
 	check := string(itter.Pop(len(s.pat)))
 	if check == s.pat {
 		return lexMatch{
-			ok:       true,
-			count:    len(s.pat),
-			nodeType: s.nodeType,
+			ok:        true,
+			count:     len(s.pat),
+			matchType: s.matchType,
 		}
 	}
 	return lexMatch{}
 }
 
 type regPat struct {
-	reg      *regexp.Regexp
-	nodeType NodeType
+	reg       *regexp.Regexp
+	matchType Type
 }
 
-func newRegPat(pat string, nodeType NodeType) pat {
+func newRegPat(pat string, matchType Type) pat {
 	if !strings.HasPrefix("^", pat) {
 		pat = "^" + pat
 	}
 
 	return &regPat{
-		reg:      regexp.MustCompile(pat),
-		nodeType: nodeType,
+		reg:       regexp.MustCompile(pat),
+		matchType: matchType,
 	}
 }
 
 func (m regPat) lex(itter slice.Itter[rune]) lexMatch {
 	matchCount := len(m.reg.FindString(string(itter.All())))
 	return lexMatch{
-		ok:       matchCount > 0,
-		count:    matchCount,
-		nodeType: m.nodeType,
+		ok:        matchCount > 0,
+		count:     matchCount,
+		matchType: m.matchType,
 	}
 }
 
@@ -142,9 +142,9 @@ func (s stringValuePat) lex(i slice.Itter[rune]) lexMatch {
 		}
 		if i.Item() == '"' && !escape {
 			return lexMatch{
-				ok:       true,
-				count:    matchCount,
-				nodeType: Value,
+				ok:        true,
+				count:     matchCount,
+				matchType: Value,
 			}
 		}
 		escape = false

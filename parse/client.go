@@ -18,7 +18,7 @@ func NewClient(table *sym.Table) *Client {
 		table: table,
 		patterns: []pat{
 			newRegPat(`#[^\n\r]*\n`, Comment),
-			newRegPat(`\n|\r\n`, NewLine),
+			newRegPat(`\n|\n`, NewLine),
 			newRegPat(`[\t ]+`, WhiteSpace),
 			newSPat("=", SetOp),
 			newSPat("if", IfKeyword),
@@ -40,7 +40,7 @@ func NewClient(table *sym.Table) *Client {
 			newSPat("]", CloseIndex),
 			newSPat(",", Comma),
 			newRegPat(`[0-9]+`, Value),
-			newRegPat(`(\.|\.\.|~){0,1}\/[^ \(\)\[\]\{\}\n\r]+`, Value),
+			newRegPat(`(\.|\.\.|~){0,1}\/[^ \(\)\[\]\{\}\n]+`, Value),
 			newRegPat(`[a-zA-Z][a-zA-Z0-9_]*`, Identifyer),
 			newSPat("==", CompOp),
 			newSPat("!=", CompOp),
@@ -80,7 +80,7 @@ func (c *Client) Parse(tokens []Token) (Node, error) {
 }
 
 func (c *Client) parse(itter slice.Itter[Token]) parseMatch {
-	root := Node{NodeType: Root}
+	root := Node{Type: Root}
 
 	for itter.Continue() {
 		var match parseMatch

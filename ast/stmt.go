@@ -24,7 +24,7 @@ func (r Root) Yok() fmt.Stringer {
 }
 
 func buildRoot(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
-	if node.NodeType != parse.Root {
+	if node.Type != parse.Root {
 		return nil
 	}
 
@@ -43,8 +43,8 @@ func (n NewLine) Yok() fmt.Stringer {
 }
 
 func buildNewLine(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
-	if node.NodeType == parse.NewLineGroup {
-		return []Stmt{NewLine{ID: node.Nodes[0].Token.ID}}
+	if node.Type == parse.NewLineGroup {
+		return []Stmt{NewLine{ID: node.Nodes[0].ID}}
 	}
 	return nil
 }
@@ -89,17 +89,17 @@ func (u Use) Yok() fmt.Stringer {
 }
 
 func buildUseImport(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
-	if node.NodeType != parse.UseKeyword {
+	if node.Type != parse.UseKeyword {
 		return nil
 	}
 	if len(node.Nodes) == 0 {
 		return nil
 	}
-	if node.Nodes[0].NodeType != parse.OpenBlock {
+	if node.Nodes[0].Type != parse.OpenBlock {
 		return nil
 	}
 
-	ret := Use{ID: node.Token.ID}
+	ret := Use{ID: node.ID}
 	for _, n := range node.Nodes {
 		imp := subUseImport(table, stmts, n)
 		if imp != nil {
@@ -130,35 +130,35 @@ func (i Import) Yok() fmt.Stringer {
 }
 
 func subUseImport(table *sym.Table, stmts []Stmt, node parse.Node) *Import {
-	if node.NodeType != parse.ImportExpr {
+	if node.Type != parse.ImportExpr {
 		return nil
 	}
 	if len(node.Nodes) == 0 {
 		return nil
 	}
 
-	ret := &Import{ID: node.Nodes[0].Token.ID}
+	ret := &Import{ID: node.Nodes[0].ID}
 	n := node.Nodes[0]
 	switch {
-	case n.NodeType == parse.Identifyer && len(node.Nodes) > 2 && node.Nodes[1].NodeType == parse.AsKeyword:
-		cmdName := table.MustGetSymbol(n.Token.ID)
+	case n.Type == parse.Identifyer && len(node.Nodes) > 2 && node.Nodes[1].Type == parse.AsKeyword:
+		cmdName := table.MustGetSymbol(n.ID)
 		ret.CmdName = cmdName.Value
-		alias := table.MustGetSymbol(node.Nodes[2].Token.ID).Value
+		alias := table.MustGetSymbol(node.Nodes[2].ID).Value
 		cmdName.Alias = alias
 		ret.Alias = alias
 
-	case n.NodeType == parse.Value && len(node.Nodes) > 2 && node.Nodes[1].NodeType == parse.AsKeyword:
-		path := table.MustGetSymbol(n.Token.ID)
+	case n.Type == parse.Value && len(node.Nodes) > 2 && node.Nodes[1].Type == parse.AsKeyword:
+		path := table.MustGetSymbol(n.ID)
 		ret.Path = path.Value
-		alias := table.MustGetSymbol(node.Nodes[2].Token.ID).Value
+		alias := table.MustGetSymbol(node.Nodes[2].ID).Value
 		path.Alias = alias
 		ret.Alias = alias
 
-	case n.NodeType == parse.Identifyer:
-		ret.CmdName = table.MustGetSymbol(n.Token.ID).Value
+	case n.Type == parse.Identifyer:
+		ret.CmdName = table.MustGetSymbol(n.ID).Value
 
-	case n.NodeType == parse.Value:
-		ret.Path = table.MustGetSymbol(n.Token.ID).Value
+	case n.Type == parse.Value:
+		ret.Path = table.MustGetSymbol(n.ID).Value
 
 	}
 
@@ -182,64 +182,64 @@ func (a Assign) Yok() fmt.Stringer {
 }
 
 func buildAssign(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
-	if node.NodeType != parse.Assign {
+	if node.Type != parse.Assign {
 		return nil
 	}
 	if len(node.Nodes) < 3 {
 		return nil
 	}
-	if node.Nodes[0].NodeType != parse.Identifyer {
+	if node.Nodes[0].Type != parse.Identifyer {
 		return nil
 	}
 
 	ret := Assign{
-		ID:         node.Nodes[0].Token.ID,
-		Identifyer: node.Nodes[0].Token.Value,
+		ID:         node.Nodes[0].ID,
+		Identifyer: node.Nodes[0].Value,
 	}
 
-	switch node.Nodes[2].NodeType {
+	switch node.Nodes[2].Type {
 	case parse.Value:
 		ret.SetTo = Value{
-			ID:  node.Nodes[2].Token.ID,
-			Raw: node.Nodes[2].Token.Value,
+			ID:  node.Nodes[2].ID,
+			Raw: node.Nodes[2].Value,
 		}
 
 	case parse.Identifyer:
 		ret.SetTo = Identifyer{
-			ID:   node.Nodes[2].Token.ID,
-			Name: node.Nodes[2].Token.Value,
+			ID:   node.Nodes[2].ID,
+			Name: node.Nodes[2].Value,
 		}
 	case parse.Expr:
 		ret.SetTo = buildBinaryExpr(table, nil, node.Nodes[2])[0]
 	default:
-		panic("unknown type in assign: " + node.Nodes[2].NodeType)
+		panic("unknown type in assign: " + node.Nodes[2].Type)
 	}
 
 	return []Stmt{ret}
 }
 
 func buildDecl(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
-	if node.NodeType != parse.Decl {
+	if node.Type != parse.Decl {
 		return nil
 	}
 	if len(node.Nodes) < 3 {
 		return nil
 	}
-	if node.Nodes[0].NodeType != parse.LetKeyword {
+	if node.Nodes[0].Type != parse.LetKeyword {
 		return nil
 	}
-	if node.Nodes[1].NodeType != parse.Identifyer {
+	if node.Nodes[1].Type != parse.Identifyer {
 		return nil
 	}
-	if node.Nodes[2].NodeType != parse.TypeKeyword {
+	if node.Nodes[2].Type != parse.TypeKeyword {
 		return nil
 	}
 
-	yokType := sym.StrToType(node.Nodes[2].Token.Value)
+	yokType := sym.StrToType(node.Nodes[2].Value)
 
 	return []Stmt{Assign{
-		ID:         node.Nodes[1].Token.ID,
-		Identifyer: node.Nodes[1].Token.Value,
+		ID:         node.Nodes[1].ID,
+		Identifyer: node.Nodes[1].Value,
 		SetTo:      Value{Raw: sym.DefaultValue(yokType)},
 		IsDecl:     true,
 	}}
@@ -256,15 +256,15 @@ func (c Comment) Yok() fmt.Stringer {
 }
 
 func buildComment(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
-	if node.NodeType != parse.Comment {
+	if node.Type != parse.Comment {
 		return nil
 	}
 
-	symbol := table.MustGetSymbol(node.Token.ID)
-	symbol.Value = strings.Trim(symbol.Value, "# \t\r\n")
+	symbol := table.MustGetSymbol(node.ID)
+	symbol.Value = strings.Trim(symbol.Value, "# \t\n")
 
 	return []Stmt{Comment{
-		ID:  node.Token.ID,
+		ID:  node.ID,
 		Raw: symbol.Value,
 	}}
 }
@@ -290,7 +290,7 @@ func (i If) Yok() fmt.Stringer {
 }
 
 func buildIf(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
-	if node.NodeType != parse.IfKeyword {
+	if node.Type != parse.IfKeyword {
 		return nil
 	}
 	if len(node.Nodes) < 1 {
@@ -304,7 +304,7 @@ func buildIf(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 	}
 
 	ret := If{
-		ID:    node.Token.ID,
+		ID:    node.ID,
 		Check: built[0],
 	}
 

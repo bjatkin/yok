@@ -58,18 +58,19 @@ func nest(p parser) parser {
 	}
 }
 
-func typeSequence(seq ...NodeType) parser {
+func typeSequence(seq ...Type) parser {
 	return func(itter slice.Itter[Token]) parseMatch {
 		ret := parseMatch{}
 
 		// reset the itterator so the loop works correctly
 		itter = slice.NewIttr(itter.All())
 		for i := 0; itter.Next() && i < len(seq); i++ {
-			if itter.Item().NodeType != seq[i] {
+			if itter.Item().Type != seq[i] {
 				return parseMatch{}
 			}
 			ret.count++
-			ret.nodes = append(ret.nodes, Node{Token: itter.Item(), NodeType: itter.Item().NodeType})
+			token := itter.Item()
+			ret.nodes = append(ret.nodes, Node{ID: token.ID, Value: token.Value, Type: token.Type})
 		}
 
 		return ret
@@ -93,13 +94,13 @@ func sequence(parsers ...parser) parser {
 	}
 }
 
-func tree(root NodeType, p parser) parser {
+func tree(root Type, p parser) parser {
 	return func(itter slice.Itter[Token]) parseMatch {
 		match := p(itter)
 		if match.count == 0 {
 			return parseMatch{}
 		}
-		clone := Node{NodeType: root}
+		clone := Node{Type: root}
 		clone.Nodes = append(clone.Nodes, match.nodes...)
 
 		return parseMatch{
@@ -109,9 +110,9 @@ func tree(root NodeType, p parser) parser {
 	}
 }
 
-func typeTree(root NodeType, p parser) parser {
+func typeTree(root Type, p parser) parser {
 	return func(itter slice.Itter[Token]) parseMatch {
-		if itter.Item().NodeType != root {
+		if itter.Item().Type != root {
 			return parseMatch{}
 		}
 
@@ -119,7 +120,8 @@ func typeTree(root NodeType, p parser) parser {
 		if len(n) == 0 {
 			return parseMatch{}
 		}
-		root := Node{Token: n[0], NodeType: n[0].NodeType}
+		token := n[0]
+		root := Node{ID: token.ID, Value: token.Value, Type: token.Type}
 
 		match := p(itter)
 		if match.count == 0 {
