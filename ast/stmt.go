@@ -10,7 +10,6 @@ import (
 )
 
 type Root struct {
-	Expr
 	Stmt
 	Stmts []Stmt
 }
@@ -211,7 +210,7 @@ func buildAssign(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 			Name: node.Nodes[2].Token.Value,
 		}
 	case parse.Expr:
-		ret.SetTo = buildBinaryExpr(table, nil, node.Nodes[2])
+		ret.SetTo = buildBinaryExpr(table, nil, node.Nodes[2])[0]
 	default:
 		panic("unknown type in assign: " + node.Nodes[2].NodeType)
 	}
@@ -297,34 +296,22 @@ func buildIf(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 	if len(node.Nodes) < 1 {
 		return nil
 	}
-	if node.Nodes[0].NodeType != parse.Expr {
+
+	client := NewClient(table)
+	built := client.buildExpr(nil, node.Nodes[0])
+	if len(built) == 0 {
 		return nil
 	}
 
 	ret := If{
-		ID: node.Token.ID,
+		ID:    node.Token.ID,
+		Check: built[0],
 	}
 
-	// TODO: make a top level set of matchers that just match expressions
-	// then use it here to match abitrary expressions
-	expr := node.Nodes[0]
-	switch {
-	case len(expr.Nodes) > 0 && expr.Nodes[0].NodeType == parse.Identifyer:
-		ret.Check = Identifyer{
-			ID:   expr.Nodes[0].Token.ID,
-			Name: table.MustGetSymbol(expr.Nodes[0].Token.ID).Value,
-		}
-	case len(expr.Nodes) > 0 && expr.Nodes[0].NodeType == parse.Value:
-		ret.Check = Value{
-			ID:  expr.Nodes[0].Token.ID,
-			Raw: table.MustGetSymbol(expr.Nodes[0].Token.ID).Value,
-		}
-	}
-
-	if len(stmts) == 0 {
+	if len(stmts) < 2 {
 		return []Stmt{ret}
 	}
-	root, ok := stmts[0].(Root)
+	root, ok := stmts[1].(Root)
 	if !ok {
 		return []Stmt{ret}
 	}

@@ -36,8 +36,7 @@ func StrToType(t string) YokType {
 		return PathType
 	default:
 		// TODO: this should be an error instead of a panic
-		fmt.Println("paicigin:", t)
-		panic(1)
+		panic(fmt.Sprintf("panicing: %T", t))
 	}
 }
 
@@ -53,7 +52,7 @@ func TypeFromValue(value string) YokType {
 		return PathType
 	default:
 		// TODO: this should be an error instead of a panic
-		panic(1)
+		panic(fmt.Sprintf("unmatched value: %s", value))
 	}
 }
 

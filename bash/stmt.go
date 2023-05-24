@@ -22,8 +22,8 @@ func (r Root) Bash() fmt.Stringer {
 	return ret
 }
 
-func buildRoot(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
-	if _, ok := stmt.(ast.Root); !ok {
+func buildRoot(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+	if _, ok := node.(ast.Root); !ok {
 		return nil
 	}
 
@@ -41,8 +41,8 @@ func (n NewLine) Bash() fmt.Stringer {
 	return source.NewLine{}
 }
 
-func buildNewLine(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
-	newLine, ok := stmt.(ast.NewLine)
+func buildNewLine(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+	newLine, ok := node.(ast.NewLine)
 	if !ok {
 		return nil
 	}
@@ -68,8 +68,8 @@ func (u Use) Bash() fmt.Stringer {
 	return ret
 }
 
-func buildUseImport(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
-	use, ok := stmt.(ast.Use)
+func buildUseImport(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+	use, ok := node.(ast.Use)
 	if !ok {
 		return nil
 	}
@@ -166,8 +166,8 @@ func (c Comment) Bash() fmt.Stringer {
 	return source.Linef("# %s", c.Raw)
 }
 
-func buildComment(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
-	comment, ok := stmt.(ast.Comment)
+func buildComment(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+	comment, ok := node.(ast.Comment)
 	if !ok {
 		return nil
 	}
@@ -189,8 +189,8 @@ func (a Assign) Bash() fmt.Stringer {
 	return source.Linef("%s=%s", a.Identifyer.Name, a.SetTo.Bash())
 }
 
-func buildAssign(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
-	assign, ok := stmt.(ast.Assign)
+func buildAssign(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+	assign, ok := node.(ast.Assign)
 	if !ok {
 		return nil
 	}
@@ -259,8 +259,8 @@ func (i If) Bash() fmt.Stringer {
 	return ret
 }
 
-func buildIf(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
-	ifBlock, ok := stmt.(ast.If)
+func buildIf(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+	ifBlock, ok := node.(ast.If)
 	if !ok {
 		return nil
 	}

@@ -9,15 +9,16 @@ import (
 )
 
 type Client struct {
-	table      *sym.Table
-	builders   []builder
-	validators []validator
+	table        *sym.Table
+	stmtBuilders []stmtBuilder
+	exprBuilders []exprBuilder
+	validators   []validator
 }
 
 func NewClient(table *sym.Table) *Client {
 	return &Client{
 		table: table,
-		builders: []builder{
+		stmtBuilders: []stmtBuilder{
 			buildRoot,
 			buildUseImport,
 			buildAssign,
@@ -28,6 +29,11 @@ func NewClient(table *sym.Table) *Client {
 			buildEnv,
 			buildIf,
 		},
+		exprBuilders: []exprBuilder{
+			buildBinaryExpr,
+			buildIdentifyer,
+			buildValue,
+		},
 		validators: []validator{
 			NewValidateIdentifyer(),
 		},
@@ -35,23 +41,54 @@ func NewClient(table *sym.Table) *Client {
 }
 
 func (c *Client) Build(tree parse.Node) Root {
-	ret := Root{}
-
 	var stmts []Stmt
 	for _, node := range tree.Nodes {
 		tree := c.Build(node)
 		stmts = append(stmts, tree.Stmts...)
 	}
 
-	for _, builder := range c.builders {
-		stmts := builder(c.table, stmts, tree)
-		ret.Stmts = append(ret.Stmts, stmts...)
-		if len(stmts) > 0 {
-			break
+	ret := Root{}
+	gotStmts := c.buildStmt(stmts, tree)
+	if len(gotStmts) > 0 {
+		ret.Stmts = gotStmts
+		return ret
+	}
+
+	gotExprs := c.buildExpr(stmts, tree)
+	if len(gotExprs) > 0 {
+		for _, expr := range gotExprs {
+			ret.Stmts = append(ret.Stmts, expr)
 		}
+		return ret
 	}
 
 	return ret
+}
+
+func (c *Client) buildStmt(stmts []Stmt, node parse.Node) []Stmt {
+	for _, builder := range c.stmtBuilders {
+		ret := builder(c.table, stmts, node)
+		if len(ret) == 0 {
+			continue
+		}
+
+		return ret
+	}
+
+	return nil
+}
+
+func (c *Client) buildExpr(stmts []Stmt, node parse.Node) []Expr {
+	for _, builder := range c.exprBuilders {
+		ret := builder(c.table, stmts, node)
+		if len(ret) == 0 {
+			continue
+		}
+
+		return ret
+	}
+
+	return nil
 }
 
 func (c *Client) Yok(tree Root) []byte {
@@ -91,7 +128,9 @@ func (c *Client) Validate(stmt Stmt) error {
 	return nil
 }
 
-type builder func(*sym.Table, []Stmt, parse.Node) []Stmt
+type stmtBuilder func(*sym.Table, []Stmt, parse.Node) []Stmt
+
+type exprBuilder func(*sym.Table, []Stmt, parse.Node) []Expr
 
 type Node interface {
 	Yok() fmt.Stringer
@@ -105,4 +144,5 @@ type Stmt interface {
 type Expr interface {
 	Node
 	expr()
+	stmt() // any expression can behave as a statment if the return value is ignored
 }

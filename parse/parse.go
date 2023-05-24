@@ -134,24 +134,6 @@ func typeTree(root NodeType, p parser) parser {
 	}
 }
 
-func typeUntil(t NodeType) parser {
-	return func(itter slice.Itter[Token]) parseMatch {
-		ret := parseMatch{}
-
-		// reset the itterator so the loop works correctly
-		itter = slice.NewIttr(itter.All())
-		for itter.Next() {
-			if itter.Item().NodeType == t {
-				return ret
-			}
-
-			ret.count++
-			ret.nodes = append(ret.nodes, Node{Token: itter.Item(), NodeType: itter.Item().NodeType})
-		}
-		return ret
-	}
-}
-
 type parseMatch struct {
 	count int
 	nodes []Node
@@ -268,12 +250,9 @@ var parseExpr = oneOf(
 )
 
 func parseIfBlock(itter slice.Itter[Token]) parseMatch {
-	// this has to be a function so that initialization cycles dont occure
 	return typeTree(IfKeyword,
 		sequence(
-			tree(Expr,
-				typeUntil(OpenBlock),
-			),
+			parseExpr,
 			parseBlock,
 		),
 	)(itter)

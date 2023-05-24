@@ -18,6 +18,8 @@ const (
 	NewLine      = NodeType("newline")
 	WhiteSpace   = NodeType("whitespace")
 	BinaryOp     = NodeType("binaryop")
+	CompOp       = NodeType("compop")
+	BoolOp       = NodeType("boolop")
 	SetOp        = NodeType("setop")
 	Expr         = NodeType("expr")
 	IfKeyword    = NodeType("ifkeyword")

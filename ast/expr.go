@@ -10,7 +10,6 @@ import (
 )
 
 type Value struct {
-	Stmt
 	Expr
 	ID  sym.ID
 	Raw string
@@ -20,8 +19,18 @@ func (v Value) Yok() fmt.Stringer {
 	return source.Line(v.Raw)
 }
 
+func buildValue(table *sym.Table, stmts []Stmt, node parse.Node) []Expr {
+	if node.NodeType != parse.Value {
+		return nil
+	}
+
+	return []Expr{Value{
+		ID:  node.Token.ID,
+		Raw: node.Token.Value,
+	}}
+}
+
 type Identifyer struct {
-	Stmt
 	Expr
 	ID   sym.ID
 	Name string
@@ -31,8 +40,18 @@ func (i Identifyer) Yok() fmt.Stringer {
 	return source.Line(i.Name)
 }
 
+func buildIdentifyer(table *sym.Table, stmts []Stmt, node parse.Node) []Expr {
+	if node.NodeType != parse.Identifyer {
+		return nil
+	}
+
+	return []Expr{Identifyer{
+		ID:   node.Token.ID,
+		Name: node.Token.Value,
+	}}
+}
+
 type Command struct {
-	Stmt
 	Expr
 	ID         sym.ID
 	Identifyer string
@@ -80,41 +99,35 @@ func buildCommandCall(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 		ID:         node.Nodes[0].Token.ID,
 		Identifyer: table.MustGetSymbol(node.Nodes[0].Token.ID).Value,
 	}
+
+	client := NewClient(table)
 	for _, n := range node.Nodes {
 		if n.NodeType != parse.Arg {
 			continue
 		}
 
-		switch {
-		case len(n.Nodes) > 1 && n.Nodes[0].NodeType == parse.Dot && n.Nodes[1].NodeType == parse.Identifyer:
+		if len(n.Nodes) > 1 && n.Nodes[0].NodeType == parse.Dot && n.Nodes[1].NodeType == parse.Identifyer {
 			ret.SubCommand = append(ret.SubCommand,
 				Identifyer{
 					ID:   n.Nodes[1].Token.ID,
 					Name: table.MustGetSymbol(n.Nodes[1].Token.ID).Value,
 				},
 			)
-		case len(n.Nodes) > 0 && n.Nodes[0].NodeType == parse.Identifyer:
-			ret.Args = append(ret.Args,
-				Identifyer{
-					ID:   n.Nodes[0].Token.ID,
-					Name: table.MustGetSymbol(n.Nodes[0].Token.ID).Value,
-				},
-			)
-		case len(n.Nodes) > 0 && n.Nodes[0].NodeType == parse.Value:
-			ret.Args = append(ret.Args,
-				Value{
-					ID:  n.Nodes[0].Token.ID,
-					Raw: table.MustGetSymbol(n.Nodes[0].Token.ID).Value,
-				},
-			)
+			continue
 		}
+
+		if len(n.Nodes) > 0 {
+			ret.Args = append(ret.Args, client.buildExpr(stmts, n.Nodes[0])...)
+			continue
+		}
+
+		panic(fmt.Sprintf("unknown arugment: %v", n.Nodes))
 	}
 
 	return []Stmt{ret}
 }
 
 type Env struct {
-	Stmt
 	Expr
 	ID   sym.ID
 	Name string
@@ -143,7 +156,6 @@ func buildEnv(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 
 type BinaryExpr struct {
 	Expr
-	Stmt
 	Left  Expr
 	Op    string
 	Right Expr
@@ -153,7 +165,7 @@ func (b BinaryExpr) Yok() fmt.Stringer {
 	return source.Linef("%s %s %s", b.Left.Yok(), b.Op, b.Right.Yok())
 }
 
-func buildBinaryExpr(table *sym.Table, stmts []Stmt, node parse.Node) Expr {
+func buildBinaryExpr(table *sym.Table, stmts []Stmt, node parse.Node) []Expr {
 	if node.NodeType != parse.Expr {
 		return nil
 	}
@@ -194,8 +206,8 @@ func buildBinaryExpr(table *sym.Table, stmts []Stmt, node parse.Node) Expr {
 		}
 	}
 	if right.NodeType == parse.Expr {
-		ret.Right = buildBinaryExpr(table, nil, right)
+		ret.Right = buildBinaryExpr(table, nil, right)[0]
 	}
 
-	return ret
+	return []Expr{ret}
 }

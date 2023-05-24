@@ -15,7 +15,6 @@ Additionally, many of the existing features are subject to change.
 The following tasks should be completed in the near future:
 - [ ] Add support for string computation (+).
 - [ ] Add support for binary expressions (== != > >= < <= && ||)
-- [ ] Seperate Expr and Stmt ast.builders to make building if, call, and other nodes more robust.
 
 The following tasks are still in progress:
 - [ ] Design a sutable error package.
@@ -38,3 +37,5 @@ The following tasks are still in progress:
 - [x] Add a yok run command to complie and then run yok scripts in the same step.
 - [x] Add a validation phase to the AST.
 - [x] Add in the basics of the type system.
+- [x] Seperate Expr and Stmt ast.builders.
+    - [x] make building if, call, and other nodes more robust.

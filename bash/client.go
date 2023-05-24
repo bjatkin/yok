@@ -9,23 +9,26 @@ import (
 )
 
 type Client struct {
-	table    *sym.Table
-	builders []builder
+	table        *sym.Table
+	stmtBuilders []stmtBuilder
+	exprBuilders []exprBuilder
 }
 
 func NewClient(table *sym.Table) *Client {
 	return &Client{
 		table: table,
-		builders: []builder{
+		stmtBuilders: []stmtBuilder{
 			buildNewLine,
 			buildAssign,
 			buildComment,
 			buildUseImport,
 			buildEnv,
 			buildRoot,
+			buildIf,
+		},
+		exprBuilders: []exprBuilder{
 			buildBinaryExpr,
 			buildCommandCall,
-			buildIf,
 		},
 	}
 }
@@ -42,12 +45,26 @@ func (c *Client) Build(tree ast.Stmt) Root {
 	}
 
 	var ret Root
-	for _, builder := range c.builders {
-		stmts := builder(c.table, stmts, tree)
-		ret.Stmts = append(ret.Stmts, stmts...)
-		if len(stmts) > 0 {
-			break
+	for _, builder := range c.stmtBuilders {
+		built := builder(c.table, stmts, tree)
+		if len(built) == 0 {
+			continue
 		}
+
+		ret.Stmts = append(ret.Stmts, built...)
+		return ret
+	}
+
+	for _, builder := range c.exprBuilders {
+		built := builder(c.table, stmts, tree)
+		if len(built) == 0 {
+			continue
+		}
+
+		for _, expr := range built {
+			ret.Stmts = append(ret.Stmts, expr)
+		}
+		break
 	}
 
 	return ret
@@ -62,7 +79,9 @@ func (c *Client) Bash(tree Root) []byte {
 	return []byte(strings.Join(raw, "\n") + "\n")
 }
 
-type builder func(*sym.Table, []Stmt, ast.Stmt) []Stmt
+type stmtBuilder func(*sym.Table, []Stmt, ast.Node) []Stmt
+
+type exprBuilder func(*sym.Table, []Stmt, ast.Node) []Expr
 
 type Node interface {
 	Bash() fmt.Stringer
@@ -76,4 +95,5 @@ type Stmt interface {
 type Expr interface {
 	Node
 	expr()
+	stmt() // any expression can behave as a statment if the return value is ignored
 }

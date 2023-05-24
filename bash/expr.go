@@ -10,7 +10,6 @@ import (
 )
 
 type Identifyer struct {
-	Stmt
 	Expr
 	ID   sym.ID
 	Name string
@@ -20,8 +19,8 @@ func (v Identifyer) Bash() fmt.Stringer {
 	return source.Linef("$%s", v.Name)
 }
 
-func buildEnv(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
-	env, ok := stmt.(ast.Env)
+func buildEnv(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+	env, ok := node.(ast.Env)
 	if !ok {
 		return nil
 	}
@@ -34,7 +33,6 @@ func buildEnv(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
 
 type Value struct {
 	Expr
-	Stmt
 	ID  sym.ID
 	Raw string
 }
@@ -73,7 +71,6 @@ func (m Math) Bash() fmt.Stringer {
 
 type BinaryExpr struct {
 	Expr
-	Stmt
 	Left Expr
 	// TODO: make this more strict than just an abitrary string
 	Op    string
@@ -84,8 +81,8 @@ func (b BinaryExpr) Bash() fmt.Stringer {
 	return source.Linef("%s %s %s", b.Left.Bash().String(), b.Op, b.Right.Bash().String())
 }
 
-func buildBinaryExpr(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
-	expr, ok := stmt.(ast.BinaryExpr)
+func buildBinaryExpr(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
+	expr, ok := node.(ast.BinaryExpr)
 	if !ok {
 		return nil
 	}
@@ -109,20 +106,15 @@ func buildBinaryExpr(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
 	case ast.Value:
 		ret.Right = Value{ID: v.ID, Raw: v.Raw}
 	case ast.BinaryExpr:
-		// TODO: this is really messy, clean this up
-		stmt := buildBinaryExpr(table, nil, v)[0]
-		if expr, ok := stmt.(Expr); ok {
-			ret.Right = expr
-		}
+		ret.Right = buildBinaryExpr(table, nil, v)[0]
 	default:
 		panic("unknown left type in bash binary expression")
 	}
 
-	return []Stmt{ret}
+	return []Expr{ret}
 }
 
 type Command struct {
-	Stmt
 	Expr
 	ID         sym.ID
 	Identifyer string
@@ -141,8 +133,8 @@ func (c Command) Bash() fmt.Stringer {
 	)
 }
 
-func buildCommandCall(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
-	call, ok := stmt.(ast.Command)
+func buildCommandCall(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
+	call, ok := node.(ast.Command)
 	if !ok {
 		return nil
 	}
@@ -174,7 +166,7 @@ func buildCommandCall(table *sym.Table, stmts []Stmt, stmt ast.Stmt) []Stmt {
 		}
 	}
 
-	return []Stmt{ret}
+	return []Expr{ret}
 }
 
 type FileExpr struct {
@@ -190,7 +182,6 @@ func (b FileExpr) Bash() fmt.Stringer {
 
 type SubShell struct {
 	Expr
-	Stmt
 	Root Root
 }
 
