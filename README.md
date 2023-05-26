@@ -12,11 +12,10 @@ Yōk is currently in active development so not all its features are fully implem
 Additionally, many of the existing features are subject to change.
 
 ## TODO
-The following tasks should be completed in the near future:
+The following tasks are still in progress:
+- [ ] Add types to identifyers in the validation phase
 - [ ] Add support for string computation (+).
 - [ ] Add support for binary expressions (== != > >= < <= && ||)
-
-The following tasks are still in progress:
 - [ ] Design a sutable error package.
     - [ ] How should internal complier errors be handled.
     - [ ] How should user facing errors be displayed (hoping to borrow from rust for this).
@@ -31,6 +30,7 @@ The following tasks are still in progress:
 - [ ] Design a testing system so that itteration on scripts can move faster.
 
 ## DONE
+- [x] Add identifyer validation (all identifyers must be set before being used)
 - [x] The Lex phase should produce a stream of parse.Tokens rather than Nodes.
 - [x] Add support for numerical computation (+ - / *).
 - [x] Fix the double-wrapping behavior occuring when building the AST.
@@ -39,3 +39,7 @@ The following tasks are still in progress:
 - [x] Add in the basics of the type system.
 - [x] Seperate Expr and Stmt ast.builders.
     - [x] make building if, call, and other nodes more robust.
+- [x] Validate the use block
+    - [x] use block needs to come first
+    - [x] all imports should be used
+    - [x] all commands should be imported before being used

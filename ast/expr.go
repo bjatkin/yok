@@ -61,6 +61,7 @@ type Command struct {
 	Expr
 	ID         sym.ID
 	Identifyer string
+	// TODO: this should probably be an array of string literals instead
 	SubCommand []Identifyer
 	Args       []Expr
 }

@@ -36,6 +36,7 @@ func NewClient(table *sym.Table) *Client {
 		},
 		validators: []validator{
 			newValidateuse(),
+			newValidateIdentifyers(),
 		},
 	}
 }

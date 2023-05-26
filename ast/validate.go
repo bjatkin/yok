@@ -7,7 +7,6 @@ type validator interface {
 	errors() []string
 }
 
-// TODO: check for unused imports
 type validateUse struct {
 	useBlocks        int
 	visited          int
@@ -56,6 +55,7 @@ func (v *validateUse) visit(node Node) visitor {
 		v.visited++
 		if _, ok := v.imported[t.Identifyer]; !ok {
 			v.unknownCommand = append(v.unknownCommand, t.Identifyer)
+			return v
 		}
 		v.imported[t.Identifyer]++
 		return v
@@ -83,6 +83,78 @@ func (v *validateUse) errors() []string {
 		if count == 0 {
 			errs = append(errs, fmt.Sprintf("unused command %s", name))
 		}
+	}
+
+	return errs
+}
+
+// TODO: identify unused identifyers, this is a little tricky right now since we copy
+// identifyers from outer scopes into inner scopes
+type validateIdentifyers struct {
+	unknownIdentifyer []string
+	identifyers       map[string]int
+	sub               []*validateIdentifyers
+}
+
+func newValidateIdentifyers() *validateIdentifyers {
+	return &validateIdentifyers{
+		identifyers: make(map[string]int),
+	}
+}
+
+func (v *validateIdentifyers) newSub() *validateIdentifyers {
+	ret := newValidateIdentifyers()
+	for k, v := range v.identifyers {
+		ret.identifyers[k] = v
+	}
+	v.sub = append(v.sub, ret)
+
+	return ret
+}
+
+func (v *validateIdentifyers) visit(node Node) visitor {
+	switch t := node.(type) {
+	case Root:
+		return v.newSub()
+	case Identifyer:
+		if _, ok := v.identifyers[t.Name]; !ok {
+			v.unknownIdentifyer = append(v.unknownIdentifyer, t.Name)
+			return nil
+		}
+
+		v.identifyers[t.Name]++
+		return nil
+	case Assign:
+		if w, ok := t.SetTo.(walker); ok {
+			w.walk(v)
+		} else {
+			v.visit(t.SetTo)
+		}
+
+		v.identifyers[t.Identifyer] = 0
+		return nil
+	case Command:
+		for _, arg := range t.Args {
+			if w, ok := arg.(walker); ok {
+				w.walk(v)
+			} else {
+				v.visit(arg)
+			}
+		}
+		return nil
+	default:
+		return v
+	}
+}
+
+func (v *validateIdentifyers) errors() []string {
+	var errs []string
+	for _, unknown := range v.unknownIdentifyer {
+		errs = append(errs, fmt.Sprintf("unknown identifyer: %s", unknown))
+	}
+
+	for _, sub := range v.sub {
+		errs = append(errs, sub.errors()...)
 	}
 
 	return errs
