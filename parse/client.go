@@ -18,7 +18,7 @@ func NewClient(table *sym.Table) *Client {
 		table: table,
 		patterns: []pat{
 			newRegPat(`#[^\n\r]*\n`, Comment),
-			newRegPat(`\n|\n`, NewLine),
+			newSPat("\n", NewLine),
 			newRegPat(`[\t ]+`, WhiteSpace),
 			newSPat("=", SetOp),
 			newSPat("if", IfKeyword),

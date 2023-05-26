@@ -1,149 +1,89 @@
 package ast
 
-import (
-	"fmt"
-
-	"github.com/bjatkin/yok/sym"
-)
-
-// TODO: the pattern that I'm moving towards is visiting every node, returning structured information
-// and then handing that structure at the call site. I should apply that pattern here as well.
+import "fmt"
 
 type validator interface {
-	check(Stmt) error
+	visitor
+	errors() []string
 }
 
-type scope map[string]sym.YokType
+// TODO: check for unused imports
+type validateUse struct {
+	useBlocks        int
+	visited          int
+	useIsNotFirst    bool
+	duplicateImports []string
+	unknownCommand   []string
+	imported         map[string]int
+}
 
-func (s scope) Add(name string, yokType sym.YokType) error {
-	setType, ok := s[name]
-	if !ok {
-		s[name] = yokType
+func newValidateuse() *validateUse {
+	return &validateUse{
+		imported: map[string]int{
+			"echo": 1, // echo is a built in
+		},
+	}
+}
+
+func (v *validateUse) visit(node Node) visitor {
+	switch t := node.(type) {
+	case Comment:
 		return nil
-	}
-
-	if setType == yokType {
+	case NewLine:
 		return nil
-	}
-
-	return fmt.Errorf("identifyer %s has type %s, but got type %s", name, setType, yokType)
-}
-
-func (s scope) GetType(name string) (sym.YokType, bool) {
-	t, ok := s[name]
-	return t, ok
-}
-
-type validateIdentifyers struct {
-	scopeStack []scope
-}
-
-func NewValidateIdentifyer() *validateIdentifyers {
-	ret := &validateIdentifyers{}
-	ret.PushScope()
-	return ret
-}
-
-func (v *validateIdentifyers) GetType(name string) (sym.YokType, bool) {
-	for i := len(v.scopeStack) - 1; i >= 0; i++ {
-		t, ok := v.scopeStack[i].GetType(name)
-		if ok {
-			return t, ok
+	case Root:
+		return v
+	case Use:
+		if v.visited > 0 {
+			v.useIsNotFirst = true
 		}
-	}
-	return sym.UnknownType, false
-}
-
-func (v *validateIdentifyers) Scope() scope {
-	return v.scopeStack[len(v.scopeStack)-1]
-}
-
-func (v *validateIdentifyers) PushScope() {
-	v.scopeStack = append(v.scopeStack, scope{})
-}
-
-func (v *validateIdentifyers) PopScope() {
-	v.scopeStack = v.scopeStack[:len(v.scopeStack)-1]
-}
-
-func (v *validateIdentifyers) check(stmt Stmt) error {
-	switch s := stmt.(type) {
-	case Assign:
-		var setType sym.YokType
-		switch t := s.SetTo.(type) {
-		case Value:
-			setType = sym.TypeFromValue(t.Raw)
-		case Identifyer:
-			var ok bool
-			setType, ok = v.GetType(t.Name)
-			if !ok {
-				return fmt.Errorf("identifyer '%s' has unknown type", t.Name)
-			}
-		case BinaryExpr:
-			var ok bool
-			setType, ok = v.getBinaryExprType(t)
-			if !ok {
-				return fmt.Errorf("expression '%s' has unknown type", t.Yok())
-			}
-		default:
-			return fmt.Errorf("invalid set to type: %T", t)
+		v.useBlocks++
+		return v
+	case Import:
+		name := t.Alias
+		if name == "" {
+			name = t.CmdName
 		}
-
-		return v.Scope().Add(s.Identifyer, setType)
-	case If:
-		if check, ok := s.Check.(Identifyer); ok {
-			checkType, ok := v.GetType(check.Name)
-			if !ok {
-				return fmt.Errorf("identifyer '%s' has unknown type", check.Name)
-			}
-
-			if checkType != sym.BoolType {
-				return fmt.Errorf("identifyer '%s' has type %s but it must be a bool type", check.Name, checkType)
-			}
+		if name == "" {
+			name = t.Path
 		}
-	}
-
-	return nil
-}
-
-func (v *validateIdentifyers) getBinaryExprType(expr BinaryExpr) (sym.YokType, bool) {
-	var leftType sym.YokType
-	switch t := expr.Left.(type) {
-	case Identifyer:
-		var ok bool
-		leftType, ok = v.GetType(t.Name)
-		if !ok {
-			return "", false
+		if _, ok := v.imported[name]; ok {
+			v.duplicateImports = append(v.duplicateImports, name)
 		}
-	case Value:
-		leftType = sym.TypeFromValue(t.Raw)
+		v.imported[name] = 0
+		return nil
+	case Command:
+		v.visited++
+		if _, ok := v.imported[t.Identifyer]; !ok {
+			v.unknownCommand = append(v.unknownCommand, t.Identifyer)
+		}
+		v.imported[t.Identifyer]++
+		return v
 	default:
-		panic("unknown left type")
+		v.visited++
+		return v
+	}
+}
+
+func (v *validateUse) errors() []string {
+	var errs []string
+	if v.useIsNotFirst {
+		errs = append(errs, "use import must be the first command in a yok script")
 	}
 
-	var rightType sym.YokType
-	switch t := expr.Right.(type) {
-	case Identifyer:
-		var ok bool
-		rightType, ok = v.GetType(t.Name)
-		if !ok {
-			return "", false
+	for _, imports := range v.duplicateImports {
+		errs = append(errs, fmt.Sprintf("duplicate import %s", imports))
+	}
+
+	for _, cmd := range v.unknownCommand {
+		errs = append(errs, fmt.Sprintf("unknown command %s", cmd))
+	}
+
+	for name, count := range v.imported {
+		if count == 0 {
+			errs = append(errs, fmt.Sprintf("unused command %s", name))
 		}
-	case Value:
-		rightType = sym.TypeFromValue(t.Raw)
-	case BinaryExpr:
-		var ok bool
-		rightType, ok = v.getBinaryExprType(t)
-		if !ok {
-			return "", false
-		}
-	default:
-		panic("unknown right type")
 	}
 
-	if leftType != rightType {
-		return "", false
-	}
-
-	return leftType, true
+	return errs
 }

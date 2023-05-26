@@ -9,6 +9,11 @@ import (
 	"github.com/bjatkin/yok/sym"
 )
 
+type Stmt interface {
+	Node
+	stmt()
+}
+
 type Root struct {
 	Stmt
 	Stmts []Stmt
@@ -23,14 +28,39 @@ func (r Root) Yok() fmt.Stringer {
 	return ret
 }
 
-func buildRoot(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
+func (r Root) walk(v visitor) {
+	v = v.visit(r)
+	if v == nil {
+		return
+	}
+
+	for _, stmt := range r.Stmts {
+		w, ok := stmt.(walker)
+		if ok {
+			w.walk(v)
+			continue
+		}
+
+		v.visit(stmt)
+	}
+}
+
+func buildRoot(table *sym.Table, node parse.Node) Stmt {
 	if node.Type != parse.Root {
 		return nil
 	}
 
-	return []Stmt{Root{
-		Stmts: stmts,
-	}}
+	client := NewClient(table)
+
+	ret := Root{}
+	for _, node := range node.Nodes {
+		stmt := client.build(node)
+		if stmt != nil {
+			ret.Stmts = append(ret.Stmts, stmt)
+		}
+	}
+
+	return ret
 }
 
 type NewLine struct {
@@ -42,9 +72,9 @@ func (n NewLine) Yok() fmt.Stringer {
 	return source.NewLine{}
 }
 
-func buildNewLine(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
+func buildNewLine(table *sym.Table, node parse.Node) Stmt {
 	if node.Type == parse.NewLineGroup {
-		return []Stmt{NewLine{ID: node.Nodes[0].ID}}
+		return NewLine{ID: node.Nodes[0].ID}
 	}
 	return nil
 }
@@ -88,7 +118,18 @@ func (u Use) Yok() fmt.Stringer {
 	return ret
 }
 
-func buildUseImport(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
+func (u Use) walk(v visitor) {
+	v = v.visit(u)
+	if v == nil {
+		return
+	}
+
+	for _, imp := range u.Imports {
+		v.visit(imp)
+	}
+}
+
+func buildUseImport(table *sym.Table, node parse.Node) Stmt {
 	if node.Type != parse.UseKeyword {
 		return nil
 	}
@@ -101,13 +142,13 @@ func buildUseImport(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 
 	ret := Use{ID: node.ID}
 	for _, n := range node.Nodes {
-		imp := subUseImport(table, stmts, n)
+		imp := subUseImport(table, n)
 		if imp != nil {
 			ret.Imports = append(ret.Imports, *imp)
 		}
 	}
 
-	return []Stmt{ret}
+	return ret
 }
 
 type Import struct {
@@ -129,7 +170,7 @@ func (i Import) Yok() fmt.Stringer {
 	}
 }
 
-func subUseImport(table *sym.Table, stmts []Stmt, node parse.Node) *Import {
+func subUseImport(table *sym.Table, node parse.Node) *Import {
 	if node.Type != parse.ImportExpr {
 		return nil
 	}
@@ -181,7 +222,22 @@ func (a Assign) Yok() fmt.Stringer {
 	return source.Linef("%s = %s", a.Identifyer, a.SetTo.Yok())
 }
 
-func buildAssign(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
+func (a Assign) walk(v visitor) {
+	v = v.visit(a)
+	if v == nil {
+		return
+	}
+
+	w, ok := a.SetTo.(walker)
+	if ok {
+		w.walk(v)
+		return
+	}
+
+	v.visit(a.SetTo)
+}
+
+func buildAssign(table *sym.Table, node parse.Node) Stmt {
 	if node.Type != parse.Assign {
 		return nil
 	}
@@ -210,15 +266,15 @@ func buildAssign(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 			Name: node.Nodes[2].Value,
 		}
 	case parse.Expr:
-		ret.SetTo = buildBinaryExpr(table, nil, node.Nodes[2])[0]
+		ret.SetTo = buildBinaryExpr(table, node.Nodes[2])
 	default:
 		panic("unknown type in assign: " + node.Nodes[2].Type)
 	}
 
-	return []Stmt{ret}
+	return ret
 }
 
-func buildDecl(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
+func buildDecl(table *sym.Table, node parse.Node) Stmt {
 	if node.Type != parse.Decl {
 		return nil
 	}
@@ -237,12 +293,12 @@ func buildDecl(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 
 	yokType := sym.StrToType(node.Nodes[2].Value)
 
-	return []Stmt{Assign{
+	return Assign{
 		ID:         node.Nodes[1].ID,
 		Identifyer: node.Nodes[1].Value,
 		SetTo:      Value{Raw: sym.DefaultValue(yokType)},
 		IsDecl:     true,
-	}}
+	}
 }
 
 type Comment struct {
@@ -255,7 +311,7 @@ func (c Comment) Yok() fmt.Stringer {
 	return source.Linef("# %s", c.Raw)
 }
 
-func buildComment(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
+func buildComment(table *sym.Table, node parse.Node) Stmt {
 	if node.Type != parse.Comment {
 		return nil
 	}
@@ -263,10 +319,10 @@ func buildComment(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 	symbol := table.MustGetSymbol(node.ID)
 	symbol.Value = strings.Trim(symbol.Value, "# \t\n")
 
-	return []Stmt{Comment{
+	return Comment{
 		ID:  node.ID,
 		Raw: symbol.Value,
-	}}
+	}
 }
 
 type If struct {
@@ -282,6 +338,8 @@ func (i If) Yok() fmt.Stringer {
 		return source.Linef("if %s { }", i.Check.Yok())
 	}
 
+	// TODO: Seems like the indentation on this block is incorrect...
+	// either that or the indnetation on the use block is wrong
 	return source.PrefixBlock{
 		Prefix: source.Line(fmt.Sprintf("if %s {", i.Check.Yok())),
 		Block:  block,
@@ -289,34 +347,61 @@ func (i If) Yok() fmt.Stringer {
 	}
 }
 
-func buildIf(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
+func (i If) walk(v visitor) {
+	v = v.visit(i)
+	if v == nil {
+		return
+	}
+
+	// TODO: this check might be any abitrary expression. If it's just an identifyer
+	// or a value that's fine. If it's a binary expression or anthing like that though,
+	// we should walk that node.
+	w, ok := i.Check.(walker)
+	if ok {
+		w.walk(v)
+	} else {
+		v.visit(i.Check)
+	}
+
+	for _, stmt := range i.Root.Stmts {
+		w, ok := stmt.(walker)
+		if ok {
+			w.walk(v)
+			continue
+		}
+
+		v.visit(stmt)
+	}
+}
+
+func buildIf(table *sym.Table, node parse.Node) Stmt {
 	if node.Type != parse.IfKeyword {
 		return nil
 	}
-	if len(node.Nodes) < 1 {
+	if len(node.Nodes) < 2 {
+		return nil
+	}
+	if node.Nodes[1].Type != parse.OpenBlock {
 		return nil
 	}
 
 	client := NewClient(table)
-	built := client.buildExpr(nil, node.Nodes[0])
-	if len(built) == 0 {
+	check := client.buildExpr(node.Nodes[0])
+	if check == nil {
 		return nil
 	}
 
-	ret := If{
+	root := Root{}
+	for _, node := range node.Nodes[2:] {
+		stmt := client.build(node)
+		if stmt != nil {
+			root.Stmts = append(root.Stmts, stmt)
+		}
+	}
+
+	return If{
 		ID:    node.ID,
-		Check: built[0],
+		Check: check,
+		Root:  root,
 	}
-
-	if len(stmts) < 2 {
-		return []Stmt{ret}
-	}
-	root, ok := stmts[1].(Root)
-	if !ok {
-		return []Stmt{ret}
-	}
-
-	ret.Root = root
-
-	return []Stmt{ret}
 }

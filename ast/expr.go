@@ -9,6 +9,12 @@ import (
 	"github.com/bjatkin/yok/sym"
 )
 
+type Expr interface {
+	Node
+	expr()
+	stmt() // any expression can behave as a statment if the return value is ignored
+}
+
 type Value struct {
 	Expr
 	ID  sym.ID
@@ -19,15 +25,15 @@ func (v Value) Yok() fmt.Stringer {
 	return source.Line(v.Raw)
 }
 
-func buildValue(table *sym.Table, stmts []Stmt, node parse.Node) []Expr {
+func buildValue(table *sym.Table, node parse.Node) Expr {
 	if node.Type != parse.Value {
 		return nil
 	}
 
-	return []Expr{Value{
+	return Value{
 		ID:  node.ID,
 		Raw: node.Value,
-	}}
+	}
 }
 
 type Identifyer struct {
@@ -40,15 +46,15 @@ func (i Identifyer) Yok() fmt.Stringer {
 	return source.Line(i.Name)
 }
 
-func buildIdentifyer(table *sym.Table, stmts []Stmt, node parse.Node) []Expr {
+func buildIdentifyer(table *sym.Table, node parse.Node) Expr {
 	if node.Type != parse.Identifyer {
 		return nil
 	}
 
-	return []Expr{Identifyer{
+	return Identifyer{
 		ID:   node.ID,
 		Name: node.Value,
-	}}
+	}
 }
 
 type Command struct {
@@ -84,7 +90,7 @@ func (c Command) Yok() fmt.Stringer {
 	))
 }
 
-func buildCommandCall(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
+func buildCommandCall(table *sym.Table, node parse.Node) Expr {
 	if node.Type != parse.Call {
 		return nil
 	}
@@ -117,14 +123,14 @@ func buildCommandCall(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 		}
 
 		if len(n.Nodes) > 0 {
-			ret.Args = append(ret.Args, client.buildExpr(stmts, n.Nodes[0])...)
+			ret.Args = append(ret.Args, client.buildExpr(n.Nodes[0]))
 			continue
 		}
 
 		panic(fmt.Sprintf("unknown arugment: %v", n.Nodes))
 	}
 
-	return []Stmt{ret}
+	return ret
 }
 
 type Env struct {
@@ -137,7 +143,7 @@ func (e Env) Yok() fmt.Stringer {
 	return source.Line(fmt.Sprintf("env[%s]", e.Name))
 }
 
-func buildEnv(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
+func buildEnv(table *sym.Table, node parse.Node) Stmt {
 	if node.Type != parse.EnvKeyword {
 		return nil
 	}
@@ -148,10 +154,10 @@ func buildEnv(table *sym.Table, stmts []Stmt, node parse.Node) []Stmt {
 		return nil
 	}
 
-	return []Stmt{Env{
+	return Env{
 		ID:   node.Nodes[1].ID,
 		Name: table.MustGetSymbol(node.Nodes[1].ID).Value,
-	}}
+	}
 }
 
 type BinaryExpr struct {
@@ -165,7 +171,8 @@ func (b BinaryExpr) Yok() fmt.Stringer {
 	return source.Linef("%s %s %s", b.Left.Yok(), b.Op, b.Right.Yok())
 }
 
-func buildBinaryExpr(table *sym.Table, stmts []Stmt, node parse.Node) []Expr {
+// TODO: use the client expression matcher to make this more robusts
+func buildBinaryExpr(table *sym.Table, node parse.Node) Expr {
 	if node.Type != parse.Expr {
 		return nil
 	}
@@ -206,8 +213,8 @@ func buildBinaryExpr(table *sym.Table, stmts []Stmt, node parse.Node) []Expr {
 		}
 	}
 	if right.Type == parse.Expr {
-		ret.Right = buildBinaryExpr(table, nil, right)[0]
+		ret.Right = buildBinaryExpr(table, right)
 	}
 
-	return []Expr{ret}
+	return ret
 }

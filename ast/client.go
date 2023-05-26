@@ -24,68 +24,72 @@ func NewClient(table *sym.Table) *Client {
 			buildAssign,
 			buildDecl,
 			buildComment,
-			buildCommandCall,
 			buildNewLine,
 			buildEnv,
 			buildIf,
 		},
 		exprBuilders: []exprBuilder{
+			buildCommandCall,
 			buildBinaryExpr,
 			buildIdentifyer,
 			buildValue,
 		},
 		validators: []validator{
-			NewValidateIdentifyer(),
+			newValidateuse(),
 		},
 	}
 }
 
 func (c *Client) Build(tree parse.Node) Root {
-	var stmts []Stmt
-	for _, node := range tree.Nodes {
-		tree := c.Build(node)
-		stmts = append(stmts, tree.Stmts...)
+	if tree.Type != parse.Root {
+		// TODO: this should be an error
+		panic("tree root passed to build must have type root not " + tree.Type)
 	}
 
-	ret := Root{}
-	gotStmts := c.buildStmt(stmts, tree)
-	if len(gotStmts) > 0 {
-		ret.Stmts = gotStmts
-		return ret
+	root, ok := c.build(tree).(Root)
+	if !ok {
+		// TODO: this should be an error
+		panic("invalid AST root")
 	}
 
-	gotExprs := c.buildExpr(stmts, tree)
-	if len(gotExprs) > 0 {
-		for _, expr := range gotExprs {
-			ret.Stmts = append(ret.Stmts, expr)
-		}
-		return ret
-	}
-
-	return ret
+	return root
 }
 
-func (c *Client) buildStmt(stmts []Stmt, node parse.Node) []Stmt {
-	for _, builder := range c.stmtBuilders {
-		ret := builder(c.table, stmts, node)
-		if len(ret) == 0 {
-			continue
-		}
+func (c *Client) build(node parse.Node) Stmt {
+	stmt := c.buildStmt(node)
+	if stmt != nil {
+		return stmt
+	}
 
-		return ret
+	expr := c.buildExpr(node)
+	if expr != nil {
+		return expr
 	}
 
 	return nil
 }
 
-func (c *Client) buildExpr(stmts []Stmt, node parse.Node) []Expr {
-	for _, builder := range c.exprBuilders {
-		ret := builder(c.table, stmts, node)
-		if len(ret) == 0 {
+func (c *Client) buildStmt(node parse.Node) Stmt {
+	for _, builder := range c.stmtBuilders {
+		stmt := builder(c.table, node)
+		if stmt == nil {
 			continue
 		}
 
-		return ret
+		return stmt
+	}
+
+	return nil
+}
+
+func (c *Client) buildExpr(node parse.Node) Expr {
+	for _, builder := range c.exprBuilders {
+		expr := builder(c.table, node)
+		if expr == nil {
+			continue
+		}
+
+		return expr
 	}
 
 	return nil
@@ -100,49 +104,30 @@ func (c *Client) Yok(tree Root) []byte {
 	return []byte(strings.Join(raw, "\n") + "\n")
 }
 
-func (c *Client) Validate(stmt Stmt) error {
-	switch v := stmt.(type) {
-	case Root:
-		for _, stmt := range v.Stmts {
-			err := c.Validate(stmt)
-			if err != nil {
-				return err
-			}
-		}
-	case If:
-		for _, stmt := range v.Root.Stmts {
-			err := c.Validate(stmt)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
+func (c *Client) Validate(tree Root) error {
 	for _, validator := range c.validators {
-		err := validator.check(stmt)
-		if err != nil {
-			return err
+		tree.walk(validator)
+		errs := validator.errors()
+		if len(errs) > 0 {
+			return fmt.Errorf("validation failure: %s", strings.Join(errs, "\n\t"))
 		}
 	}
 
 	return nil
 }
 
-type stmtBuilder func(*sym.Table, []Stmt, parse.Node) []Stmt
-
-type exprBuilder func(*sym.Table, []Stmt, parse.Node) []Expr
-
 type Node interface {
 	Yok() fmt.Stringer
 }
 
-type Stmt interface {
-	Node
-	stmt()
+type stmtBuilder func(*sym.Table, parse.Node) Stmt
+
+type exprBuilder func(*sym.Table, parse.Node) Expr
+
+type visitor interface {
+	visit(Node) visitor
 }
 
-type Expr interface {
-	Node
-	expr()
-	stmt() // any expression can behave as a statment if the return value is ignored
+type walker interface {
+	walk(visitor)
 }
