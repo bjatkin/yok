@@ -16,7 +16,7 @@ The following tasks are still in progress:
 - [ ] Add types to identifyers in the validation phase
 - [ ] Add support for string computation (+).
 - [ ] Add support for binary expressions (== != > >= < <= && ||)
-- [ ] Design a sutable error package.
+- [ ] Design a suitable error package.
     - [ ] How should internal complier errors be handled.
     - [ ] How should user facing errors be displayed (hoping to borrow from rust for this).
 - [ ] Add support arrays.

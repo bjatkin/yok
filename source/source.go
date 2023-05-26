@@ -30,6 +30,10 @@ type Import struct {
 }
 
 func (y Import) String() string {
+	if y.Alias == "" {
+		return y.Name
+	}
+
 	padd := y.MaxNameLen - len(y.Name)
 	return y.Name + strings.Repeat(" ", padd) + " as " + y.Alias
 }

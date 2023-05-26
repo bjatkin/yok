@@ -147,7 +147,7 @@ func buildCommandCall(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
 	for _, arg := range call.SubCommand {
 		ret.Args = append(ret.Args, Value{
 			ID:  arg.ID,
-			Raw: arg.Name,
+			Raw: arg.Raw,
 		})
 	}
 

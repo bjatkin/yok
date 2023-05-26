@@ -61,8 +61,7 @@ type Command struct {
 	Expr
 	ID         sym.ID
 	Identifyer string
-	// TODO: this should probably be an array of string literals instead
-	SubCommand []Identifyer
+	SubCommand []Value
 	Args       []Expr
 }
 
@@ -104,7 +103,7 @@ func buildCommandCall(table *sym.Table, node parse.Node) Expr {
 
 	ret := Command{
 		ID:         node.Nodes[0].ID,
-		Identifyer: table.MustGetSymbol(node.Nodes[0].ID).Value,
+		Identifyer: node.Nodes[0].Value,
 	}
 
 	client := NewClient(table)
@@ -115,9 +114,9 @@ func buildCommandCall(table *sym.Table, node parse.Node) Expr {
 
 		if len(n.Nodes) > 1 && n.Nodes[0].Type == parse.Dot && n.Nodes[1].Type == parse.Identifyer {
 			ret.SubCommand = append(ret.SubCommand,
-				Identifyer{
-					ID:   n.Nodes[1].ID,
-					Name: table.MustGetSymbol(n.Nodes[1].ID).Value,
+				Value{
+					ID:  n.Nodes[1].ID,
+					Raw: n.Nodes[1].Value,
 				},
 			)
 			continue
@@ -157,7 +156,7 @@ func buildEnv(table *sym.Table, node parse.Node) Stmt {
 
 	return Env{
 		ID:   node.Nodes[1].ID,
-		Name: table.MustGetSymbol(node.Nodes[1].ID).Value,
+		Name: node.Nodes[1].Value,
 	}
 }
 
