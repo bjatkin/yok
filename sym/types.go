@@ -21,7 +21,11 @@ const (
 	StringType  = YokType("string")
 	IntType     = YokType("int")
 	BoolType    = YokType("bool")
-	PathType    = YokType("path")
+	// TODO: we need to rethink the path type './dir' is different from 'dir' to bash
+	// since ./dir tries to execute dir. I want to understand that better and change how path
+	// literalls are declared.
+	// maybe prefix them with $? $. $dir $/usr/home?
+	PathType = YokType("path")
 )
 
 func StrToType(t string) YokType {

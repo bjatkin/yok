@@ -7,7 +7,6 @@ type ID int64
 type Symbol struct {
 	Value string
 	Alias string
-	Type  YokType
 	File  string
 	Line  int
 	Col   int

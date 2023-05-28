@@ -20,7 +20,7 @@ func (v Identifyer) Bash() fmt.Stringer {
 }
 
 func buildEnv(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
-	env, ok := node.(ast.Env)
+	env, ok := node.(*ast.Env)
 	if !ok {
 		return nil
 	}
@@ -82,7 +82,7 @@ func (b BinaryExpr) Bash() fmt.Stringer {
 }
 
 func buildBinaryExpr(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
-	expr, ok := node.(ast.BinaryExpr)
+	expr, ok := node.(*ast.BinaryExpr)
 	if !ok {
 		return nil
 	}
@@ -92,20 +92,20 @@ func buildBinaryExpr(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
 		Op: expr.Op,
 	}
 	switch v := expr.Left.(type) {
-	case ast.Identifyer:
+	case *ast.Identifyer:
 		ret.Left = Identifyer{ID: v.ID, Name: v.Name}
-	case ast.Value:
+	case *ast.Value:
 		ret.Left = Value{ID: v.ID, Raw: v.Raw}
 	default:
 		panic("unknown left type in bash binary expression")
 	}
 
 	switch v := expr.Right.(type) {
-	case ast.Identifyer:
+	case *ast.Identifyer:
 		ret.Right = Identifyer{ID: v.ID, Name: v.Name}
-	case ast.Value:
+	case *ast.Value:
 		ret.Right = Value{ID: v.ID, Raw: v.Raw}
-	case ast.BinaryExpr:
+	case *ast.BinaryExpr:
 		ret.Right = buildBinaryExpr(table, nil, v)[0]
 	default:
 		panic("unknown left type in bash binary expression")
@@ -134,7 +134,7 @@ func (c Command) Bash() fmt.Stringer {
 }
 
 func buildCommandCall(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
-	call, ok := node.(ast.Command)
+	call, ok := node.(*ast.Command)
 	if !ok {
 		return nil
 	}
@@ -153,12 +153,12 @@ func buildCommandCall(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
 
 	for _, arg := range call.Args {
 		switch v := arg.(type) {
-		case ast.Identifyer:
+		case *ast.Identifyer:
 			ret.Args = append(ret.Args, Identifyer{
 				ID:   v.ID,
 				Name: v.Name,
 			})
-		case ast.Value:
+		case *ast.Value:
 			ret.Args = append(ret.Args, Value{
 				ID:  v.ID,
 				Raw: v.Raw,

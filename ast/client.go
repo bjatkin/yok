@@ -37,17 +37,18 @@ func NewClient(table *sym.Table) *Client {
 		validators: []validator{
 			newValidateuse(),
 			newValidateIdentifyers(),
+			newValidateTypes(),
 		},
 	}
 }
 
-func (c *Client) Build(tree parse.Node) Root {
+func (c *Client) Build(tree parse.Node) *Root {
 	if tree.Type != parse.Root {
 		// TODO: this should be an error
 		panic("tree root passed to build must have type root not " + tree.Type)
 	}
 
-	root, ok := c.build(tree).(Root)
+	root, ok := c.build(tree).(*Root)
 	if !ok {
 		// TODO: this should be an error
 		panic("invalid AST root")
@@ -96,7 +97,7 @@ func (c *Client) buildExpr(node parse.Node) Expr {
 	return nil
 }
 
-func (c *Client) Yok(tree Root) []byte {
+func (c *Client) Yok(tree *Root) []byte {
 	var raw []string
 	for _, stmt := range tree.Stmts {
 		raw = append(raw, stmt.Yok().String())
@@ -105,7 +106,7 @@ func (c *Client) Yok(tree Root) []byte {
 	return []byte(strings.Join(raw, "\n") + "\n")
 }
 
-func (c *Client) Validate(tree Root) error {
+func (c *Client) Validate(tree *Root) error {
 	for _, validator := range c.validators {
 		tree.walk(validator)
 		errs := validator.errors()

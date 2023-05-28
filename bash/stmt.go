@@ -23,7 +23,7 @@ func (r Root) Bash() fmt.Stringer {
 }
 
 func buildRoot(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
-	if _, ok := node.(ast.Root); !ok {
+	if _, ok := node.(*ast.Root); !ok {
 		return nil
 	}
 
@@ -42,7 +42,7 @@ func (n NewLine) Bash() fmt.Stringer {
 }
 
 func buildNewLine(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
-	newLine, ok := node.(ast.NewLine)
+	newLine, ok := node.(*ast.NewLine)
 	if !ok {
 		return nil
 	}
@@ -69,7 +69,7 @@ func (u Use) Bash() fmt.Stringer {
 }
 
 func buildUseImport(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
-	use, ok := node.(ast.Use)
+	use, ok := node.(*ast.Use)
 	if !ok {
 		return nil
 	}
@@ -167,7 +167,7 @@ func (c Comment) Bash() fmt.Stringer {
 }
 
 func buildComment(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
-	comment, ok := node.(ast.Comment)
+	comment, ok := node.(*ast.Comment)
 	if !ok {
 		return nil
 	}
@@ -190,13 +190,13 @@ func (a Assign) Bash() fmt.Stringer {
 }
 
 func buildAssign(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
-	assign, ok := node.(ast.Assign)
+	assign, ok := node.(*ast.Assign)
 	if !ok {
 		return nil
 	}
 
 	switch v := assign.SetTo.(type) {
-	case ast.Identifyer:
+	case *ast.Identifyer:
 		return []Stmt{Assign{
 			ID: assign.ID,
 			Identifyer: Identifyer{
@@ -208,7 +208,7 @@ func buildAssign(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
 				Name: v.Name,
 			},
 		}}
-	case ast.Value:
+	case *ast.Value:
 		return []Stmt{Assign{
 			ID: assign.ID,
 			Identifyer: Identifyer{
@@ -220,7 +220,7 @@ func buildAssign(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
 				Raw: v.Raw,
 			},
 		}}
-	case ast.BinaryExpr:
+	case *ast.BinaryExpr:
 		stmt := buildBinaryExpr(table, nil, v)[0]
 		expr, ok := stmt.(Expr)
 		if !ok {
@@ -260,7 +260,7 @@ func (i If) Bash() fmt.Stringer {
 }
 
 func buildIf(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
-	ifBlock, ok := node.(ast.If)
+	ifBlock, ok := node.(*ast.If)
 	if !ok {
 		return nil
 	}
@@ -272,7 +272,7 @@ func buildIf(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
 	// TODO: make a top level set of builders that just match expressions
 	// then use it here ot match abitrary expression
 	switch v := ifBlock.Check.(type) {
-	case ast.Identifyer:
+	case *ast.Identifyer:
 		ret.Check = Test{
 			Exprs: []Expr{BinaryExpr{
 				Left: Identifyer{
@@ -285,7 +285,7 @@ func buildIf(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
 				},
 			}},
 		}
-	case ast.Value:
+	case *ast.Value:
 		ret.Check = Test{
 			Exprs: []Expr{BinaryExpr{
 				Left: Value{

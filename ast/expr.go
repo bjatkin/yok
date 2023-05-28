@@ -13,16 +13,22 @@ type Expr interface {
 	Node
 	expr()
 	stmt() // any expression can behave as a statment if the return value is ignored
+	yokType() sym.YokType
 }
 
 type Value struct {
 	Expr
-	ID  sym.ID
-	Raw string
+	ID   sym.ID
+	Raw  string
+	Type sym.YokType
 }
 
-func (v Value) Yok() fmt.Stringer {
+func (v *Value) Yok() fmt.Stringer {
 	return source.Line(v.Raw)
+}
+
+func (v *Value) yokType() sym.YokType {
+	return v.Type
 }
 
 func buildValue(table *sym.Table, node parse.Node) Expr {
@@ -30,7 +36,7 @@ func buildValue(table *sym.Table, node parse.Node) Expr {
 		return nil
 	}
 
-	return Value{
+	return &Value{
 		ID:  node.ID,
 		Raw: node.Value,
 	}
@@ -40,10 +46,15 @@ type Identifyer struct {
 	Expr
 	ID   sym.ID
 	Name string
+	Type sym.YokType
 }
 
-func (i Identifyer) Yok() fmt.Stringer {
+func (i *Identifyer) Yok() fmt.Stringer {
 	return source.Line(i.Name)
+}
+
+func (i *Identifyer) yokType() sym.YokType {
+	return i.Type
 }
 
 func buildIdentifyer(table *sym.Table, node parse.Node) Expr {
@@ -51,7 +62,7 @@ func buildIdentifyer(table *sym.Table, node parse.Node) Expr {
 		return nil
 	}
 
-	return Identifyer{
+	return &Identifyer{
 		ID:   node.ID,
 		Name: node.Value,
 	}
@@ -59,13 +70,14 @@ func buildIdentifyer(table *sym.Table, node parse.Node) Expr {
 
 type Command struct {
 	Expr
+	Type       sym.YokType
 	ID         sym.ID
 	Identifyer string
 	SubCommand []Value
 	Args       []Expr
 }
 
-func (c Command) Yok() fmt.Stringer {
+func (c *Command) Yok() fmt.Stringer {
 	var subCommands []string
 	for _, sub := range c.SubCommand {
 		subCommands = append(subCommands, sub.Yok().String())
@@ -90,6 +102,10 @@ func (c Command) Yok() fmt.Stringer {
 	))
 }
 
+func (c *Command) yokType() sym.YokType {
+	return sym.StringType
+}
+
 func buildCommandCall(table *sym.Table, node parse.Node) Expr {
 	if node.Type != parse.Call {
 		return nil
@@ -101,7 +117,7 @@ func buildCommandCall(table *sym.Table, node parse.Node) Expr {
 		return nil
 	}
 
-	ret := Command{
+	ret := &Command{
 		ID:         node.Nodes[0].ID,
 		Identifyer: node.Nodes[0].Value,
 	}
@@ -139,8 +155,12 @@ type Env struct {
 	Name string
 }
 
-func (e Env) Yok() fmt.Stringer {
+func (e *Env) Yok() fmt.Stringer {
 	return source.Line(fmt.Sprintf("env[%s]", e.Name))
+}
+
+func (e *Env) yokType() sym.YokType {
+	return sym.StringType
 }
 
 func buildEnv(table *sym.Table, node parse.Node) Stmt {
@@ -154,7 +174,7 @@ func buildEnv(table *sym.Table, node parse.Node) Stmt {
 		return nil
 	}
 
-	return Env{
+	return &Env{
 		ID:   node.Nodes[1].ID,
 		Name: node.Nodes[1].Value,
 	}
@@ -165,13 +185,17 @@ type BinaryExpr struct {
 	Left  Expr
 	Op    string
 	Right Expr
+	Type  sym.YokType
 }
 
-func (b BinaryExpr) Yok() fmt.Stringer {
+func (b *BinaryExpr) Yok() fmt.Stringer {
 	return source.Linef("%s %s %s", b.Left.Yok(), b.Op, b.Right.Yok())
 }
 
-// TODO: use the client expression matcher to make this more robusts
+func (b *BinaryExpr) yokType() sym.YokType {
+	return b.Type
+}
+
 func buildBinaryExpr(table *sym.Table, node parse.Node) Expr {
 	if node.Type != parse.Expr {
 		return nil
@@ -183,38 +207,20 @@ func buildBinaryExpr(table *sym.Table, node parse.Node) Expr {
 		return nil
 	}
 
-	left := node.Nodes[0]
-	right := node.Nodes[2]
-	ret := BinaryExpr{
-		Op: node.Nodes[1].Value,
-	}
-	if left.Type == parse.Identifyer {
-		ret.Left = Identifyer{
-			ID:   left.ID,
-			Name: left.Value,
-		}
-	}
-	if left.Type == parse.Value {
-		ret.Left = Value{
-			ID:  left.ID,
-			Raw: left.Value,
-		}
-	}
-	if right.Type == parse.Identifyer {
-		ret.Right = Identifyer{
-			ID:   right.ID,
-			Name: right.Value,
-		}
-	}
-	if right.Type == parse.Value {
-		ret.Right = Value{
-			ID:  right.ID,
-			Raw: right.Value,
-		}
-	}
-	if right.Type == parse.Expr {
-		ret.Right = buildBinaryExpr(table, right)
+	client := NewClient(table)
+	left := client.buildExpr(node.Nodes[0])
+	if left == nil {
+		return nil
 	}
 
-	return ret
+	right := client.buildExpr(node.Nodes[2])
+	if right == nil {
+		return nil
+	}
+
+	return &BinaryExpr{
+		Left:  left,
+		Op:    node.Nodes[1].Value,
+		Right: right,
+	}
 }

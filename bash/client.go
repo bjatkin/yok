@@ -36,7 +36,7 @@ func NewClient(table *sym.Table) *Client {
 func (c *Client) Build(tree ast.Stmt) Root {
 	var stmts []Stmt
 
-	if root, ok := tree.(ast.Root); ok {
+	if root, ok := tree.(*ast.Root); ok {
 		for _, stmt := range root.Stmts {
 			root := c.Build(stmt)
 			stmts = append(stmts, root.Stmts...)

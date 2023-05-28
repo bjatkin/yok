@@ -19,7 +19,7 @@ type Root struct {
 	Stmts []Stmt
 }
 
-func (r Root) Yok() fmt.Stringer {
+func (r *Root) Yok() fmt.Stringer {
 	var ret source.Block
 	for _, stmt := range r.Stmts {
 		ret.Lines = append(ret.Lines, stmt.Yok())
@@ -28,7 +28,7 @@ func (r Root) Yok() fmt.Stringer {
 	return ret
 }
 
-func (r Root) walk(v visitor) {
+func (r *Root) walk(v visitor) {
 	v = v.visit(r)
 	if v == nil {
 		return
@@ -52,7 +52,7 @@ func buildRoot(table *sym.Table, node parse.Node) Stmt {
 
 	client := NewClient(table)
 
-	ret := Root{}
+	ret := &Root{}
 	for _, node := range node.Nodes {
 		stmt := client.build(node)
 		if stmt != nil {
@@ -68,13 +68,13 @@ type NewLine struct {
 	ID sym.ID
 }
 
-func (n NewLine) Yok() fmt.Stringer {
+func (n *NewLine) Yok() fmt.Stringer {
 	return source.NewLine{}
 }
 
 func buildNewLine(table *sym.Table, node parse.Node) Stmt {
 	if node.Type == parse.NewLineGroup {
-		return NewLine{ID: node.Nodes[0].ID}
+		return &NewLine{ID: node.Nodes[0].ID}
 	}
 	return nil
 }
@@ -82,7 +82,7 @@ func buildNewLine(table *sym.Table, node parse.Node) Stmt {
 type Use struct {
 	Stmt
 	ID      sym.ID
-	Imports []Import
+	Imports []*Import
 }
 
 func (u Use) Yok() fmt.Stringer {
@@ -118,7 +118,7 @@ func (u Use) Yok() fmt.Stringer {
 	return ret
 }
 
-func (u Use) walk(v visitor) {
+func (u *Use) walk(v visitor) {
 	v = v.visit(u)
 	if v == nil {
 		return
@@ -140,11 +140,11 @@ func buildUseImport(table *sym.Table, node parse.Node) Stmt {
 		return nil
 	}
 
-	ret := Use{ID: node.ID}
+	ret := &Use{ID: node.ID}
 	for _, n := range node.Nodes {
 		imp := subUseImport(table, n)
 		if imp != nil {
-			ret.Imports = append(ret.Imports, *imp)
+			ret.Imports = append(ret.Imports, imp)
 		}
 	}
 
@@ -159,7 +159,7 @@ type Import struct {
 	Alias   string
 }
 
-func (i Import) Yok() fmt.Stringer {
+func (i *Import) Yok() fmt.Stringer {
 	name := i.CmdName
 	if name == "" {
 		name = i.Path
@@ -209,12 +209,13 @@ func subUseImport(table *sym.Table, node parse.Node) *Import {
 type Assign struct {
 	Stmt
 	ID         sym.ID
+	Type       sym.YokType
 	Identifyer string
 	SetTo      Expr
 	IsDecl     bool
 }
 
-func (a Assign) Yok() fmt.Stringer {
+func (a *Assign) Yok() fmt.Stringer {
 	if a.IsDecl {
 		value := a.SetTo.Yok().String()
 		return source.Linef("let %s %s", a.Identifyer, sym.TypeFromValue(value))
@@ -222,7 +223,7 @@ func (a Assign) Yok() fmt.Stringer {
 	return source.Linef("%s = %s", a.Identifyer, a.SetTo.Yok())
 }
 
-func (a Assign) walk(v visitor) {
+func (a *Assign) walk(v visitor) {
 	v = v.visit(a)
 	if v == nil {
 		return
@@ -248,28 +249,18 @@ func buildAssign(table *sym.Table, node parse.Node) Stmt {
 		return nil
 	}
 
-	ret := Assign{
+	ret := &Assign{
 		ID:         node.Nodes[0].ID,
 		Identifyer: node.Nodes[0].Value,
 	}
 
-	switch node.Nodes[2].Type {
-	case parse.Value:
-		ret.SetTo = Value{
-			ID:  node.Nodes[2].ID,
-			Raw: node.Nodes[2].Value,
-		}
-
-	case parse.Identifyer:
-		ret.SetTo = Identifyer{
-			ID:   node.Nodes[2].ID,
-			Name: node.Nodes[2].Value,
-		}
-	case parse.Expr:
-		ret.SetTo = buildBinaryExpr(table, node.Nodes[2])
-	default:
-		panic("unknown type in assign: " + node.Nodes[2].Type)
+	client := NewClient(table)
+	right := client.buildExpr(node.Nodes[2])
+	if right == nil {
+		return nil
 	}
+
+	ret.SetTo = right
 
 	return ret
 }
@@ -293,10 +284,11 @@ func buildDecl(table *sym.Table, node parse.Node) Stmt {
 
 	yokType := sym.StrToType(node.Nodes[2].Value)
 
-	return Assign{
+	return &Assign{
 		ID:         node.Nodes[1].ID,
 		Identifyer: node.Nodes[1].Value,
-		SetTo:      Value{Raw: sym.DefaultValue(yokType)},
+		SetTo:      &Value{Raw: sym.DefaultValue(yokType)},
+		Type:       yokType,
 		IsDecl:     true,
 	}
 }
@@ -307,7 +299,7 @@ type Comment struct {
 	Raw string
 }
 
-func (c Comment) Yok() fmt.Stringer {
+func (c *Comment) Yok() fmt.Stringer {
 	return source.Linef("# %s", c.Raw)
 }
 
@@ -319,7 +311,7 @@ func buildComment(table *sym.Table, node parse.Node) Stmt {
 	symbol := table.MustGetSymbol(node.ID)
 	symbol.Value = strings.Trim(symbol.Value, "# \t\n")
 
-	return Comment{
+	return &Comment{
 		ID:  node.ID,
 		Raw: symbol.Value,
 	}
@@ -329,10 +321,10 @@ type If struct {
 	Stmt
 	ID    sym.ID
 	Check Expr
-	Root  Root
+	Root  *Root
 }
 
-func (i If) Yok() fmt.Stringer {
+func (i *If) Yok() fmt.Stringer {
 	block, ok := i.Root.Yok().(source.Block)
 	if !ok {
 		return source.Linef("if %s { }", i.Check.Yok())
@@ -347,15 +339,12 @@ func (i If) Yok() fmt.Stringer {
 	}
 }
 
-func (i If) walk(v visitor) {
+func (i *If) walk(v visitor) {
 	v = v.visit(i)
 	if v == nil {
 		return
 	}
 
-	// TODO: this check might be any abitrary expression. If it's just an identifyer
-	// or a value that's fine. If it's a binary expression or anthing like that though,
-	// we should walk that node.
 	w, ok := i.Check.(walker)
 	if ok {
 		w.walk(v)
@@ -391,7 +380,7 @@ func buildIf(table *sym.Table, node parse.Node) Stmt {
 		return nil
 	}
 
-	root := Root{}
+	root := &Root{}
 	for _, node := range node.Nodes[2:] {
 		stmt := client.build(node)
 		if stmt != nil {
@@ -399,7 +388,7 @@ func buildIf(table *sym.Table, node parse.Node) Stmt {
 		}
 	}
 
-	return If{
+	return &If{
 		ID:    node.ID,
 		Check: check,
 		Root:  root,

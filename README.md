@@ -13,7 +13,6 @@ Additionally, many of the existing features are subject to change.
 
 ## TODO
 The following tasks are still in progress:
-- [ ] Add types to identifyers in the validation phase
 - [ ] Add support for string computation (+).
 - [ ] Add support for binary expressions (== != > >= < <= && ||)
 - [ ] Design a suitable error package.
@@ -30,6 +29,7 @@ The following tasks are still in progress:
 - [ ] Design a testing system so that itteration on scripts can move faster.
 
 ## DONE
+- [x] Add types to identifyers in the validation phase
 - [x] Add identifyer validation (all identifyers must be set before being used)
 - [x] The Lex phase should produce a stream of parse.Tokens rather than Nodes.
 - [x] Add support for numerical computation (+ - / *).
