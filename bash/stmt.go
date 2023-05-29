@@ -27,16 +27,6 @@ func (r Root) Bash() fmt.Stringer {
 	return ret
 }
 
-func buildRoot(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
-	if _, ok := node.(*ast.Root); !ok {
-		return nil
-	}
-
-	return Root{
-		Stmts: stmts,
-	}
-}
-
 type NewLine struct {
 	Stmt
 	ID sym.ID
@@ -46,7 +36,7 @@ func (n NewLine) Bash() fmt.Stringer {
 	return source.NewLine{}
 }
 
-func buildNewLine(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
+func buildNewLine(table *sym.Table, node ast.Node) Stmt {
 	newLine, ok := node.(*ast.NewLine)
 	if !ok {
 		return nil
@@ -73,7 +63,7 @@ func (u Use) Bash() fmt.Stringer {
 	return ret
 }
 
-func buildUseImport(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
+func buildUseImport(table *sym.Table, node ast.Node) Stmt {
 	use, ok := node.(*ast.Use)
 	if !ok {
 		return nil
@@ -105,7 +95,7 @@ func buildUseImport(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
 							},
 						},
 					},
-					Root: Root{
+					Root: &Root{
 						Stmts: []Stmt{
 							// TODO: add a recirect to send this message to std error
 							// echo "..." >&2
@@ -139,7 +129,7 @@ func buildUseImport(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
 							},
 						},
 					},
-					Root: Root{
+					Root: &Root{
 						Stmts: []Stmt{
 							// TODO: add a recirect to send this message to std error
 							// echo "..." >&2
@@ -171,7 +161,7 @@ func (c Comment) Bash() fmt.Stringer {
 	return source.Linef("# %s", c.Raw)
 }
 
-func buildComment(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
+func buildComment(table *sym.Table, node ast.Node) Stmt {
 	comment, ok := node.(*ast.Comment)
 	if !ok {
 		return nil
@@ -194,7 +184,7 @@ func (a Assign) Bash() fmt.Stringer {
 	return source.Linef("%s=%s", a.Identifyer.Name, a.SetTo.Bash())
 }
 
-func buildAssign(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
+func buildAssign(table *sym.Table, node ast.Node) Stmt {
 	assign, ok := node.(*ast.Assign)
 	if !ok {
 		return nil
@@ -227,7 +217,7 @@ func buildAssign(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
 			},
 		}
 	case *ast.BinaryExpr:
-		stmt := buildBinaryExpr(table, nil, v)
+		stmt := buildBinaryExpr(table, v)
 		expr, ok := stmt.(Expr)
 		if !ok {
 			panic("build binary expr returned a stmt not an expr")
@@ -249,7 +239,7 @@ type If struct {
 	Stmt
 	ID    sym.ID
 	Check Expr
-	Root  Root
+	Root  *Root
 }
 
 func (i If) Bash() fmt.Stringer {
@@ -265,7 +255,7 @@ func (i If) Bash() fmt.Stringer {
 	return ret
 }
 
-func buildIf(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
+func buildIf(table *sym.Table, node ast.Node) Stmt {
 	ifBlock, ok := node.(*ast.If)
 	if !ok {
 		return nil

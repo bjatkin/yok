@@ -7,7 +7,7 @@ import (
 )
 
 type validator interface {
-	visitor
+	Visitor
 	errors() []string
 }
 
@@ -28,7 +28,7 @@ func newValidateuse() *validateUse {
 	}
 }
 
-func (v *validateUse) visit(node Node) visitor {
+func (v *validateUse) Visit(node Node) Visitor {
 	switch t := node.(type) {
 	case *Comment:
 		return nil
@@ -53,6 +53,7 @@ func (v *validateUse) visit(node Node) visitor {
 		if _, ok := v.imported[name]; ok {
 			v.duplicateImports = append(v.duplicateImports, name)
 		}
+
 		v.imported[name] = 0
 		return nil
 	case *Command:
@@ -116,7 +117,7 @@ func (v *validateIdentifyers) newSub() *validateIdentifyers {
 	return ret
 }
 
-func (v *validateIdentifyers) visit(node Node) visitor {
+func (v *validateIdentifyers) Visit(node Node) Visitor {
 	switch t := node.(type) {
 	case *Root:
 		return v.newSub()
@@ -129,20 +130,20 @@ func (v *validateIdentifyers) visit(node Node) visitor {
 		v.identifyers[t.Name]++
 		return nil
 	case *Assign:
-		if w, ok := t.SetTo.(walker); ok {
-			w.walk(v)
+		if w, ok := t.SetTo.(Walker); ok {
+			w.Walk(v)
 		} else {
-			v.visit(t.SetTo)
+			v.Visit(t.SetTo)
 		}
 
 		v.identifyers[t.Identifyer] = 0
 		return nil
 	case *Command:
 		for _, arg := range t.Args {
-			if w, ok := arg.(walker); ok {
-				w.walk(v)
+			if w, ok := arg.(Walker); ok {
+				w.Walk(v)
 			} else {
-				v.visit(arg)
+				v.Visit(arg)
 			}
 		}
 		return nil
@@ -196,20 +197,17 @@ func (v *validateTypes) FindType(name string) sym.YokType {
 	return sym.UnknownType
 }
 
-// TODO: set types for values as well so I don't need to remember to include type information
-// when building the AST. It would make sense if every node could be given a type at creation time
-// however, since that's not possible, I should do it all here at once.
-func (v *validateTypes) visit(node Node) visitor {
+func (v *validateTypes) Visit(node Node) Visitor {
 	switch t := node.(type) {
 	case *Root:
 		return v.newSub()
 	case *Value:
 		t.Type = sym.TypeFromValue(t.Raw)
 	case *Assign:
-		if w, ok := t.SetTo.(walker); ok {
-			w.walk(v)
+		if w, ok := t.SetTo.(Walker); ok {
+			w.Walk(v)
 		} else {
-			v.visit(t.SetTo)
+			v.Visit(t.SetTo)
 		}
 
 		if v.names[t.Identifyer] != sym.UnknownType && v.names[t.Identifyer] != t.SetTo.yokType() {
@@ -234,16 +232,16 @@ func (v *validateTypes) visit(node Node) visitor {
 		}
 		t.Type = v.names[t.Name]
 	case *BinaryExpr:
-		if w, ok := t.Left.(walker); ok {
-			w.walk(v)
+		if w, ok := t.Left.(Walker); ok {
+			w.Walk(v)
 		} else {
-			v.visit(t.Left)
+			v.Visit(t.Left)
 		}
 
-		if w, ok := t.Right.(walker); ok {
-			w.walk(v)
+		if w, ok := t.Right.(Walker); ok {
+			w.Walk(v)
 		} else {
-			v.visit(t.Right)
+			v.Visit(t.Right)
 		}
 
 		if t.Left.yokType() != t.Right.yokType() {

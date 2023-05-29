@@ -50,7 +50,6 @@ func (y Block) String() string {
 	for _, line := range y.Lines {
 		switch v := line.(type) {
 		case Block:
-			fmt.Println("block: ", v)
 			v.indent = y.indent + 1
 			yok = append(yok, v.String())
 		case PrefixBlock:

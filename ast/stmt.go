@@ -28,20 +28,20 @@ func (r *Root) Yok() fmt.Stringer {
 	return ret
 }
 
-func (r *Root) walk(v visitor) {
-	v = v.visit(r)
+func (r *Root) Walk(v Visitor) {
+	v = v.Visit(r)
 	if v == nil {
 		return
 	}
 
 	for _, stmt := range r.Stmts {
-		w, ok := stmt.(walker)
+		w, ok := stmt.(Walker)
 		if ok {
-			w.walk(v)
+			w.Walk(v)
 			continue
 		}
 
-		v.visit(stmt)
+		v.Visit(stmt)
 	}
 }
 
@@ -118,14 +118,14 @@ func (u Use) Yok() fmt.Stringer {
 	return ret
 }
 
-func (u *Use) walk(v visitor) {
-	v = v.visit(u)
+func (u *Use) Walk(v Visitor) {
+	v = v.Visit(u)
 	if v == nil {
 		return
 	}
 
 	for _, imp := range u.Imports {
-		v.visit(imp)
+		v.Visit(imp)
 	}
 }
 
@@ -223,19 +223,19 @@ func (a *Assign) Yok() fmt.Stringer {
 	return source.Linef("%s = %s", a.Identifyer, a.SetTo.Yok())
 }
 
-func (a *Assign) walk(v visitor) {
-	v = v.visit(a)
+func (a *Assign) Walk(v Visitor) {
+	v = v.Visit(a)
 	if v == nil {
 		return
 	}
 
-	w, ok := a.SetTo.(walker)
+	w, ok := a.SetTo.(Walker)
 	if ok {
-		w.walk(v)
+		w.Walk(v)
 		return
 	}
 
-	v.visit(a.SetTo)
+	v.Visit(a.SetTo)
 }
 
 func buildAssign(table *sym.Table, node parse.Node) Stmt {
@@ -339,27 +339,27 @@ func (i *If) Yok() fmt.Stringer {
 	}
 }
 
-func (i *If) walk(v visitor) {
-	v = v.visit(i)
+func (i *If) Walk(v Visitor) {
+	v = v.Visit(i)
 	if v == nil {
 		return
 	}
 
-	w, ok := i.Check.(walker)
+	w, ok := i.Check.(Walker)
 	if ok {
-		w.walk(v)
+		w.Walk(v)
 	} else {
-		v.visit(i.Check)
+		v.Visit(i.Check)
 	}
 
 	for _, stmt := range i.Root.Stmts {
-		w, ok := stmt.(walker)
+		w, ok := stmt.(Walker)
 		if ok {
-			w.walk(v)
+			w.Walk(v)
 			continue
 		}
 
-		v.visit(stmt)
+		v.Visit(stmt)
 	}
 }
 

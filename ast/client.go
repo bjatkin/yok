@@ -108,7 +108,7 @@ func (c *Client) Yok(tree *Root) []byte {
 
 func (c *Client) Validate(tree *Root) error {
 	for _, validator := range c.validators {
-		tree.walk(validator)
+		tree.Walk(validator)
 		errs := validator.errors()
 		if len(errs) > 0 {
 			return fmt.Errorf("validation failure: %s", strings.Join(errs, "\n\t"))
@@ -126,10 +126,10 @@ type stmtBuilder func(*sym.Table, parse.Node) Stmt
 
 type exprBuilder func(*sym.Table, parse.Node) Expr
 
-type visitor interface {
-	visit(Node) visitor
+type Visitor interface {
+	Visit(Node) Visitor
 }
 
-type walker interface {
-	walk(visitor)
+type Walker interface {
+	Walk(Visitor)
 }

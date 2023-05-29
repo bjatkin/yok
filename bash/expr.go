@@ -25,7 +25,7 @@ func (v Identifyer) Bash() fmt.Stringer {
 	return source.Linef("$%s", v.Name)
 }
 
-func buildEnv(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
+func buildEnv(table *sym.Table, node ast.Node) Stmt {
 	env, ok := node.(*ast.Env)
 	if !ok {
 		return nil
@@ -87,7 +87,7 @@ func (b BinaryExpr) Bash() fmt.Stringer {
 	return source.Linef("%s %s %s", b.Left.Bash().String(), b.Op, b.Right.Bash().String())
 }
 
-func buildBinaryExpr(table *sym.Table, stmts []Stmt, node ast.Node) Expr {
+func buildBinaryExpr(table *sym.Table, node ast.Node) Expr {
 	expr, ok := node.(*ast.BinaryExpr)
 	if !ok {
 		return nil
@@ -112,7 +112,7 @@ func buildBinaryExpr(table *sym.Table, stmts []Stmt, node ast.Node) Expr {
 	case *ast.Value:
 		ret.Right = Value{ID: v.ID, Raw: v.Raw}
 	case *ast.BinaryExpr:
-		ret.Right = buildBinaryExpr(table, nil, v)
+		ret.Right = buildBinaryExpr(table, v)
 	default:
 		panic("unknown left type in bash binary expression")
 	}
@@ -139,7 +139,7 @@ func (c Command) Bash() fmt.Stringer {
 	)
 }
 
-func buildCommandCall(table *sym.Table, stmts []Stmt, node ast.Node) Expr {
+func buildCommandCall(table *sym.Table, node ast.Node) Expr {
 	call, ok := node.(*ast.Command)
 	if !ok {
 		return nil
