@@ -18,7 +18,7 @@ The following tasks are still in progress:
 - [ ] Design a suitable error package.
     - [ ] How should internal complier errors be handled.
     - [ ] How should user facing errors be displayed (hoping to borrow from rust for this).
-- [ ] Add support arrays.
+- [ ] Add support for arrays.
 - [ ] Add support tables (associative arrasy in bash).
 - [ ] Add support for looping constructs.
 - [ ] Add support for an error type (look at TS and Rust types).
@@ -29,6 +29,7 @@ The following tasks are still in progress:
 - [ ] Design a testing system so that itteration on scripts can move faster.
 
 ## DONE
+- [x] Fix indentation for the auto fmt command.
 - [x] Add types to identifyers in the validation phase
 - [x] Add identifyer validation (all identifyers must be set before being used)
 - [x] The Lex phase should produce a stream of parse.Tokens rather than Nodes.

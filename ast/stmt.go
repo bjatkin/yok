@@ -380,12 +380,9 @@ func buildIf(table *sym.Table, node parse.Node) Stmt {
 		return nil
 	}
 
-	root := &Root{}
-	for _, node := range node.Nodes[2:] {
-		stmt := client.build(node)
-		if stmt != nil {
-			root.Stmts = append(root.Stmts, stmt)
-		}
+	root, ok := client.build(node.Nodes[3]).(*Root)
+	if !ok {
+		return nil
 	}
 
 	return &If{
