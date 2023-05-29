@@ -47,23 +47,21 @@ func (c *Client) Build(tree ast.Stmt) Root {
 	var ret Root
 	for _, builder := range c.stmtBuilders {
 		built := builder(c.table, stmts, tree)
-		if len(built) == 0 {
+		if built == nil {
 			continue
 		}
 
-		ret.Stmts = append(ret.Stmts, built...)
+		ret.Stmts = append(ret.Stmts, built)
 		return ret
 	}
 
 	for _, builder := range c.exprBuilders {
 		built := builder(c.table, stmts, tree)
-		if len(built) == 0 {
+		if built == nil {
 			continue
 		}
 
-		for _, expr := range built {
-			ret.Stmts = append(ret.Stmts, expr)
-		}
+		ret.Stmts = append(ret.Stmts, built)
 		break
 	}
 
@@ -79,21 +77,10 @@ func (c *Client) Bash(tree Root) []byte {
 	return []byte(strings.Join(raw, "\n") + "\n")
 }
 
-type stmtBuilder func(*sym.Table, []Stmt, ast.Node) []Stmt
+type stmtBuilder func(*sym.Table, []Stmt, ast.Node) Stmt
 
-type exprBuilder func(*sym.Table, []Stmt, ast.Node) []Expr
+type exprBuilder func(*sym.Table, []Stmt, ast.Node) Expr
 
 type Node interface {
 	Bash() fmt.Stringer
-}
-
-type Stmt interface {
-	Node
-	stmt()
-}
-
-type Expr interface {
-	Node
-	expr()
-	stmt() // any expression can behave as a statment if the return value is ignored
 }

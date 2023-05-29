@@ -8,6 +8,11 @@ import (
 	"github.com/bjatkin/yok/sym"
 )
 
+type Stmt interface {
+	Node
+	stmt()
+}
+
 type Root struct {
 	Stmt
 	Stmts []Stmt
@@ -22,14 +27,14 @@ func (r Root) Bash() fmt.Stringer {
 	return ret
 }
 
-func buildRoot(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+func buildRoot(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
 	if _, ok := node.(*ast.Root); !ok {
 		return nil
 	}
 
-	return []Stmt{Root{
+	return Root{
 		Stmts: stmts,
-	}}
+	}
 }
 
 type NewLine struct {
@@ -41,13 +46,13 @@ func (n NewLine) Bash() fmt.Stringer {
 	return source.NewLine{}
 }
 
-func buildNewLine(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+func buildNewLine(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
 	newLine, ok := node.(*ast.NewLine)
 	if !ok {
 		return nil
 	}
 
-	return []Stmt{NewLine{ID: newLine.ID}}
+	return NewLine{ID: newLine.ID}
 }
 
 type Use struct {
@@ -68,7 +73,7 @@ func (u Use) Bash() fmt.Stringer {
 	return ret
 }
 
-func buildUseImport(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+func buildUseImport(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
 	use, ok := node.(*ast.Use)
 	if !ok {
 		return nil
@@ -153,7 +158,7 @@ func buildUseImport(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
 		}
 	}
 
-	return []Stmt{ret}
+	return ret
 }
 
 type Comment struct {
@@ -166,16 +171,16 @@ func (c Comment) Bash() fmt.Stringer {
 	return source.Linef("# %s", c.Raw)
 }
 
-func buildComment(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+func buildComment(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
 	comment, ok := node.(*ast.Comment)
 	if !ok {
 		return nil
 	}
 
-	return []Stmt{Comment{
+	return Comment{
 		ID:  comment.ID,
 		Raw: comment.Raw,
-	}}
+	}
 }
 
 type Assign struct {
@@ -189,15 +194,16 @@ func (a Assign) Bash() fmt.Stringer {
 	return source.Linef("%s=%s", a.Identifyer.Name, a.SetTo.Bash())
 }
 
-func buildAssign(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+func buildAssign(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
 	assign, ok := node.(*ast.Assign)
 	if !ok {
 		return nil
 	}
 
+	// TODO: swap this out with client and expressions matcher
 	switch v := assign.SetTo.(type) {
 	case *ast.Identifyer:
-		return []Stmt{Assign{
+		return Assign{
 			ID: assign.ID,
 			Identifyer: Identifyer{
 				ID:   assign.ID,
@@ -207,9 +213,9 @@ func buildAssign(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
 				ID:   v.ID,
 				Name: v.Name,
 			},
-		}}
+		}
 	case *ast.Value:
-		return []Stmt{Assign{
+		return Assign{
 			ID: assign.ID,
 			Identifyer: Identifyer{
 				ID:   assign.ID,
@@ -219,21 +225,21 @@ func buildAssign(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
 				ID:  v.ID,
 				Raw: v.Raw,
 			},
-		}}
+		}
 	case *ast.BinaryExpr:
-		stmt := buildBinaryExpr(table, nil, v)[0]
+		stmt := buildBinaryExpr(table, nil, v)
 		expr, ok := stmt.(Expr)
 		if !ok {
 			panic("build binary expr returned a stmt not an expr")
 		}
-		return []Stmt{Assign{
+		return Assign{
 			ID: assign.ID,
 			Identifyer: Identifyer{
 				ID:   assign.ID,
 				Name: assign.Identifyer,
 			},
 			SetTo: Math{Exprs: []Expr{expr}},
-		}}
+		}
 	default:
 		panic(fmt.Sprintf("unknonwn set to type %T", v))
 	}
@@ -259,7 +265,7 @@ func (i If) Bash() fmt.Stringer {
 	return ret
 }
 
-func buildIf(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+func buildIf(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
 	ifBlock, ok := node.(*ast.If)
 	if !ok {
 		return nil
@@ -306,5 +312,5 @@ func buildIf(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
 	client := NewClient(table)
 	ret.Root = client.Build(ifBlock.Root)
 
-	return []Stmt{ret}
+	return ret
 }

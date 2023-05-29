@@ -9,6 +9,12 @@ import (
 	"github.com/bjatkin/yok/sym"
 )
 
+type Expr interface {
+	Node
+	expr()
+	stmt() // any expression can behave as a statment if the return value is ignored
+}
+
 type Identifyer struct {
 	Expr
 	ID   sym.ID
@@ -19,16 +25,16 @@ func (v Identifyer) Bash() fmt.Stringer {
 	return source.Linef("$%s", v.Name)
 }
 
-func buildEnv(table *sym.Table, stmts []Stmt, node ast.Node) []Stmt {
+func buildEnv(table *sym.Table, stmts []Stmt, node ast.Node) Stmt {
 	env, ok := node.(*ast.Env)
 	if !ok {
 		return nil
 	}
 
-	return []Stmt{Identifyer{
+	return Identifyer{
 		ID:   env.ID,
 		Name: strings.Trim(env.Name, `"`),
-	}}
+	}
 }
 
 type Value struct {
@@ -81,7 +87,7 @@ func (b BinaryExpr) Bash() fmt.Stringer {
 	return source.Linef("%s %s %s", b.Left.Bash().String(), b.Op, b.Right.Bash().String())
 }
 
-func buildBinaryExpr(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
+func buildBinaryExpr(table *sym.Table, stmts []Stmt, node ast.Node) Expr {
 	expr, ok := node.(*ast.BinaryExpr)
 	if !ok {
 		return nil
@@ -106,12 +112,12 @@ func buildBinaryExpr(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
 	case *ast.Value:
 		ret.Right = Value{ID: v.ID, Raw: v.Raw}
 	case *ast.BinaryExpr:
-		ret.Right = buildBinaryExpr(table, nil, v)[0]
+		ret.Right = buildBinaryExpr(table, nil, v)
 	default:
 		panic("unknown left type in bash binary expression")
 	}
 
-	return []Expr{ret}
+	return ret
 }
 
 type Command struct {
@@ -133,7 +139,7 @@ func (c Command) Bash() fmt.Stringer {
 	)
 }
 
-func buildCommandCall(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
+func buildCommandCall(table *sym.Table, stmts []Stmt, node ast.Node) Expr {
 	call, ok := node.(*ast.Command)
 	if !ok {
 		return nil
@@ -166,7 +172,7 @@ func buildCommandCall(table *sym.Table, stmts []Stmt, node ast.Node) []Expr {
 		}
 	}
 
-	return []Expr{ret}
+	return ret
 }
 
 type FileExpr struct {
