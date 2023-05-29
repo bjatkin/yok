@@ -13,7 +13,6 @@ Additionally, many of the existing features are subject to change.
 
 ## TODO
 The following tasks are still in progress:
-- [ ] Add support for string computation (+).
 - [ ] Add support for binary expressions (== != > >= < <= && ||)
 - [ ] Design a suitable error package.
     - [ ] How should internal complier errors be handled.
@@ -29,6 +28,7 @@ The following tasks are still in progress:
 - [ ] Design a testing system so that itteration on scripts can move faster.
 
 ## DONE
+- [x] Add support for string computation (+).
 - [x] Fix indentation for the auto fmt command.
 - [x] Add types to identifyers in the validation phase
 - [x] Add identifyer validation (all identifyers must be set before being used)

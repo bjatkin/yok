@@ -54,10 +54,12 @@ func NewClient(table *sym.Table) *Client {
 			buildAssign,
 			buildComment,
 			buildUseImport,
-			buildEnv,
 			buildIf,
 		},
 		exprBuilders: []exprBuilder{
+			buildValue,
+			buildEnv,
+			buildIdentifyer,
 			buildBinaryExpr,
 			buildCommandCall,
 		},

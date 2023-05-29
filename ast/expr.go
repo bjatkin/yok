@@ -13,7 +13,7 @@ type Expr interface {
 	Node
 	expr()
 	stmt() // any expression can behave as a statment if the return value is ignored
-	yokType() sym.YokType
+	YokType() sym.YokType
 }
 
 type Value struct {
@@ -27,7 +27,7 @@ func (v *Value) Yok() fmt.Stringer {
 	return source.Line(v.Raw)
 }
 
-func (v *Value) yokType() sym.YokType {
+func (v *Value) YokType() sym.YokType {
 	return v.Type
 }
 
@@ -53,7 +53,7 @@ func (i *Identifyer) Yok() fmt.Stringer {
 	return source.Line(i.Name)
 }
 
-func (i *Identifyer) yokType() sym.YokType {
+func (i *Identifyer) YokType() sym.YokType {
 	return i.Type
 }
 
@@ -102,7 +102,7 @@ func (c *Command) Yok() fmt.Stringer {
 	))
 }
 
-func (c *Command) yokType() sym.YokType {
+func (c *Command) YokType() sym.YokType {
 	return sym.StringType
 }
 
@@ -159,7 +159,7 @@ func (e *Env) Yok() fmt.Stringer {
 	return source.Line(fmt.Sprintf("env[%s]", e.Name))
 }
 
-func (e *Env) yokType() sym.YokType {
+func (e *Env) YokType() sym.YokType {
 	return sym.StringType
 }
 
@@ -192,7 +192,7 @@ func (b *BinaryExpr) Yok() fmt.Stringer {
 	return source.Linef("%s %s %s", b.Left.Yok(), b.Op, b.Right.Yok())
 }
 
-func (b *BinaryExpr) yokType() sym.YokType {
+func (b *BinaryExpr) YokType() sym.YokType {
 	return b.Type
 }
 

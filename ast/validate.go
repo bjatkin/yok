@@ -210,16 +210,16 @@ func (v *validateTypes) Visit(node Node) Visitor {
 			v.Visit(t.SetTo)
 		}
 
-		if v.names[t.Identifyer] != sym.UnknownType && v.names[t.Identifyer] != t.SetTo.yokType() {
+		if v.names[t.Identifyer] != sym.UnknownType && v.names[t.Identifyer] != t.SetTo.YokType() {
 			v.typeMissmatch = append(
 				v.typeMissmatch,
-				fmt.Sprintf("missmatched types %s and %s for assignemnt %s", v.names[t.Identifyer], t.SetTo.yokType(), t.Yok()),
+				fmt.Sprintf("missmatched types %s and %s for assignemnt %s", v.names[t.Identifyer], t.SetTo.YokType(), t.Yok()),
 			)
 			return nil
 		}
 
-		v.names[t.Identifyer] = t.SetTo.yokType()
-		t.Type = t.SetTo.yokType()
+		v.names[t.Identifyer] = t.SetTo.YokType()
+		t.Type = t.SetTo.YokType()
 
 		return nil
 	case *Identifyer:
@@ -244,14 +244,14 @@ func (v *validateTypes) Visit(node Node) Visitor {
 			v.Visit(t.Right)
 		}
 
-		if t.Left.yokType() != t.Right.yokType() {
+		if t.Left.YokType() != t.Right.YokType() {
 			v.typeMissmatch = append(
 				v.typeMissmatch,
-				fmt.Sprintf("missmatched types %s and %s for binary expression %s", t.Left.yokType(), t.Right.yokType(), t.Yok()),
+				fmt.Sprintf("missmatched types %s and %s for binary expression %s", t.Left.YokType(), t.Right.YokType(), t.Yok()),
 			)
 		}
 
-		t.Type = t.Left.yokType()
+		t.Type = t.Left.YokType()
 		return nil
 	default:
 		return v

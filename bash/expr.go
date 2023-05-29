@@ -25,7 +25,19 @@ func (v Identifyer) Bash() fmt.Stringer {
 	return source.Linef("$%s", v.Name)
 }
 
-func buildEnv(table *sym.Table, node ast.Node) Stmt {
+func buildIdentifyer(table *sym.Table, node ast.Node) Expr {
+	identifyer, ok := node.(*ast.Identifyer)
+	if !ok {
+		return nil
+	}
+
+	return Identifyer{
+		ID:   identifyer.ID,
+		Name: identifyer.Name,
+	}
+}
+
+func buildEnv(table *sym.Table, node ast.Node) Expr {
 	env, ok := node.(*ast.Env)
 	if !ok {
 		return nil
@@ -45,6 +57,18 @@ type Value struct {
 
 func (v Value) Bash() fmt.Stringer {
 	return source.Line(v.Raw)
+}
+
+func buildValue(table *sym.Table, node ast.Node) Expr {
+	value, ok := node.(*ast.Value)
+	if !ok {
+		return nil
+	}
+
+	return &Value{
+		ID:  value.ID,
+		Raw: value.Raw,
+	}
 }
 
 type Test struct {
@@ -84,6 +108,9 @@ type BinaryExpr struct {
 }
 
 func (b BinaryExpr) Bash() fmt.Stringer {
+	if b.Op == "string concat" {
+		return source.Line(b.Left.Bash().String() + b.Right.Bash().String())
+	}
 	return source.Linef("%s %s %s", b.Left.Bash().String(), b.Op, b.Right.Bash().String())
 }
 
@@ -93,29 +120,46 @@ func buildBinaryExpr(table *sym.Table, node ast.Node) Expr {
 		return nil
 	}
 
-	// TODO: would be nice to have a general build exprs thing here
 	ret := BinaryExpr{
 		Op: expr.Op,
 	}
-	switch v := expr.Left.(type) {
-	case *ast.Identifyer:
-		ret.Left = Identifyer{ID: v.ID, Name: v.Name}
-	case *ast.Value:
-		ret.Left = Value{ID: v.ID, Raw: v.Raw}
-	default:
-		panic("unknown left type in bash binary expression")
+	if expr.Left.YokType() == sym.StringType && expr.Op == "+" {
+		ret.Op = "string concat"
 	}
 
-	switch v := expr.Right.(type) {
-	case *ast.Identifyer:
-		ret.Right = Identifyer{ID: v.ID, Name: v.Name}
-	case *ast.Value:
-		ret.Right = Value{ID: v.ID, Raw: v.Raw}
-	case *ast.BinaryExpr:
-		ret.Right = buildBinaryExpr(table, v)
-	default:
+	client := NewClient(table)
+	left := client.buildExpr(expr.Left)
+	if left == nil {
 		panic("unknown left type in bash binary expression")
 	}
+	ret.Left = left
+
+	right := client.buildExpr(expr.Right)
+	if right == nil {
+		panic("unknown right type in bash binary expression")
+	}
+	ret.Right = right
+
+	// TODO: would be nice to have a general build exprs thing here
+	// switch v := expr.Left.(type) {
+	// case *ast.Identifyer:
+	// 	ret.Left = Identifyer{ID: v.ID, Name: v.Name}
+	// case *ast.Value:
+	// 	ret.Left = Value{ID: v.ID, Raw: v.Raw}
+	// default:
+	// 	panic("unknown left type in bash binary expression")
+	// }
+
+	// switch v := expr.Right.(type) {
+	// case *ast.Identifyer:
+	// 	ret.Right = Identifyer{ID: v.ID, Name: v.Name}
+	// case *ast.Value:
+	// 	ret.Right = Value{ID: v.ID, Raw: v.Raw}
+	// case *ast.BinaryExpr:
+	// 	ret.Right = buildBinaryExpr(table, v)
+	// default:
+	// 	panic("unknown left type in bash binary expression")
+	// }
 
 	return ret
 }

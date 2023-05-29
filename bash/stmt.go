@@ -176,12 +176,12 @@ func buildComment(table *sym.Table, node ast.Node) Stmt {
 type Assign struct {
 	Stmt
 	ID         sym.ID
-	Identifyer Identifyer
+	Identifyer string
 	SetTo      Expr
 }
 
 func (a Assign) Bash() fmt.Stringer {
-	return source.Linef("%s=%s", a.Identifyer.Name, a.SetTo.Bash())
+	return source.Linef("%s=%s", a.Identifyer, a.SetTo.Bash())
 }
 
 func buildAssign(table *sym.Table, node ast.Node) Stmt {
@@ -190,48 +190,21 @@ func buildAssign(table *sym.Table, node ast.Node) Stmt {
 		return nil
 	}
 
-	// TODO: swap this out with client and expressions matcher
-	switch v := assign.SetTo.(type) {
-	case *ast.Identifyer:
-		return Assign{
-			ID: assign.ID,
-			Identifyer: Identifyer{
-				ID:   assign.ID,
-				Name: assign.Identifyer,
-			},
-			SetTo: Identifyer{
-				ID:   v.ID,
-				Name: v.Name,
-			},
-		}
-	case *ast.Value:
-		return Assign{
-			ID: assign.ID,
-			Identifyer: Identifyer{
-				ID:   assign.ID,
-				Name: assign.Identifyer,
-			},
-			SetTo: Value{
-				ID:  v.ID,
-				Raw: v.Raw,
-			},
-		}
-	case *ast.BinaryExpr:
-		stmt := buildBinaryExpr(table, v)
-		expr, ok := stmt.(Expr)
-		if !ok {
-			panic("build binary expr returned a stmt not an expr")
-		}
-		return Assign{
-			ID: assign.ID,
-			Identifyer: Identifyer{
-				ID:   assign.ID,
-				Name: assign.Identifyer,
-			},
-			SetTo: Math{Exprs: []Expr{expr}},
-		}
-	default:
-		panic(fmt.Sprintf("unknonwn set to type %T", v))
+	client := NewClient(table)
+	setTo := client.buildExpr(assign.SetTo)
+	if setTo == nil {
+		panic("invalid set to value in assign")
+	}
+
+	_, isExpr := setTo.(BinaryExpr)
+	if isExpr && assign.SetTo.YokType() == sym.IntType {
+		setTo = Math{Exprs: []Expr{setTo}}
+	}
+
+	return Assign{
+		ID:         assign.ID,
+		Identifyer: assign.Identifyer,
+		SetTo:      setTo,
 	}
 }
 
