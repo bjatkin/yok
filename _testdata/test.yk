@@ -1,0 +1,10 @@
+var a = 10
+var b = 20
+c = false
+
+# this is a comment!
+if true {
+    a = 5
+} else {
+    var test = ./
+}
