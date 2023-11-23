@@ -3,8 +3,37 @@ var b = 20
 c = false
 
 # this is a comment!
-if true {
+if a == 11 {
     a = 5
 } else {
     var test = ./
 }
+
+if b != a {
+    var last string
+}
+
+# nested expressions with correct precidence
+var d = (a + b * 7) + ok
+
+# default values
+var i int
+var b bool
+var s string
+var p path
+
+# comparison operators
+var great = a > b
+var less = a < b
+
+great = a >= b
+less = a <= b
+
+# return and break
+return
+return 10
+break
+break false
+
+return string
+break error

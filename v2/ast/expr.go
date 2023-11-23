@@ -35,6 +35,12 @@ type BoolLiteral struct {
 	Value bool
 }
 
+type StringLiteral struct {
+	Expr
+
+	Value string
+}
+
 type ErrorLiteral struct {
 	Expr
 
@@ -45,4 +51,10 @@ type PathLiteral struct {
 	Expr
 
 	Value string
+}
+
+type Identifyer struct {
+	Expr
+
+	Name string
 }

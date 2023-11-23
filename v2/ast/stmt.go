@@ -44,6 +44,18 @@ type NewLine struct {
 	Stmt
 }
 
+type Return struct {
+	Stmt
+
+	Value Expr
+}
+
+type Break struct {
+	Stmt
+
+	Value Expr
+}
+
 type Comment struct {
 	Stmt
 

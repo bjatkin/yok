@@ -34,7 +34,7 @@ func (p *Parser) Parse(filePath string, src []byte) (ast.Program, error) {
 			errs.AddErr(err)
 
 			// panic mode! eat tokens until we're safe again
-			p.panic(tokens)
+			p.panicTake(tokens)
 		}
 
 		program.Stmts = append(program.Stmts, stmt)
@@ -47,11 +47,15 @@ func (p *Parser) Parse(filePath string, src []byte) (ast.Program, error) {
 	return program, nil
 }
 
-func (p *Parser) panic(tokens *stream[token.Token]) {
+func (p *Parser) panicTake(tokens *stream[token.Token]) {
 	for !tokens.isEmpty() {
 		// look for safe tokens to exit panic mode
 		switch tokens.peek().Type {
 		case token.If:
+			return
+		case token.Return:
+			return
+		case token.Break:
 			return
 		default:
 			tokens.take()
@@ -155,8 +159,8 @@ func (p *Parser) stmt(tokens *stream[token.Token]) (ast.Stmt, error) {
 				return nil, p.wrapErr(
 					err,
 					ekit.TitleInvalidExpression,
-					"this is not an assignable value for a variable",
-				)
+					"this is not a valid expression",
+				).AddCondition("only valid expressions can be assigned to variables")
 			}
 
 			value = expr
@@ -164,10 +168,12 @@ func (p *Parser) stmt(tokens *stream[token.Token]) (ast.Stmt, error) {
 			value = &ast.IntLiteral{}
 		case token.Bool:
 			value = &ast.BoolLiteral{}
+		case token.String:
+			value = &ast.StringLiteral{}
 		case token.Error:
 			value = &ast.ErrorLiteral{}
 		case token.Path:
-			value = &ast.PathLiteral{Value: "."}
+			value = &ast.PathLiteral{Value: "./"}
 		default:
 			return nil, p.newErr(
 				tokens.peek(),
@@ -204,8 +210,45 @@ func (p *Parser) stmt(tokens *stream[token.Token]) (ast.Stmt, error) {
 			Name:  name,
 			Value: value,
 		}, nil
+	case token.Return:
+		// take the 'return' token
+		tokens.take()
+		if tokens.peek().Type == token.NewLine {
+			return &ast.Return{}, nil
+		}
+
+		// TODO: check to make sure we're inside a function context,
+		// returning from the root is not valid and show show up as failed here
+		ret, err := p.expr(tokens)
+		if err != nil {
+			return nil, p.wrapErr(
+				err,
+				ekit.TitleInvalidControllFlow,
+				"this is not a valid return value",
+			)
+		}
+		return &ast.Return{Value: ret}, nil
+	case token.Break:
+		// take the 'break' token
+		tokens.take()
+		if tokens.peek().Type == token.NewLine {
+			return &ast.Break{}, nil
+		}
+
+		// TODO: check to make sure we're inside a loop/ switch context.
+		// breaking out of a function or loop is not valid and shoulw show up as failed here
+		ret, err := p.expr(tokens)
+		if err != nil {
+			return nil, p.wrapErr(
+				err,
+				ekit.TitleInvalidControllFlow,
+				"this is not a valid break value",
+			)
+		}
+
+		return &ast.Break{Value: ret}, nil
 	case token.NewLine:
-		// take the '\n' character
+		// take the '\n' token
 		tokens.take()
 		return ast.NewLine{}, nil
 	case token.Comment:
@@ -254,6 +297,116 @@ func (p *Parser) block(tokens *stream[token.Token]) (*ast.Block, error) {
 }
 
 func (p *Parser) expr(tokens *stream[token.Token]) (ast.Expr, error) {
+	// TODO: do we actually need this expr function?
+	// right now it just makes expanding expression parsing easy
+	return p.equality(tokens)
+}
+
+func (p *Parser) equality(tokens *stream[token.Token]) (ast.Expr, error) {
+	left, err := p.comparison(tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	next := tokens.peek().Type
+	if next != token.Equal && next != token.NotEqual {
+		return left, nil
+	}
+
+	op := tokens.take()
+	right, err := p.expr(tokens)
+	if err != nil {
+		return nil, ekit.NewCondition(tokens.peek(),
+			fmt.Sprintf("I expected an expression on the right side of the '%s' symbol. Instead I found '%s'", op.Lexeme, tokens.peek().Lexeme),
+		)
+	}
+
+	return &ast.Binary{
+		Left:  left,
+		Op:    op,
+		Right: right,
+	}, nil
+}
+
+func (p *Parser) comparison(tokens *stream[token.Token]) (ast.Expr, error) {
+	left, err := p.addSubExpr(tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	next := tokens.peek().Type
+	if next != token.Greater && next != token.GreaterEqual && next != token.Less && next != token.LessEqual {
+		return left, nil
+	}
+
+	op := tokens.take()
+	right, err := p.expr(tokens)
+	if err != nil {
+		return nil, ekit.NewCondition(tokens.peek(),
+			fmt.Sprintf("I expected an expression on the right side of the '%s' symbol. Instead I found '%s'", op.Lexeme, tokens.peek().Lexeme),
+		)
+	}
+
+	return &ast.Binary{
+		Left:  left,
+		Op:    op,
+		Right: right,
+	}, nil
+}
+
+func (p *Parser) addSubExpr(tokens *stream[token.Token]) (ast.Expr, error) {
+	left, err := p.multiplyDivideExpr(tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	next := tokens.peek().Type
+	if next != token.Add && next != token.Minus {
+		return left, nil
+	}
+
+	op := tokens.take()
+	right, err := p.expr(tokens)
+	if err != nil {
+		return nil, ekit.NewCondition(tokens.peek(),
+			fmt.Sprintf("I expected an expression on the right side of the '%s' symbol. Instead I found '%s'", op.Lexeme, tokens.peek().Lexeme),
+		)
+	}
+
+	return &ast.Binary{
+		Left:  left,
+		Op:    op,
+		Right: right,
+	}, nil
+}
+
+func (p *Parser) multiplyDivideExpr(tokens *stream[token.Token]) (ast.Expr, error) {
+	left, err := p.baseExpr(tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	next := tokens.peek().Type
+	if next != token.Star && next != token.Divide {
+		return left, nil
+	}
+
+	op := tokens.take()
+	right, err := p.expr(tokens)
+	if err != nil {
+		return nil, ekit.NewCondition(tokens.peek(),
+			fmt.Sprintf("I expected an expression on the right side of the '%s' symbol. Instead I found '%s'", op.Lexeme, tokens.peek().Lexeme),
+		)
+	}
+
+	return &ast.Binary{
+		Left:  left,
+		Op:    op,
+		Right: right,
+	}, nil
+}
+
+func (p *Parser) baseExpr(tokens *stream[token.Token]) (ast.Expr, error) {
 	switch tokens.peek().Type {
 	case token.IntLiteral:
 		valueToken := tokens.take()
@@ -282,10 +435,29 @@ func (p *Parser) expr(tokens *stream[token.Token]) (ast.Expr, error) {
 		valueToken := tokens.take()
 		// TODO: validate the path
 		return &ast.PathLiteral{Value: valueToken.Lexeme}, nil
+	case token.Identifyer:
+		nameToken := tokens.take()
+		return &ast.Identifyer{Name: nameToken.Lexeme}, nil
+	case token.OpenParen:
+		// take the open paren
+		tokens.take()
+		group, err := p.expr(tokens)
+		if err != nil {
+			return nil, err
+		}
+
+		if got := tokens.take(); got.Type != token.CloseParen {
+			return nil, ekit.NewCondition(got,
+				fmt.Sprintf("I expected the opening paren to be matched by a closing paren, instead I found '%s'", got.Lexeme),
+			)
+		}
+
+		return group, nil
 	default:
 		return nil, ekit.NewCondition(
 			tokens.peek(),
 			fmt.Sprintf("'%s' is a not valid way to start an expression", tokens.peek().Lexeme),
+			fmt.Sprintf("I expected there to be an expression here"),
 		)
 	}
 }

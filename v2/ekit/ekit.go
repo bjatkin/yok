@@ -18,10 +18,11 @@ const (
 type Title string
 
 const (
-	TitleInvalidStatement  = Title("INVALID STATEMENT")
-	TitleInvalidExpression = Title("INVALID EXPRESSION")
-	TitleInvalidBlock      = Title("INVALID BLOCK")
-	TitleUnknownToken      = Title("UNKNOWN TOKEN")
+	TitleInvalidStatement    = Title("INVALID STATEMENT")
+	TitleInvalidExpression   = Title("INVALID EXPRESSION")
+	TitleInvalidControllFlow = Title("INVALID CONTROLL FLOW")
+	TitleInvalidBlock        = Title("INVALID BLOCK")
+	TitleUnknownToken        = Title("UNKNOWN TOKEN")
 )
 
 type Condition struct {
@@ -29,6 +30,10 @@ type Condition struct {
 	Conditions []string
 }
 
+// TODO: It would be nice if conditions could point to specific spots in the code as well.
+// it would not always be needed but somtimes it would be nice
+//
+// Or maybe just allowing characters to be colored/ hilighted...
 func NewCondition(start token.Token, conditions ...string) *Condition {
 	return &Condition{
 		Start:      start,
@@ -111,7 +116,7 @@ func (e *Err) Error() string {
 
 	// add all the relevent context
 	for _, c := range e.Extra.Conditions {
-		lines = append(lines, "  * "+c)
+		lines = append(lines, "  * "+strings.ReplaceAll(c, "\n", `\n`))
 	}
 
 	return strings.Join(lines, "\n") + "\n"
