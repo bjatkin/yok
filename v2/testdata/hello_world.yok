@@ -1,0 +1,5 @@
+# set the subject name
+let subject = :world
+
+# say hello to the subject
+print("Hello", subject)

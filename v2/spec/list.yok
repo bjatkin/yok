@@ -1,0 +1,4 @@
+# arrays are only possible by using 'jq'
+# I'll likely end up implementing a module that makes it possible to work with 
+# JSON arrays, probably by leveraging the macro system
+# that's future work though

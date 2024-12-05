@@ -1,0 +1,27 @@
+fn add(a, b) {
+    return a + b
+}
+
+fn div(num, den) {
+    if den == 0 {
+        # exit exits the function with an error code rather than returning
+        exit 1
+    }
+
+    return num/den
+}
+
+fn print_multi(msg, repeat) {
+    for i in range(:0, repeat) {
+        print("-n", msg)
+    }
+
+    return :ok
+}
+
+print(add(:10, :20))
+
+print(div(:10, :5) or :0)
+print(div(:10, :0) or :0)
+
+print(print_multi("hello ", :3))

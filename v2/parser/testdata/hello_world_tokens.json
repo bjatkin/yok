@@ -1,0 +1,19 @@
+[
+    {"Type": "comment", "Pos": 0, "Value": "# set the subject name"},
+    {"Type": "new_line", "Pos": 22, "Value": "\r\n"},
+    {"Type": "let", "Pos": 24, "Value": "let"},
+    {"Type": "identifier", "Pos": 28, "Value": "subject"},
+    {"Type": "assign", "Pos": 36, "Value": "="},
+    {"Type": "atom", "Pos": 38, "Value": ":world"},
+    {"Type": "new_line", "Pos": 44, "Value": "\r\n"},
+    {"Type": "new_line", "Pos": 46, "Value": "\r\n"},
+    {"Type": "comment", "Pos": 48, "Value": "# say hello to the subject"},
+    {"Type": "new_line", "Pos": 74, "Value": "\r\n"},
+    {"Type": "identifier", "Pos": 76, "Value": "print"},
+    {"Type": "open_paren", "Pos": 81, "Value": "("},
+    {"Type": "string", "Pos": 82, "Value": "\"Hello\""},
+    {"Type": "comma", "Pos": 89, "Value": ","},
+    {"Type": "identifier", "Pos": 91, "Value": "subject"},
+    {"Type": "close_paren", "Pos": 98, "Value": ")"},
+    {"Type": "new_line", "Pos": 99, "Value": "\r\n"}
+]

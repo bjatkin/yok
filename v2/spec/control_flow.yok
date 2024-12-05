@@ -1,0 +1,47 @@
+if 10 < 100 {
+    print("all is well")
+}
+
+if 10 > 100 {
+    print("something is wrong")
+} else {
+    print("all is well")
+}
+
+let a = :20
+let b = :30
+if a > :10 and b > :5 {
+    print("both checks are true")
+} else {
+    print("a or b is false")
+}
+
+switch a {
+    :0 { print("a is 0") }
+    :1 { print("a is 1") }
+    :2 { print("a is 2") }
+    :5 or :10 or :15 or :20 {
+        print("a is 5, 10, 15 or 20")
+    }
+    _ { print("a is unknown") }
+}
+
+let c = "test" 
+switch c {
+    "ok" { print("c is ok") }
+    "test" { print("c is test") }
+}
+
+for i in range(:0, :10) {
+    print("i: ", i)
+}
+
+for i in range(:2, :12, :2) {
+    print("even: ", i)
+}
+
+let j = :0
+while j < :10 {
+    print("j: ", j)
+    j++
+}

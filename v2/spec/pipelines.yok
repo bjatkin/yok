@@ -1,0 +1,15 @@
+cat(./examples/data/test.txt) | grep("a") | sort()
+
+ls("-l") | wc("-l")
+
+fn greet(greeting) {
+    let name = ""
+    while read(name) {
+        print("{greeting} {name}")
+    }
+}
+
+# you can also use functions in pipelines as long as you read from stdin using 'read'
+echo("-e", "John\nJacob\nJingleheimer\nSchmidt") | greet("Hello")
+print("---")
+echo("-e", "John\nJacob\nJingleheimer\nSchmidt") | greet("Guten Tag")

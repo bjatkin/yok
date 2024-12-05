@@ -1,0 +1,12 @@
+# I'm not sure how to design this system yet (I probably want something like Elixir)
+# but it seems like with `sh` being as limited as it is, a good macro system might be really useful
+
+# contains checks if str string contains the sub string
+mx contains(str, sub) {
+    quote(switch str {
+        case '_"{unquote(sub)}"_':
+            return _, 0
+        case _:
+            return _, 1
+    })
+}

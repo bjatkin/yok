@@ -1,0 +1,17 @@
+# error handling is not required, but all commands and functions might fail
+# so it's generally good practice to try to handle your errors
+let name = curl("localhost:8080/get_name")
+print("name is '{name}'")
+
+# if custom logic is required when a command fails it can be handled using
+# zig style try catch (without the try)
+name = curl("localhost:8080/get_name") catch(e) {
+    print("command failed with code {e}")
+    name="Jay"
+}
+print("now name is", name)
+
+# if you just want the command return to default to a specific value on failure
+# you can use `or` to default the value
+name = curl("localhost:8080/get_name") or "Lex"
+print("default name is", name)

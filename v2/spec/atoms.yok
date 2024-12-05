@@ -1,0 +1,5 @@
+# atoms are basically just strings constants so they could be a good addition to yok
+:hello
+:world
+
+print(:hello, :world)

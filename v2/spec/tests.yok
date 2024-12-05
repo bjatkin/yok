@@ -1,0 +1,32 @@
+fn new_greet(name) {
+    return "Hello " <> name <> "!"
+}
+
+test "say hello" {
+    let greet = new_greet("Jay")
+    assert greet == "Hello Jay!"
+}
+
+let count = ls("-l") | wc ("-l")
+print(count)
+print(new_greet("Lex"))
+
+test "test full script" {
+    # mock the ls command
+    fn ls() {
+        return """total 0
+file 1
+file 2
+file 3
+"""
+    }
+
+    # the wc command does not need to be mocked as we already 
+    # mocked the input with ls
+
+    # self calls this full script in the context of the test
+    result = self()
+
+    assert grep(stdin=result, "4") == "4"
+    assert grep(stdin=result, "Lex") == "Hello Lex!"
+}

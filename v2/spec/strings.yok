@@ -1,0 +1,38 @@
+let first_name = "Alexis"
+let last_name = "Smith"
+let full_name = first_name <> last_name
+print("full name: ", full_name)
+
+let name_len = len(full_name)
+print("name len: ", name_len)
+
+let greet = "Hello"
+# we use <start:end> here to preserve [start:end] for arrays if we ever add them
+# start or end can be omitted if they are 0 or len(str) respectively
+let sub_string = greet<:4>
+
+let greet_world = "{greet} World"
+print(greet_world)
+
+let greet_lex = replace(greet_world, "World", "Lex")
+print(greet_lex)
+
+let cheer = "Jay Jay Jay!"
+print(cheer)
+let new_cheer = replace_all(cheer, "Jay", "Lex")
+print(new_cheer)
+
+if first_name == "Alexis" {
+    print("Name is Lex")
+}
+
+if last_name == "" {
+    print("No last name")
+}
+
+switch greet_world {
+    # you can do some light pattern matching with strings as well which is cool!
+    # pattern strings are denoted by single quotes
+    case '_lo_': 
+        print("Contains 'lo'")
+}

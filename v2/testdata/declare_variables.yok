@@ -1,0 +1,12 @@
+# atom values
+let a = :10
+let b = :20
+let status = :ok
+
+# string values
+let pet = "dog"
+let color = "red"
+
+# file paths
+let my_file = :/my/file.txt
+let my_dir = :my/relative/dir

@@ -1,0 +1,7 @@
+# TODO: this probably needs to be a little more sophisticated so I can import not just tools, but also other yok packages...
+
+# these use commands will be checked before the script runs
+use (
+    git
+    foo
+)

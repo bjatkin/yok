@@ -1,0 +1,24 @@
+[
+    {"Node": "comment", "Value": "# set the subject name"},
+    {
+        "Node": "assign",
+        "Identifier": {"Type": "identifier", "Pos": 28, "Value": "subject"},
+        "Value": {"Node": "atom", "Value": ":world"}
+    },
+    {"Node": "new line"},
+    {"Node": "comment", "Value": "# say hello to the subject"},
+    {
+        "Node": "function call",
+        "Identifier": {
+            "Node": "identifier",
+            "Token": {"Type": "identifier", "Pos": 76, "Value": "print"}
+        },
+        "Arguments": [
+            {"Node": "string", "Value": "\"Hello\""},
+            {
+                "Node": "identifier",
+                "Token": {"Type": "identifier", "Pos": 91, "Value": "subject"}
+            }
+        ]
+    }
+]

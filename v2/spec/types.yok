@@ -1,0 +1,33 @@
+# DISCLAIMER
+#   I don't think types are going to be used.
+#   `sh` represents everything using strings and I don't think I want to abstract that away.
+#   The only reason I really needed it was because $(()) can't be reliably complied if `+` is used for both integer addition and string concat.
+#   I'm just going to fix this by makeing the string concat op be <> like in Elixir
+#
+# UPDATE
+#   After some more though I still don't think I want to build in a type system by default.
+#   I'm convinced that I can add a type system using a module if I take advantage of the yok macro system.
+#   That way the type system can be opt in since it will almost certinaly complicate the generated code greatly.
+#   In order for the tool to be successful I think it needs to be possible to generate really clean sh code,
+#   which kinda rules out the type system as a default option.
+
+let a = 10    # type is int
+let b = "str" # type is string
+let c = false # type is a bool
+
+let d int = 20     # type is still int
+let e str = "str"  # type is still string
+let f bool = true # type is still bool
+
+let g int  # type is int and default value is 0
+let h str  # type is string and default value is ""
+let i bool # type is bool and default value is false
+
+# constants are repleced with values by the complier
+const j = 11    # this is a constant int
+const k = "str" # this is a constant string
+const l = true  # this is a constant bool
+
+# yok also supports lists
+let m = []
+let n list = ["a", 1, false]

@@ -1,2 +1,7 @@
+# editor files
+.vscode
+
 # local only files
 local
+TODO.md
+cover.out

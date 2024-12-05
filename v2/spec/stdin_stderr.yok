@@ -1,0 +1,22 @@
+curl("-X POST", "localhost:8080/get_name", stderr=/dev/null)
+# paths are first class values in Yok
+# anythin that starts with / or ./ is a path
+cat(./examples/data/my_file.txt, stdout=./examples/data/my_log.txt, stderr=stdout)
+
+# = just sets stdout to overwrite the file
+# => sets it to append to the file
+cat(./examples/data/test.txt, stdout=>./examples/data/new_test.txt)
+
+# you get send input directly into a command using stdin
+sort(stdin=./examples/data/test.txt)
+print("---")
+
+# you can also send multiline strings directly to stdin
+sort(stdin="""
+a
+c
+d
+b
+""")
+
+sort(stdin=./examples/data/test.txt, stdout=./examples/data/sorted.txt)

@@ -1,0 +1,88 @@
+[
+    {
+        "Node": "assign",
+        "Identifier": "A",
+        "Value": {
+            "Node": "arithmetic command",
+            "Expression": {
+                "Node": "infix expression",
+                "Operator": "+",
+                "Left": {"Node": "string", "Value": "\"5\""},
+                "Right": {"Node": "string", "Value": "\"10\""}
+            }
+        }
+    },
+    {
+        "Node": "assign",
+        "Identifier": "B",
+        "Value": {
+            "Node": "arithmetic command",
+            "Expression": {
+                "Node": "infix expression",
+                "Operator": "-",
+                "Left": {"Node": "string", "Value": "\"10\""},
+                "Right": {"Node": "string", "Value": "\"15\""}
+            }
+        }
+    },
+    {
+        "Node": "assign",
+        "Identifier": "C",
+        "Value": {
+            "Node": "arithmetic command",
+            "Expression": {
+                "Node": "infix expression",
+                "Operator": "*",
+                "Left": {"Node": "string", "Value": "\"15\""},
+                "Right": {"Node": "string", "Value": "\"20\""}
+            }
+        }
+    },
+    {
+        "Node": "assign",
+        "Identifier": "D",
+        "Value": {
+            "Node": "arithmetic command",
+            "Expression": {
+                "Node": "infix expression",
+                "Operator": "/",
+                "Left": {"Node": "string", "Value": "\"20\""},
+                "Right": {"Node": "string", "Value": "\"10\""}
+            }
+        }
+    },
+    {
+        "Node": "assign",
+        "Identifier": "E",
+        "Value": {
+            "Node": "arithmetic command",
+            "Expression": {
+                "Node": "infix expression",
+                "Operator": "%",
+                "Left": {"Node": "string", "Value": "\"10\""},
+                "Right": {"Node": "string", "Value": "\"15\""}
+            }
+        }
+    },
+    {
+        "Node": "assign",
+        "Identifier": "F",
+        "Value": {
+            "Node": "arithmetic command",
+            "Expression": {
+                "Node": "infix expression",
+                "Operator": "*",
+                "Left": {
+                    "Node": "group expression",
+                    "Expression": {
+                        "Node": "infix expression",
+                        "Operator": "+",
+                        "Left": {"Node": "string", "Value": "\"1\""},
+                        "Right": {"Node": "string", "Value": "\"2\""}
+                    }
+                },
+                "Right": {"Node": "string", "Value": "\"3\""}
+            }
+        }
+    }
+]
