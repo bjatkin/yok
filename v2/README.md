@@ -89,15 +89,6 @@ let b = :20
 let status = :ok
 ```
 
-The boolean values `true` and `false` are also usually represented using `atoms`
-
-```yok
-let ok = :true
-while ok {
-    print("loop forever")
-}
-```
-
 As long as the file paths do not contain spaces you can also use atoms to represent file paths.
 
 ```yok
@@ -105,7 +96,7 @@ let my_file = :/my/file.txt
 let my_dir = :my/relative/dir
 ```
 
-In **Yо̄k** you can also use triple double quotes (""") to specify multiline string values.
+In **Yо̄k** you can also use triple quotes (""") to specify multiline string values.
 
 ```yok
 let his_name = """John
@@ -117,11 +108,10 @@ let my_name = his_name
 ```
 
 **Yо̄k** also supports single quoted strings.
-However these are only ever used in case statements for pattern matching 
+However these are only ever in switch statements for string pattern matching 
 You can learn more in the [Control Flow](#control-flow) section.
 
-**BUT WHY?:** It may seem odd for **Yо̄k** to eschew integer or boolean values.
-While this could technically be supported, we choose to avoided it.
+**BUT WHY?:** It may seem odd for **Yо̄k** to eschew integer or boolean types.
 This is because in **sh** support for integer literals is actually illusory.
 Integer literals are actual strings.
 
@@ -129,7 +119,7 @@ Integer literals are actual strings.
 a=10 # <- this is actually the string "10"
 ```
 
-In fact in **sh** pretty much everything defaults to being a string.
+In fact in **sh** pretty much everything can be thought of as being a string.
 
 ```sh
 a=hello # <- this is a string
@@ -138,6 +128,7 @@ c=true  # <- and this
 d=3.14  # <- this is a string too
 
 echo a "world" # <- this prints `a world` instead of `hello world` because `a` is a string, not the variable `a`
+echo $a "world" # <- this is how to actually print `hello world`
 ```
 
 This is surprising for many developers and can be a source of unexpected behavior.
@@ -147,17 +138,21 @@ This is of course at the expense of some slightly clunky syntax but we feel this
 ### Variables
 
 Variables must be declared with `let` before they can be used.
-This prevents bugs where misspelled variables silently resolve to empty values.
+This prevents some bugs including instances where misspelled variables silently resolve to empty values.
 
 ```yok
 let x = :42
 let y = "hello"
 y = :world
+
+let verbs = "run, jump, skip"
+# this is a compile time error error because `verb` is not declare and should actually be `verbs`
+print("I like to do the following:", verb)
 ```
 
 ### Integer Math
 
-While **Yо̄k** does not support integers, it has several operators that can be used to do integer calculations.
+While **Yо̄k** does not support typed integers, it has several operators that can be used to do integer calculations.
 These tools take strings as input, convert those strings to integers, and then return strings as output.
 
 ```yok
@@ -173,19 +168,6 @@ a = ( :1 + :2 ) * :3
 a++
 a--
 a = -a
-```
-
-bit-wise operations are also supported.
-Inputs are treated as 32-bit signed integers by these operations
-
-```yok
-# bitwise operators
-a = :5 & :0   # AND
-a = :5 | :0   # OR
-a = :5 ^ :0   # XOR
-a = ~a        # NOT
-a = :10 << :1 # left shift
-a = :10 >> :1 # right shift
 ```
 
 **Note:** Floating point math is not supported natively in **Yо̄k** (yet :D), but you can leverage tools like `bc` or `awk` to make it possible.
@@ -240,7 +222,7 @@ if x > 0 {
     print("x is positive")
 }
 
-if x == 0 {
+if x ==i 0 {
     print("x is zero")
 } else {
     print("x is not zero")
@@ -279,7 +261,7 @@ switch a {
 }
 ```
 
-`for` and `while` loops are also present:
+as well as `for` and `while` loops:
 
 ```yok
 for i in range(:1, :10) {
@@ -292,10 +274,56 @@ while :true {
 }
 ```
 
+### Comparison Operators
+
+Control flow relies on the use of comparison operators.
+**Yо̄k** supports all the basic comparison operators you would expect.
+
+```yok
+let x = :10
+let y = :20
+
+if x == y {
+    print("x == y")
+}
+
+if x != y {
+    print("x != y")
+}
+
+if x > y {
+    print("x > y")
+}
+
+if x < y {
+    print("x < y")
+}
+
+if x >= y {
+    print("x >= y")
+}
+
+if x <= y {
+    print("x <= y")
+}
+```
+
+**Warning:** Comparison are *statements* in **Yо̄k**, not expressions.
+This means they do *not* return a value.
+Instead they work by setting the `error code`.
+Trying to use a comparison as a value will result in a compile time error.
+
+```yok
+let age = 19
+
+# this fails because `age > 16` does not return a value and so can not be assigned to a variable
+let can_drive = age > 16
+```
+
 ### Functions
 
 **Yо̄k** functions are declared with the `fn` keyword.
-They can take input parameters and return a single value.
+They can take input parameters and return a value.
 
 ```yok
 fn add(a, b) {
@@ -304,12 +332,14 @@ fn add(a, b) {
 ```
 
 Functions behave like commands so they can also read from `stdin` and set the `error code`
+
 ```yok
 fn div(a, b) {
     if b == 0 {
         # return an empty value and set the error code to 1
         return :0, :1
     }
+    # no status code is specified so it defaults to 0
     return a / b
 }
 ```
@@ -317,8 +347,8 @@ fn div(a, b) {
 ### Commands
 
 **Yо̄k** treats commands and function calls in the same way.
-Command from the environment must be explicitly imported with `use` at the top of your script.
-These commands can then be called as if they were functions.
+Commands from the environment must be explicitly imported with `use` at the top of your script.
+These commands can then be called just like functions.
 
 ```yok
 use {
@@ -329,7 +359,6 @@ curl("-X=POST", "localhost:8000/")
 ```
 
 The content that these commands send to `stdout` can be "captured" and placed in a variable.
-This behaves like you would expect from **Yо̄k** functions.
 
 ```yok
 use {
@@ -344,26 +373,29 @@ print(sequence) # this will print the numbers from 1 to 10
 
 `stdin`, `stdout`, `stderr` can be manipulated just like in `sh`.
 
-For example, you can send data from a file into a command using the `stdin` argument in a command or function.
+For example, you can send data from a file into a command using the named `stdin` argument in a command or function.
 
 ```yok
+# take the test.txt file descriptor and set it to greps `stdin` file descriptor
 grep("test", stdin=:test.txt)
 ```
 
-You can also pipe a string into `stdin` along with `<=`.
+You can also pipe a string directly into `stdin` with the `<=` syntax.
 
 ```yok
+# create a temporary file from the given string and use the file descriptor for greps `stdin`
 grep("test, stdin<="testing\ntesting\n1 2 3")
 ```
 
 `stdout` and `stderr` can also be set for either commands or functions.
 
 ```yok
-# silence all output from `cat`
+# silence all output from `cat` using the special `/dev/null` file descriptor
+# also remap stderr to stdout, notice stdout here is a keyword, not a string
 cat(:my_file.txt, stdout=:/dev/null, stderr=stdout)
 ```
 
-using `=>` a file can be appended to, rather than overwritten.
+using the `=>` syntax a file can be appended to, rather than overwritten.
 
 ```yok
 cat(:my_file.txt, stdout=>:my_log.txt)
@@ -374,6 +406,7 @@ cat(:my_file.txt, stdout=>:my_log.txt)
 **Yо̄k** supports classic **sh** pipelines.
 Because the language treats commands and functions the same, they can be used interchangeably in the pipeline.
 in order to use a function in a pipeline it must use the `read` keyword to get input from `stdin` and `yield` a value.
+Functions which do not read from `stdin` and `yield` a value will cause a compile time error if they are used in a pipeline.
 
 ```yok
 use {
@@ -390,21 +423,23 @@ fn say_hello(greet) {
 
 let lex_greeting = cat(:names.txt) | say_hello("xin chao") | grep(:lex)
 ```
+
 ### Error Handling
 
 **sh** relies on `error codes` and the special `$?` variable for handling errors.
 **Yо̄k** cleans up the syntax around using these tools for error handling.
-You can use the `catch` construct to explicitly handle error codes.
-This is not required but can be useful to provide better error messages to your user, exit your script, or perform any necessary cleanup when your code fails.
+You can use the `catch` syntax to explicitly handle any non-zero error codes.
+This is not required but can be useful to provide better error messages to your user, exit your script gracefully, and perform any necessary cleanup when your code fails.
 
 ```yok
 let result = curl("localhost:8000/") catch(e) {
     print("failed to curl localhost, error_code:{e}")
+    do_cleanup()
     result = :none
 }
 ```
 
-The `or` keyword can also be used to set a default value when something fails.
+The `or` keyword can be used quickly set a default value when something fails.
 
 ```yok
 let result = curl("localhost:8000/") or "request failed!"
@@ -416,9 +451,11 @@ This value must be a string literal for a value between :1 and :255
 ```yok
 fn div(a, b) {
     if b == 0 {
-        return :0, :1 # <- return the error code :1 here
+        # return the error code :1 here
+        return :0, :1
     }
-    return a / b # <- no error code is specified so the code :0 is returned
+    # no error code is specified so the code :0 is returned
+    return a / b
 }
 ```
 
@@ -426,6 +463,7 @@ Error code returns can even be used from the top level of a script to exit with 
 
 ```yok
 let password = ""
+# read the password in from the user
 read(password)
 
 if password != "password" {
@@ -433,9 +471,19 @@ if password != "password" {
 }
 ```
 
+### Yо̄k Builtins
+
+**Yо̄k** comes with several useful builtins
+
+* `read` can be used to read strings from `stdin`. This is especially useful in pipelines.
+* `len` can be used to get the length of a string in characters.
+* `replace` and `replace_all` can be used to replace substrings in a larger string.
+
 ### Inline Sh
 
-In the case that direct used of sh script is required, it can be accessed using an `sh` block.
+In the case that direct used of `sh` script is required, it can be accessed using an `sh` block.
+This code will not be validated by the **Yо̄k** compiler and breaks all guarantees that the **Yо̄k** language makes.
+Use this feature with caution.
 
 ```yok
 let greeting = "Hello"
@@ -447,7 +495,7 @@ sh {
 
 ### Testing
 
-The idea of testing is built directly into **Yо̄k**.
+Testing support is built directly into **Yо̄k**.
 You can define a test anywhere in a **Yо̄k** script to test functionality.
 
 ```yok
@@ -470,14 +518,15 @@ test "div works as expected" {
 }
 ```
 
-An entire script can also be tested by calling `self()`.
+If you want to test your entire script, rather than a simple function, you can do so by calling `self()`.
 This will execute the script, replacing all command and function with those defined in the test environment.
 
 ```yok
 ls("-l") | wc("-l")
 
 test "test full script" {
-    fn ls() { # <- this function overwrites the `ls` command so it can be mocked
+    # this function overwrites the `ls` command so it can be mocked
+    fn ls() {
         return """total 0
 file 1
 file 2
@@ -486,7 +535,6 @@ file 3
     }
 
     # 'got' here is populated with the contents of stdout after running the given script
-    # this can be modified using the stdout, stderr, and stdin parameters
     let got = self()
     assert got == :4, "the script returned {got}, but wanted :4"
 }
