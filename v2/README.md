@@ -150,6 +150,13 @@ let verbs = "run, jump, skip"
 print("I like to do the following:", verb)
 ```
 
+Variables can also be set in the parent environment (i.e. exported), using the `super` keyword
+
+```yok
+# this will be set in the parent environment
+super home = :/usr/me
+```
+
 ### Integer Math
 
 While **Yо̄k** does not support typed integers, it has several operators that can be used to do integer calculations.
@@ -222,7 +229,7 @@ if x > 0 {
     print("x is positive")
 }
 
-if x ==i 0 {
+if x == 0 {
     print("x is zero")
 } else {
     print("x is not zero")
@@ -308,7 +315,7 @@ if x <= y {
 }
 ```
 
-**Warning:** Comparison are *statements* in **Yо̄k**, not expressions.
+**Warning:** Comparison operations are *statements* in **Yо̄k**, not expressions.
 This means they do *not* return a value.
 Instead they work by setting the `error code`.
 Trying to use a comparison as a value will result in a compile time error.
@@ -336,7 +343,7 @@ Functions behave like commands so they can also read from `stdin` and set the `e
 ```yok
 fn div(a, b) {
     if b == 0 {
-        # return an empty value and set the error code to 1
+        # set the error code to 1 on return
         return :0, :1
     }
     # no status code is specified so it defaults to 0
@@ -404,8 +411,8 @@ cat(:my_file.txt, stdout=>:my_log.txt)
 ### Pipelines
 
 **Yо̄k** supports classic **sh** pipelines.
-Because the language treats commands and functions the same, they can be used interchangeably in the pipeline.
-in order to use a function in a pipeline it must use the `read` keyword to get input from `stdin` and `yield` a value.
+The language treats commands and functions the same, meaning they can be used interchangeably in the pipeline.
+In order to use a function in a pipeline it must use the `read` keyword to get input from `stdin` and `yield` a value.
 Functions which do not read from `stdin` and `yield` a value will cause a compile time error if they are used in a pipeline.
 
 ```yok
@@ -454,7 +461,7 @@ fn div(a, b) {
         # return the error code :1 here
         return :0, :1
     }
-    # no error code is specified so the code :0 is returned
+    # no error code is specified so the error code is set to :0
     return a / b
 }
 ```
@@ -475,8 +482,14 @@ if password != "password" {
 
 **Yо̄k** comes with several useful builtins
 
-* `read` can be used to read strings from `stdin`. This is especially useful in pipelines.
-* `len` can be used to get the length of a string in characters.
+* `print` is used to write output to the terminal.
+    It writes to `stderr` rather than `stdout`.
+    This is because `stdout` is used when piping commands together.
+    `stdout` is also used to return values from functions (remember functions are essentially small shell commands).
+    All of this makes writing user facing messages to `stderr` a much better default choice.
+* `read` can be used to read strings from `stdin`.
+    This is especially useful in pipelines and can be used in conjunction with the `while` and `yield` keywords to great effect.
+* `len` can be used to get the length of a string in bytes.
 * `replace` and `replace_all` can be used to replace substrings in a larger string.
 
 ### Inline Sh
@@ -539,6 +552,8 @@ file 3
     assert got == :4, "the script returned {got}, but wanted :4"
 }
 ```
+
+running these tests is as simple as running `yok test [your yok file]`
 
 ### Macros
 
