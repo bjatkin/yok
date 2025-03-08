@@ -41,7 +41,7 @@
                     "Node": "test statement",
                     "Expression": {
                         "Node": "infix expression",
-                        "Operator": "-eq",
+                        "Operator": "=",
                         "Left": {"Node": "identifier", "Token": "Y"},
                         "Right": {"Node": "string", "Value": "\"20\""}
                     }
@@ -61,7 +61,7 @@
                             "Node": "test statement",
                             "Expression": {
                                 "Node": "infix expression",
-                                "Operator": "-ne",
+                                "Operator": "!=",
                                 "Left": {"Node": "identifier", "Token": "Z"},
                                 "Right": {"Node": "identifier", "Token": "X"}
                             }
@@ -97,7 +97,7 @@
                     "Node": "test statement",
                     "Expression": {
                         "Node": "infix expression",
-                        "Operator": "-ne",
+                        "Operator": "!=",
                         "Left": {"Node": "identifier", "Token": "Y"},
                         "Right": {"Node": "string", "Value": "\"20\""}
                     }

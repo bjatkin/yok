@@ -4,15 +4,15 @@ let z = :30
 
 if x > :0 {
     print("x is positive")
-    if y ==i :20 {
+    if y == :20 {
         print("y is 20")
-        if z !=i x {
+        if z != x {
             print("z does not equal x")
         }
     }
 } else {
     print("x is negative or zero")
-    if y !=i :20 {
+    if y != :20 {
         print("y is not 20")
     } else {
         print("y is still 20")

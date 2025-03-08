@@ -6,7 +6,7 @@ Z=30
 
 if [ "$X" -gt 0 ]; then
     echo "x is positive" >&2
-    if [ "$Y" == 20 ]; then
+    if [ "$Y" = 20 ]; then
         echo "y is 20" >&2
         if [ "$Z" != "$X" ]; then
             echo "z does not equal x" >&2

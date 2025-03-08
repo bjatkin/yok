@@ -59,16 +59,6 @@ func (l *lexer) take() token.Token {
 		}
 	}
 
-	// check for tokens that match exactly three bytes
-	if len(l.source) >= 3 {
-		tok, found := matchTripleToken(l.source[l.pos:l.pos+3], l.pos)
-		if found {
-			l.nextToken = tok
-			l.pos += 3
-			return currentToken
-		}
-	}
-
 	// we have to wait till after checking the double token case in order
 	// to correctly match tokens like '==' instead of '='
 	if foundSingle {
@@ -179,6 +169,10 @@ func matchSingleToken(char byte, pos int) (token.Token, bool) {
 func matchDoubleToken(chars []byte, pos int) (token.Token, bool) {
 	var t token.Type
 	switch {
+	case slices.Equal(chars, []byte("==")):
+		t = token.EqualEqual
+	case slices.Equal(chars, []byte("!=")):
+		t = token.NotEqual
 	case slices.Equal(chars, []byte("++")):
 		t = token.PlusPlus
 	case slices.Equal(chars, []byte("--")):
@@ -194,25 +188,6 @@ func matchDoubleToken(chars []byte, pos int) (token.Token, bool) {
 	}
 
 	return token.NewToken(t, pos, 2), true
-}
-
-// matchTripleToken matches all the tokens that are exactly 3 bytes in length
-func matchTripleToken(chars []byte, pos int) (token.Token, bool) {
-	var t token.Type
-	switch {
-	case slices.Equal(chars, []byte("==s")):
-		t = token.EqualEqualS
-	case slices.Equal(chars, []byte("==i")):
-		t = token.EqualEqualI
-	case slices.Equal(chars, []byte("!=s")):
-		t = token.NotEqualS
-	case slices.Equal(chars, []byte("!=i")):
-		t = token.NotEqualI
-	default:
-		return token.Token{}, false
-	}
-
-	return token.NewToken(t, pos, 3), true
 }
 
 // matchIdentifierOrKeyword matches identifiers and keywords in the case the the

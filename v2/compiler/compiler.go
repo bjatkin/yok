@@ -108,7 +108,8 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 		value := node.Token.Value(c.source)
 		value = strings.ToUpper(value)
 		return &shast.Identifier{
-			Value: value,
+			AsString: c.inTest,
+			Value:    value,
 		}, nil
 	case *yokast.InfixExpr:
 		c.arithmeticDepth++
@@ -302,14 +303,10 @@ func (c *Compiler) compileCall(call *yokast.Call) (shast.Node, error) {
 // convertOperator converts the yok operator to the equivalent 'sh' operator
 func convertOperator(operator string) string {
 	switch operator {
-	case "==s":
+	case "==":
 		return "="
-	case "!=s":
+	case "!=":
 		return "!="
-	case "==i":
-		return "-eq"
-	case "!=i":
-		return "-ne"
 	case ">":
 		return "-gt"
 	case ">=":

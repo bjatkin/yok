@@ -41,6 +41,10 @@ func generateExpr(expr shast.Expr) string {
 
 		return expr.Command + " " + strings.Join(args, " ")
 	case *shast.Identifier:
+		if expr.AsString {
+			return "\"$" + expr.Value + "\""
+		}
+
 		return "$" + expr.Value
 	case *shast.ArithmeticCommand:
 		inner := generateExpr(expr.Expression)

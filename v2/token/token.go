@@ -46,10 +46,8 @@ const (
 
 	// Symbols
 	Assign
-	EqualEqualS
-	EqualEqualI
-	NotEqualS
-	NotEqualI
+	EqualEqual
+	NotEqual
 	Comma
 	Plus
 	Minus
@@ -101,10 +99,8 @@ var stringerMap = map[Type]string{
 	StringLiteral:    "string",
 	Atom:             "atom",
 	Assign:           "assign",
-	EqualEqualS:      "equal_equal_s",
-	EqualEqualI:      "equal_equal_i",
-	NotEqualS:        "not_equal_s",
-	NotEqualI:        "not_equal_i",
+	EqualEqual:       "equal_equal",
+	NotEqual:         "not_equal",
 	Comma:            "comma",
 	Plus:             "plus",
 	Minus:            "minus",

@@ -43,7 +43,7 @@
                     "Node": "if statement",
                     "Test": {
                         "Node": "infix expression",
-                        "Operator": {"Type": "equal_equal_i", "Pos": 91, "Value": "==i"},
+                        "Operator": {"Type": "equal_equal", "Pos": 91, "Value": "=="},
                         "Left": {
                             "Node": "identifier",
                             "Token": {"Type": "identifier", "Pos": 89, "Value": "y"}
@@ -57,7 +57,7 @@
                                 "Node": "function call",
                                 "Identifier": {
                                     "Node": "identifier",
-                                    "Token": {"Type": "identifier", "Pos": 110, "Value": "print"}
+                                    "Token": {"Type": "identifier", "Pos": 109, "Value": "print"}
                                 },
                                 "Arguments": [
                                     {"Node": "string", "Value": "\"y is 20\""}
@@ -67,14 +67,14 @@
                                 "Node": "if statement",
                                 "Test": {
                                     "Node": "infix expression",
-                                    "Operator": {"Type": "not_equal_i", "Pos": 141, "Value": "!=i"},
+                                    "Operator": {"Type": "not_equal", "Pos": 140, "Value": "!="},
                                     "Left": {
                                         "Node": "identifier",
-                                        "Token": {"Type": "identifier", "Pos": 139, "Value": "z"}
+                                        "Token": {"Type": "identifier", "Pos": 138, "Value": "z"}
                                     },
                                     "Right": {
                                         "Node": "identifier",
-                                        "Token": {"Type": "identifier", "Pos": 145, "Value": "x"}
+                                        "Token": {"Type": "identifier", "Pos": 143, "Value": "x"}
                                     }
                                 },
                                 "Body": {
@@ -84,7 +84,7 @@
                                             "Node": "function call",
                                             "Identifier": {
                                                 "Node": "identifier",
-                                                "Token": {"Type": "identifier", "Pos": 162, "Value": "print"}
+                                                "Token": {"Type": "identifier", "Pos": 160, "Value": "print"}
                                             },
                                             "Arguments": [
                                                 {"Node": "string", "Value": "\"z does not equal x\""}
@@ -107,7 +107,7 @@
                     "Node": "function call",
                     "Identifier": {
                         "Node": "identifier",
-                        "Token": {"Type": "identifier", "Pos": 223, "Value": "print"}
+                        "Token": {"Type": "identifier", "Pos": 221, "Value": "print"}
                     },
                     "Arguments": [
                         {"Node": "string", "Value": "\"x is negative or zero\""}
@@ -117,10 +117,10 @@
                     "Node": "if statement",
                     "Test": {
                         "Node": "infix expression",
-                        "Operator": {"Type": "not_equal_i", "Pos": 264, "Value": "!=i"},
+                        "Operator": {"Type": "not_equal", "Pos": 262, "Value": "!="},
                         "Left": {
                             "Node": "identifier",
-                            "Token": {"Type": "identifier", "Pos": 262, "Value": "y"}
+                            "Token": {"Type": "identifier", "Pos": 260, "Value": "y"}
                         },
                         "Right": {"Node": "atom", "Value": ":20"}
                     },
@@ -131,7 +131,7 @@
                                 "Node": "function call",
                                 "Identifier": {
                                     "Node": "identifier",
-                                    "Token": {"Type": "identifier", "Pos": 283, "Value": "print"}
+                                    "Token": {"Type": "identifier", "Pos": 280, "Value": "print"}
                                 },
                                 "Arguments": [
                                     {"Node": "string", "Value": "\"y is not 20\""}
@@ -146,7 +146,7 @@
                                 "Node": "function call",
                                 "Identifier": {
                                     "Node": "identifier",
-                                    "Token": {"Type": "identifier", "Pos": 327, "Value": "print"}
+                                    "Token": {"Type": "identifier", "Pos": 324, "Value": "print"}
                                 },
                                 "Arguments": [
                                     {"Node": "string", "Value": "\"y is still 20\""}

@@ -99,7 +99,8 @@ type Exec struct {
 // Identifier is a sh identifier
 type Identifier struct {
 	Expr
-	Value string
+	AsString bool
+	Value    string
 }
 
 // ArithmeticCommand represents an arithmetic expression in sh

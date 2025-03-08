@@ -22,10 +22,8 @@ const (
 
 // precedenceMap maps yok tokens to their precedence
 var precedenceMap = map[token.Type]precedence{
-	token.EqualEqualS:  Equals,
-	token.EqualEqualI:  Equals,
-	token.NotEqualS:    Equals,
-	token.NotEqualI:    Equals,
+	token.EqualEqual:   Equals,
+	token.NotEqual:     Equals,
 	token.LessThan:     LessOrGreater,
 	token.LessEqual:    LessOrGreater,
 	token.GreaterThan:  LessOrGreater,
@@ -85,10 +83,8 @@ func New(source []byte) *Parser {
 		token.GreaterEqual: p.parseInfix,
 		token.LessThan:     p.parseInfix,
 		token.LessEqual:    p.parseInfix,
-		token.EqualEqualS:  p.parseInfix,
-		token.EqualEqualI:  p.parseInfix,
-		token.NotEqualS:    p.parseInfix,
-		token.NotEqualI:    p.parseInfix,
+		token.EqualEqual:   p.parseInfix,
+		token.NotEqual:     p.parseInfix,
 	}
 
 	return p
