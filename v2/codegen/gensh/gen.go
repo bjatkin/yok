@@ -7,6 +7,8 @@ import (
 	"github.com/bjatkin/yok/ast/shast"
 )
 
+const indentToken = "    "
+
 func Generate(script *shast.Script) string {
 	scriptLines := []string{"#!/bin/sh", ""}
 	for _, stmt := range script.Statements {
@@ -62,7 +64,7 @@ func generateExpr(expr shast.Expr) string {
 }
 
 func generateStmt(stmt shast.Stmt, indentDepth int) string {
-	indent := strings.Repeat("    ", indentDepth)
+	indent := strings.Repeat(indentToken, indentDepth)
 	switch stmt := stmt.(type) {
 	case *shast.Comment:
 		return indent + stmt.Value
