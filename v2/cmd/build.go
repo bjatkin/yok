@@ -22,32 +22,41 @@ var buildCmd = &cobra.Command{
 		srcFile := args[0]
 		destFile := args[1]
 
-		source, err := os.ReadFile(srcFile)
+		yokCode, err := os.ReadFile(srcFile)
 		if err != nil {
 			return err
 		}
 
-		p := parser.New(source)
-		script, err := p.Parse()
-		if err != nil {
-			for _, e := range p.Errors {
-				fmt.Println(e)
-			}
-			return err
-		}
-
-		c := compiler.New(source)
-		shAst, err := c.Compile(script)
+		shCode, err := complieYok(yokCode)
 		if err != nil {
 			return err
 		}
 
-		code := gensh.Generate(shAst)
-		err = os.WriteFile(destFile, []byte(code), 0o0755)
+		err = os.WriteFile(destFile, shCode, 0o0755)
 		if err != nil {
 			return err
 		}
 
 		return nil
 	},
+}
+
+func complieYok(yokCode []byte) ([]byte, error) {
+	p := parser.New(yokCode)
+	script, err := p.Parse()
+	if err != nil {
+		for _, e := range p.Errors {
+			fmt.Println(e)
+		}
+		return nil, err
+	}
+
+	c := compiler.New(yokCode)
+	shAst, err := c.Compile(script)
+	if err != nil {
+		return nil, err
+	}
+
+	shCode := gensh.Generate(shAst)
+	return []byte(shCode), nil
 }
