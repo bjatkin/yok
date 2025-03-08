@@ -76,12 +76,15 @@
                                 "Redirects": [ ">&2" ]
                             }
                         ],
+                        "ElseIfs": [],
                         "ElseBody": []
                     }
                 ],
+                "ElseIfs": [],
                 "ElseBody": []
             }
         ],
+        "ElseIfs": [],
         "ElseBody": [
             {
                 "Node": "execute",
@@ -112,6 +115,7 @@
                         "Redirects": [ ">&2" ]
                     }
                 ],
+                "ElseIfs": [],
                 "ElseBody": [
                     {
                         "Node": "execute",
@@ -122,6 +126,85 @@
                         "Redirects": [ ">&2" ]
                     }
                 ]
+            }
+        ]
+    },
+    {"Node": "new line"},
+    {
+        "Node": "if statement",
+        "Test": {
+            "Node": "test statement",
+            "Expression": {
+                "Node": "infix expression",
+                "Operator": "-lt",
+                "Left": {"Node": "identifier", "Token": "X"},
+                "Right": {"Node": "string", "Value": "\"0\""}
+            }
+        },
+        "Body": [
+            {
+                "Node": "execute",
+                "Command": "echo",
+                "Arguments": [
+                    {"Node": "string", "Value": "\"x is negative\""}
+                ],
+                "Redirects": [ ">&2" ]
+            }
+        ],
+        "ElseIfs": [
+            {
+                "Node": "elif",
+                "Test": {
+                    "Node": "test statement",
+                    "Expression": {
+                        "Node": "infix expression",
+                        "Operator": "-gt",
+                        "Left": {"Node": "identifier", "Token": "X"},
+                        "Right": {"Node": "string", "Value": "\"1\""}
+                    }
+                },
+                "Body": [
+                    {
+                        "Node": "execute",
+                        "Command": "echo",
+                        "Arguments": [
+                            {"Node": "string", "Value": "\"x is positive\""}
+                        ],
+                        "Redirects": [ ">&2" ]
+                    }
+                ]
+            },
+            {
+                "Node": "elif",
+                "Test": {
+                    "Node": "test statement",
+                    "Expression": {
+                        "Node": "infix expression",
+                        "Operator": "=",
+                        "Left": {"Node": "identifier", "Token": "X"},
+                        "Right": {"Node": "string", "Value": "\"1\""}
+                    }
+                },
+                "Body": [
+                    {
+                        "Node": "execute",
+                        "Command": "echo",
+                        "Arguments": [
+                            {"Node": "string", "Value": "\"x is one\""}
+                        ],
+                        "Redirects": [ ">&2" ]
+                    }
+                ]
+            }
+        ],
+        "ElseBody": [
+            {
+                "Node": "execute",
+                "Command": "echo",
+                "Arguments": [
+                    {"Node": "string", "Value": "\"x is zero\""}
+                ],
+                "Redirects": [ ">&2" ]
             }
         ]
     }

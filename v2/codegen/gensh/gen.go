@@ -76,6 +76,8 @@ func generateStmt(stmt shast.Stmt, indentDepth int) string {
 	case *shast.StmtExpr:
 		return indent + generateExpr(stmt.Expression)
 	case *shast.If:
+		// TODO: clean all this code up, there's got to be a better way to genrate code with correct
+		// levels of indentation than these messy format strings!
 		test := generateStmt(stmt.Test, indentDepth)
 
 		body := []string{}
@@ -84,12 +86,41 @@ func generateStmt(stmt shast.Stmt, indentDepth int) string {
 			body = append(body, line)
 		}
 
-		if len(stmt.ElseStatements) == 0 {
+		if len(stmt.ElseIfs) == 0 && len(stmt.ElseStatements) == 0 {
 			return fmt.Sprintf(
 				"%sif %s; then\n%s\n%sfi",
 				indent,
 				test,
 				strings.Join(body, "\n"),
+				indent,
+			)
+		}
+
+		elseIfs := []string{}
+		for _, elseIf := range stmt.ElseIfs {
+			test := generateStmt(elseIf.Test, indentDepth)
+			body := []string{}
+			for _, stmt := range stmt.Statements {
+				line := generateStmt(stmt, indentDepth+1)
+				body = append(body, line)
+			}
+
+			elseIfs = append(elseIfs, fmt.Sprintf(
+				"%selif %s; then\n%s",
+				indent,
+				test,
+				strings.Join(body, "\n"),
+			))
+		}
+
+		if len(stmt.ElseStatements) == 0 {
+			return fmt.Sprintf(
+				"%sif %s; then\n%s%s%s\n%sfi",
+				indent,
+				test,
+				strings.Join(body, "\n"),
+				indent,
+				strings.Join(elseIfs, "\n"),
 				indent,
 			)
 		}
@@ -100,11 +131,25 @@ func generateStmt(stmt shast.Stmt, indentDepth int) string {
 			elseBody = append(elseBody, line)
 		}
 
+		if len(stmt.ElseIfs) == 0 {
+			return fmt.Sprintf(
+				"%sif %s; then\n%s\n%selse\n%s\n%sfi",
+				indent,
+				test,
+				strings.Join(body, "\n"),
+				indent,
+				strings.Join(elseBody, "\n"),
+				indent,
+			)
+		}
+
 		return fmt.Sprintf(
-			"%sif %s; then\n%s\n%selse\n%s\n%sfi",
+			"%sif %s; then\n%s\n%s%s\n%selse\n%s\n%sfi",
 			indent,
 			test,
 			strings.Join(body, "\n"),
+			indent,
+			strings.Join(elseIfs, "\n"),
 			indent,
 			strings.Join(elseBody, "\n"),
 			indent,

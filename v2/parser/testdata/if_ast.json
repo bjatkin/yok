@@ -92,14 +92,23 @@
                                         }
                                     ]
                                 },
+                                "ElseIfs": [
+                                    
+                                ],
                                 "ElseBody": null
                             }
                         ]
                     },
+                    "ElseIfs": [
+                        
+                    ],
                     "ElseBody": null
                 }
             ]
         },
+        "ElseIfs": [
+            
+        ],
         "ElseBody": {
             "Node": "block",
             "Statements": [
@@ -139,6 +148,9 @@
                             }
                         ]
                     },
+                    "ElseIfs": [
+                        
+                    ],
                     "ElseBody": {
                         "Node": "block",
                         "Statements": [
@@ -154,6 +166,105 @@
                             }
                         ]
                     }
+                }
+            ]
+        }
+    },
+    {"Node": "new line"},
+    {
+        "Node": "if statement",
+        "Test": {
+            "Node": "infix expression",
+            "Operator": {"Type": "less_than", "Pos": 365, "Value": "<"},
+            "Left": {
+                "Node": "identifier",
+                "Token": {"Type": "identifier", "Pos": 363, "Value": "x"}
+            },
+            "Right": {"Node": "atom", "Value": ":0"}
+        },
+        "Body": {
+            "Node": "block",
+            "Statements": [
+                {
+                    "Node": "function call",
+                    "Identifier": {
+                        "Node": "identifier",
+                        "Token": {"Type": "identifier", "Pos": 377, "Value": "print"}
+                    },
+                    "Arguments": [
+                        {"Node": "string", "Value": "\"x is negative\""}
+                    ]
+                }
+            ]
+        },
+        "ElseIfs": [
+            {
+                "Node": "elseIf",
+                "Test": {
+                    "Node": "infix expression",
+                    "Operator": {"Type": "greater_than", "Pos": 413, "Value": ">"},
+                    "Left": {
+                        "Node": "identifier",
+                        "Token": {"Type": "identifier", "Pos": 411, "Value": "x"}
+                    },
+                    "Right": {"Node": "atom", "Value": ":1"}
+                },
+                "Body": {
+                    "Node": "block",
+                    "Statements": [
+                        {
+                            "Node": "function call",
+                            "Identifier": {
+                                "Node": "identifier",
+                                "Token": {"Type": "identifier", "Pos": 425, "Value": "print"}
+                            },
+                            "Arguments": [
+                                {"Node": "string", "Value": "\"x is positive\""}
+                            ]
+                        }
+                    ]
+                }
+            },
+            {
+                "Node": "elseIf",
+                "Test": {
+                    "Node": "infix expression",
+                    "Operator": {"Type": "equal_equal", "Pos": 461, "Value": "=="},
+                    "Left": {
+                        "Node": "identifier",
+                        "Token": {"Type": "identifier", "Pos": 459, "Value": "x"}
+                    },
+                    "Right": {"Node": "atom", "Value": ":1"}
+                },
+                "Body": {
+                    "Node": "block",
+                    "Statements": [
+                        {
+                            "Node": "function call",
+                            "Identifier": {
+                                "Node": "identifier",
+                                "Token": {"Type": "identifier", "Pos": 474, "Value": "print"}
+                            },
+                            "Arguments": [
+                                {"Node": "string", "Value": "\"x is one\""}
+                            ]
+                        }
+                    ]
+                }
+            }
+        ],
+        "ElseBody": {
+            "Node": "block",
+            "Statements": [
+                {
+                    "Node": "function call",
+                    "Identifier": {
+                        "Node": "identifier",
+                        "Token": {"Type": "identifier", "Pos": 507, "Value": "print"}
+                    },
+                    "Arguments": [
+                        {"Node": "string", "Value": "\"x is zero\""}
+                    ]
                 }
             ]
         }

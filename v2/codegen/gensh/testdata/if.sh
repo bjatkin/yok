@@ -20,3 +20,13 @@ else
         echo "y is still 20" >&2
     fi
 fi
+
+if [ "$X" -lt 0 ]; then
+    echo "x is negative" >&2
+elif [ "$X" -gt 1 ]; then
+    echo "x is negative" >&2
+elif [ "$X" = 1 ]; then
+    echo "x is negative" >&2
+else
+    echo "x is zero" >&2
+fi

@@ -43,7 +43,13 @@ type If struct {
 	Stmt
 	Test     Expr
 	Body     *Block
+	ElseIfs  []ElseIf
 	ElseBody *Block
+}
+
+type ElseIf struct {
+	Test Expr
+	Body *Block
 }
 
 type Block struct {

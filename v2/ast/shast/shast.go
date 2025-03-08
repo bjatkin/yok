@@ -51,7 +51,14 @@ type If struct {
 	Stmt
 	Test           *TestCommand
 	Statements     []Stmt
+	ElseIfs        []ElseIf
 	ElseStatements []Stmt
+}
+
+// ElseIf is the 'elif' fragment in an if statement
+type ElseIf struct {
+	Test       *TestCommand
+	Statements []Stmt
 }
 
 // StmtExpr is any statement that consists of a single expression

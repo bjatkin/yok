@@ -206,6 +206,7 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 			}, nil
 		}
 	case *yokast.If:
+		// TODO: there are several different functions in here that could be extracted out to simplify the code.
 		c.inTest = true
 
 		testNode, err := c.compileNode(node.Test)
@@ -235,10 +236,45 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 			stmts = append(stmts, stmt)
 		}
 
+		elseIfs := []shast.ElseIf{}
+		for _, elseIf := range node.ElseIfs {
+			c.inTest = true
+
+			testNode, err := c.compileNode(elseIf.Test)
+			if err != nil {
+				return nil, errors.New(fmt.Sprintf("failed to compile test for elif stmt %v", err))
+			}
+
+			c.inTest = false
+
+			test, ok := testNode.(*shast.TestCommand)
+			if !ok {
+				return nil, errors.New("test must be a valid test command")
+			}
+
+			stmts := []shast.Stmt{}
+			for _, yokStmt := range elseIf.Body.Statements {
+				stmtNode, err := c.compileNode(yokStmt)
+				if err != nil {
+					return nil, errors.New(fmt.Sprintf("failed to complie stmt in elif body %v", err))
+				}
+
+				stmt, ok := stmtNode.(shast.Stmt)
+				if !ok {
+					return nil, errors.New("line in body was not a stmt")
+				}
+
+				stmts = append(stmts, stmt)
+			}
+
+			elseIfs = append(elseIfs, shast.ElseIf{Test: test, Statements: stmts})
+		}
+
 		if node.ElseBody == nil {
 			return &shast.If{
 				Test:       test,
 				Statements: stmts,
+				ElseIfs:    elseIfs,
 			}, nil
 
 		}
@@ -262,6 +298,7 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 		return &shast.If{
 			Test:           test,
 			Statements:     stmts,
+			ElseIfs:        elseIfs,
 			ElseStatements: elseStmts,
 		}, nil
 	default:

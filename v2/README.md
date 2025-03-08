@@ -236,7 +236,7 @@ if x == 0 {
 }
 
 if x < 0 {
-    print("x is negative)
+    print("x is negative")
 } else if x > 0 {
     print("x is positive")
 } else {

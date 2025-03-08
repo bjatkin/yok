@@ -149,10 +149,14 @@ func encodeNode(node yokast.Node, source []byte) string {
 "Node": "if statement",
 "Test": %s,
 "Body": %s,
+"ElseIfs": [
+%s
+],
 "ElseBody": %s
 }`,
 			encodeNode(node.Test.(yokast.Node), source),
 			encodeNode(node.Body, source),
+			encodeElseIfs(node.ElseIfs, source),
 			encodeNode(node.ElseBody, source),
 		)
 	case *yokast.Block:
@@ -181,6 +185,24 @@ func encodeNode(node yokast.Node, source []byte) string {
 	default:
 		panic(fmt.Sprintf("failed to encode yok ast node, unknown type %T", node))
 	}
+}
+
+// encodeElseIfs encodes a slice of ElseIf nodes into a slice of json strings
+func encodeElseIfs(elseIfs []yokast.ElseIf, source []byte) string {
+	encoded := []string{}
+	for _, elseIf := range elseIfs {
+		got := fmt.Sprintf(`{
+"Node": "elseIf",
+"Test": %s,
+"Body": %s
+}`,
+			encodeNode(elseIf.Test, source),
+			encodeNode(elseIf.Body, source),
+		)
+		encoded = append(encoded, got)
+	}
+
+	return strings.Join(encoded, ",\n")
 }
 
 // encodeExprs encodes a slice of expressions into a slice of json strings

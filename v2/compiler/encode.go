@@ -121,14 +121,21 @@ func encodeNode(node shast.Node) string {
 }`,
 			encodeNode(node.Expression))
 	case *shast.If:
-		body := `[]`
+		body := "[]"
 		if len(node.Statements) > 0 {
 			body = fmt.Sprintf(`[
 %s
 ]`, encodeStmts(node.Statements))
 		}
 
-		elseBody := `[]`
+		elseIfs := "[]"
+		if len(node.ElseIfs) > 0 {
+			elseIfs = fmt.Sprintf(`[
+%s
+]`, encodeElseIfs(node.ElseIfs))
+		}
+
+		elseBody := "[]"
 		if len(node.ElseStatements) > 0 {
 			elseBody = fmt.Sprintf(`[
 %s
@@ -139,10 +146,12 @@ func encodeNode(node shast.Node) string {
 "Node": "if statement",
 "Test": %s,
 "Body": %s,
+"ElseIfs": %s,
 "ElseBody": %s
 }`,
 			encodeNode(node.Test),
 			body,
+			elseIfs,
 			elseBody,
 		)
 	case *shast.TestCommand:
@@ -153,6 +162,30 @@ func encodeNode(node shast.Node) string {
 	default:
 		panic(fmt.Sprintf("can not encode sh node, unknown node type %T", node))
 	}
+}
+
+// encodeElseIfs encodes a slice of ElseIf nodes into a list of json strings
+func encodeElseIfs(elseIfs []shast.ElseIf) string {
+	encoded := []string{}
+	for _, elseIf := range elseIfs {
+		body := "[]"
+		if len(elseIf.Statements) > 0 {
+			body = fmt.Sprintf(`[
+%s
+]`, encodeStmts(elseIf.Statements))
+		}
+		got := fmt.Sprintf(`{
+"Node": "elif",
+"Test": %s,
+"Body": %s
+}`,
+			encodeNode(elseIf.Test),
+			body,
+		)
+		encoded = append(encoded, got)
+	}
+
+	return strings.Join(encoded, ",\n")
 }
 
 // encodeExprs encodes a slice of expressions into a slice of json strings

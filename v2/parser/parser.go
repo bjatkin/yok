@@ -217,12 +217,15 @@ func (p *Parser) parseIfStmt() *yokast.If {
 	test := p.parseExpr(Lowest)
 	body := p.parseBlock()
 
-	// check for the 'else' token
 	var elseBody *yokast.Block
-	if p.peek().Type == token.ElseKeyword {
-		_ = p.take()
-
-		elseBody = p.parseBlock()
+	elseIfs := []yokast.ElseIf{}
+	for {
+		elseIf, finalElseBody := p.parseElseIf()
+		if elseIf == nil {
+			elseBody = finalElseBody
+			break
+		}
+		elseIfs = append(elseIfs, *elseIf)
 	}
 
 	// ensure the final token is a new line or we have some random syntax to deal with...
@@ -237,8 +240,32 @@ func (p *Parser) parseIfStmt() *yokast.If {
 	return &yokast.If{
 		Test:     test,
 		Body:     body,
+		ElseIfs:  elseIfs,
 		ElseBody: elseBody,
 	}
+}
+
+func (p *Parser) parseElseIf() (*yokast.ElseIf, *yokast.Block) {
+	// check for `else if` tokens
+	if p.peek().Type != token.ElseKeyword {
+		return nil, nil
+	}
+	_ = p.take()
+
+	// check if this is just the final `else` block
+	if p.peek().Type != token.IfKeyword {
+		elseBody := p.parseBlock()
+		return nil, elseBody
+	}
+	_ = p.take()
+
+	// build the `else if` node
+	test := p.parseExpr(Lowest)
+	body := p.parseBlock()
+	return &yokast.ElseIf{
+		Test: test,
+		Body: body,
+	}, nil
 }
 
 // parseBlock parses a yok body
