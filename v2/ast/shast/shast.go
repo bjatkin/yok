@@ -129,3 +129,11 @@ type GroupExpr struct {
 	Expr
 	Expression Expr
 }
+
+// TODO: this needs some work, it dosen't really accurately represent
+// the parameter expansion yet
+type ParameterExpansion struct {
+	Expr
+	PrefixOperator string
+	Parameter      *Identifier
+}

@@ -497,6 +497,11 @@ func TestLexFile(t *testing.T) {
 			sourceFile: "if.yok",
 			tokenFile:  "if_tokens.json",
 		},
+		{
+			name:       "builtin string functions",
+			sourceFile: "string_builtins.yok",
+			tokenFile:  "string_builtins.json",
+		},
 	}
 
 	for _, tt := range tests {

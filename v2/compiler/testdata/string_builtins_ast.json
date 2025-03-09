@@ -1,0 +1,42 @@
+[
+    {
+        "Node": "assign",
+        "Identifier": "GREET",
+        "Value": {
+            "Node": "string",
+            "Value": "\"hello\""
+        }
+    },
+    {
+        "Node": "assign",
+        "Identifier": "GREET_LEN",
+        "Value": {
+            "Node": "parameter expansion",
+            "Operator": "#",
+            "Parameter": {
+                "Node": "identifier",
+                "Token": "GREET"
+            }
+        }
+    },
+    {
+        "Node": "new line"
+    },
+    {
+        "Node": "execute",
+        "Command": "echo",
+        "Arguments": [
+            {
+                "Node": "string",
+                "Value": "\"greeting length was\""
+            },
+            {
+                "Node": "identifier",
+                "Token": "GREET_LEN"
+            }
+        ],
+        "Redirects": [
+            ">&2"
+        ]
+    }
+]

@@ -1,0 +1,102 @@
+[
+    {
+        "Type": "let",
+        "Pos": 0,
+        "Value": "let"
+    },
+    {
+        "Type": "identifier",
+        "Pos": 4,
+        "Value": "greet"
+    },
+    {
+        "Type": "assign",
+        "Pos": 10,
+        "Value": "="
+    },
+    {
+        "Type": "string",
+        "Pos": 12,
+        "Value": "\"hello\""
+    },
+    {
+        "Type": "new_line",
+        "Pos": 19,
+        "Value": "\n"
+    },
+    {
+        "Type": "let",
+        "Pos": 20,
+        "Value": "let"
+    },
+    {
+        "Type": "identifier",
+        "Pos": 24,
+        "Value": "greet_len"
+    },
+    {
+        "Type": "assign",
+        "Pos": 34,
+        "Value": "="
+    },
+    {
+        "Type": "identifier",
+        "Pos": 36,
+        "Value": "len"
+    },
+    {
+        "Type": "open_paren",
+        "Pos": 39,
+        "Value": "("
+    },
+    {
+        "Type": "identifier",
+        "Pos": 40,
+        "Value": "greet"
+    },
+    {
+        "Type": "close_paren",
+        "Pos": 45,
+        "Value": ")"
+    },
+    {
+        "Type": "new_line",
+        "Pos": 46,
+        "Value": "\n"
+    },
+    {
+        "Type": "new_line",
+        "Pos": 47,
+        "Value": "\n"
+    },
+    {
+        "Type": "identifier",
+        "Pos": 48,
+        "Value": "print"
+    },
+    {
+        "Type": "open_paren",
+        "Pos": 53,
+        "Value": "("
+    },
+    {
+        "Type": "string",
+        "Pos": 54,
+        "Value": "\"greeting length was\""
+    },
+    {
+        "Type": "comma",
+        "Pos": 75,
+        "Value": ","
+    },
+    {
+        "Type": "identifier",
+        "Pos": 77,
+        "Value": "greet_len"
+    },
+    {
+        "Type": "close_paren",
+        "Pos": 86,
+        "Value": ")"
+    }
+]

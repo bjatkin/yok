@@ -35,6 +35,11 @@ func TestCompiler_Compile(t *testing.T) {
 			sourceFile: "if.yok",
 			astFile:    "if_ast.json",
 		},
+		{
+			name:       "builtin string functions",
+			sourceFile: "string_builtins.yok",
+			astFile:    "string_builtins_ast.json",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

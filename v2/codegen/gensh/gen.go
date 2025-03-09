@@ -57,6 +57,10 @@ func generateExpr(expr shast.Expr) string {
 	case *shast.GroupExpr:
 		inner := generateExpr(expr.Expression)
 		return "( " + inner + " )"
+	case *shast.ParameterExpansion:
+		operator := expr.PrefixOperator
+		identifier := expr.Parameter.Value
+		return "${" + operator + identifier + "}"
 	default:
 		panic(fmt.Sprintf("can not gen sh code, unknown expr type %T", expr))
 	}

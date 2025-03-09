@@ -112,6 +112,13 @@ func encodeNode(node shast.Node) json.Value {
 			"test statement",
 			json.NewField("Expression", expression),
 		)
+	case *shast.ParameterExpansion:
+		parameter := encodeNode(node.Parameter)
+		return newNode(
+			"parameter expansion",
+			json.NewField("Operator", json.String(node.PrefixOperator)),
+			json.NewField("Parameter", parameter),
+		)
 	default:
 		panic(fmt.Sprintf("can not encode sh node, unknown node type %T", node))
 	}

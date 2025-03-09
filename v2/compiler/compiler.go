@@ -321,6 +321,33 @@ func (c *Compiler) compileCall(call *yokast.Call) (shast.Node, error) {
 			Arguments: args,
 			Redirects: []shast.Redirect{{RightFd: "2"}},
 		}, nil
+	case "len":
+		if len(args) != 1 {
+			return nil, errors.New("len() takes only a single argument")
+		}
+		identifier, isIdentifier := args[0].(*shast.Identifier)
+		_, isLiteral := args[0].(*shast.String)
+		if !isIdentifier && !isLiteral {
+			return nil, errors.New("len() takes an identifier or a string literal")
+		}
+
+		if isIdentifier {
+			return &shast.ParameterExpansion{
+				PrefixOperator: "#",
+				Parameter:      identifier,
+			}, nil
+		}
+
+		// TODO: i'll need to grab a temporary var name from a pool so that I don't
+		// end up with any conflicts. Then I'll need to store the string in that
+		// identifier and maybe add that to the AST somehow?
+		// then I'll need to build the ParameterExpansion and return both the
+		// new identifier and the expansion.
+		//
+		// Honestly, this may be a sign that this is the wrong place to do this.
+		// I could do a pass on the yok tree to fix it up for this case.
+		// that would to prevent this from ever happening.
+		return nil, errors.New("len() for string literals is not yet implemented")
 	default:
 		return &shast.Exec{
 			Command:   command,
