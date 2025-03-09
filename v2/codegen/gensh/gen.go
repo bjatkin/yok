@@ -9,8 +9,7 @@ import (
 
 // Generate takes a shast.Script and renderes it into a well formated shell script
 func Generate(script *shast.Script) string {
-	scriptBuilder := newCodeBuilder("#!/bin/sh")
-	scriptBuilder.addLine("")
+	scriptBuilder := newCodeBuilder("#!/bin/sh", "")
 
 	bodyBuilder := generateStmts(script.Statements)
 	scriptBuilder.addUnits(bodyBuilder.units)

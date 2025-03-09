@@ -46,8 +46,13 @@ type codeBuilder struct {
 
 // newCodeBuilder creates a new codeBuilder where the first unit contains
 // the given line
-func newCodeBuilder(line string) codeBuilder {
-	return codeBuilder{units: []codeUnit{{line: line}}}
+func newCodeBuilder(lines ...string) codeBuilder {
+	units := []codeUnit{}
+	for _, line := range lines {
+		units = append(units, codeUnit{line: line})
+	}
+
+	return codeBuilder{units: units}
 }
 
 // addLine adds a new unit to the codeBuilder with the given line
