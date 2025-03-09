@@ -1,47 +1,227 @@
 [
-    {"Type": "let", "Pos": 0, "Value": "let"},
-    {"Type": "identifier", "Pos": 4, "Value": "a"},
-    {"Type": "assign", "Pos": 6, "Value": "="},
-    {"Type": "atom", "Pos": 8, "Value": ":5"},
-    {"Type": "plus", "Pos": 11, "Value": "+"},
-    {"Type": "atom", "Pos": 13, "Value": ":10"},
-    {"Type": "new_line", "Pos": 16, "Value": "\r\n"},
-    {"Type": "let", "Pos": 18, "Value": "let"},
-    {"Type": "identifier", "Pos": 22, "Value": "b"},
-    {"Type": "assign", "Pos": 24, "Value": "="},
-    {"Type": "atom", "Pos": 26, "Value": ":10"},
-    {"Type": "minus", "Pos": 30, "Value": "-"},
-    {"Type": "atom", "Pos": 32, "Value": ":15"},
-    {"Type": "new_line", "Pos": 35, "Value": "\r\n"},
-    {"Type": "let", "Pos": 37, "Value": "let"},
-    {"Type": "identifier", "Pos": 41, "Value": "c"},
-    {"Type": "assign", "Pos": 43, "Value": "="},
-    {"Type": "atom", "Pos": 45, "Value": ":15"},
-    {"Type": "multiply", "Pos": 49, "Value": "*"},
-    {"Type": "atom", "Pos": 51, "Value": ":20"},
-    {"Type": "new_line", "Pos": 54, "Value": "\r\n"},
-    {"Type": "let", "Pos": 56, "Value": "let"},
-    {"Type": "identifier", "Pos": 60, "Value": "d"},
-    {"Type": "assign", "Pos": 62, "Value": "="},
-    {"Type": "atom", "Pos": 64, "Value": ":20"},
-    {"Type": "divide", "Pos": 68, "Value": "/"},
-    {"Type": "atom", "Pos": 70, "Value": ":10"},
-    {"Type": "new_line", "Pos": 73, "Value": "\r\n"},
-    {"Type": "let", "Pos": 75, "Value": "let"},
-    {"Type": "identifier", "Pos": 79, "Value": "e"},
-    {"Type": "assign", "Pos": 81, "Value": "="},
-    {"Type": "atom", "Pos": 83, "Value": ":10"},
-    {"Type": "mod", "Pos": 87, "Value": "%"},
-    {"Type": "atom", "Pos": 89, "Value": ":15"},
-    {"Type": "new_line", "Pos": 92, "Value": "\r\n"},
-    {"Type": "let", "Pos": 94, "Value": "let"},
-    {"Type": "identifier", "Pos": 98, "Value": "f"},
-    {"Type": "assign", "Pos": 100, "Value": "="},
-    {"Type": "open_paren", "Pos": 102, "Value": "("},
-    {"Type": "atom", "Pos": 104, "Value": ":1"},
-    {"Type": "plus", "Pos": 107, "Value": "+"},
-    {"Type": "atom", "Pos": 109, "Value": ":2"},
-    {"Type": "close_paren", "Pos": 112, "Value": ")"},
-    {"Type": "multiply", "Pos": 114, "Value": "*"},
-    {"Type": "atom", "Pos": 116, "Value": ":3"}
+    {
+        "Type": "let",
+        "Pos": 0,
+        "Value": "let"
+    },
+    {
+        "Type": "identifier",
+        "Pos": 4,
+        "Value": "a"
+    },
+    {
+        "Type": "assign",
+        "Pos": 6,
+        "Value": "="
+    },
+    {
+        "Type": "atom",
+        "Pos": 8,
+        "Value": ":5"
+    },
+    {
+        "Type": "plus",
+        "Pos": 11,
+        "Value": "+"
+    },
+    {
+        "Type": "atom",
+        "Pos": 13,
+        "Value": ":10"
+    },
+    {
+        "Type": "new_line",
+        "Pos": 16,
+        "Value": "\r\n"
+    },
+    {
+        "Type": "let",
+        "Pos": 18,
+        "Value": "let"
+    },
+    {
+        "Type": "identifier",
+        "Pos": 22,
+        "Value": "b"
+    },
+    {
+        "Type": "assign",
+        "Pos": 24,
+        "Value": "="
+    },
+    {
+        "Type": "atom",
+        "Pos": 26,
+        "Value": ":10"
+    },
+    {
+        "Type": "minus",
+        "Pos": 30,
+        "Value": "-"
+    },
+    {
+        "Type": "atom",
+        "Pos": 32,
+        "Value": ":15"
+    },
+    {
+        "Type": "new_line",
+        "Pos": 35,
+        "Value": "\r\n"
+    },
+    {
+        "Type": "let",
+        "Pos": 37,
+        "Value": "let"
+    },
+    {
+        "Type": "identifier",
+        "Pos": 41,
+        "Value": "c"
+    },
+    {
+        "Type": "assign",
+        "Pos": 43,
+        "Value": "="
+    },
+    {
+        "Type": "atom",
+        "Pos": 45,
+        "Value": ":15"
+    },
+    {
+        "Type": "multiply",
+        "Pos": 49,
+        "Value": "*"
+    },
+    {
+        "Type": "atom",
+        "Pos": 51,
+        "Value": ":20"
+    },
+    {
+        "Type": "new_line",
+        "Pos": 54,
+        "Value": "\r\n"
+    },
+    {
+        "Type": "let",
+        "Pos": 56,
+        "Value": "let"
+    },
+    {
+        "Type": "identifier",
+        "Pos": 60,
+        "Value": "d"
+    },
+    {
+        "Type": "assign",
+        "Pos": 62,
+        "Value": "="
+    },
+    {
+        "Type": "atom",
+        "Pos": 64,
+        "Value": ":20"
+    },
+    {
+        "Type": "divide",
+        "Pos": 68,
+        "Value": "/"
+    },
+    {
+        "Type": "atom",
+        "Pos": 70,
+        "Value": ":10"
+    },
+    {
+        "Type": "new_line",
+        "Pos": 73,
+        "Value": "\r\n"
+    },
+    {
+        "Type": "let",
+        "Pos": 75,
+        "Value": "let"
+    },
+    {
+        "Type": "identifier",
+        "Pos": 79,
+        "Value": "e"
+    },
+    {
+        "Type": "assign",
+        "Pos": 81,
+        "Value": "="
+    },
+    {
+        "Type": "atom",
+        "Pos": 83,
+        "Value": ":10"
+    },
+    {
+        "Type": "mod",
+        "Pos": 87,
+        "Value": "%"
+    },
+    {
+        "Type": "atom",
+        "Pos": 89,
+        "Value": ":15"
+    },
+    {
+        "Type": "new_line",
+        "Pos": 92,
+        "Value": "\r\n"
+    },
+    {
+        "Type": "let",
+        "Pos": 94,
+        "Value": "let"
+    },
+    {
+        "Type": "identifier",
+        "Pos": 98,
+        "Value": "f"
+    },
+    {
+        "Type": "assign",
+        "Pos": 100,
+        "Value": "="
+    },
+    {
+        "Type": "open_paren",
+        "Pos": 102,
+        "Value": "("
+    },
+    {
+        "Type": "atom",
+        "Pos": 104,
+        "Value": ":1"
+    },
+    {
+        "Type": "plus",
+        "Pos": 107,
+        "Value": "+"
+    },
+    {
+        "Type": "atom",
+        "Pos": 109,
+        "Value": ":2"
+    },
+    {
+        "Type": "close_paren",
+        "Pos": 112,
+        "Value": ")"
+    },
+    {
+        "Type": "multiply",
+        "Pos": 114,
+        "Value": "*"
+    },
+    {
+        "Type": "atom",
+        "Pos": 116,
+        "Value": ":3"
+    }
 ]

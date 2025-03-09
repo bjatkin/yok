@@ -1,70 +1,161 @@
 [
     {
         "Node": "assign",
-        "Identifier": {"Type": "identifier", "Pos": 4, "Value": "a"},
+        "Identifier": {
+            "Type": "identifier",
+            "Pos": 4,
+            "Value": "a"
+        },
         "Value": {
             "Node": "infix expression",
-            "Operator": {"Type": "plus", "Pos": 11, "Value": "+"},
-            "Left": {"Node": "atom", "Value": ":5"},
-            "Right": {"Node": "atom", "Value": ":10"}
+            "Operator": {
+                "Type": "plus",
+                "Pos": 11,
+                "Value": "+"
+            },
+            "Left": {
+                "Node": "atom",
+                "Value": ":5"
+            },
+            "Right": {
+                "Node": "atom",
+                "Value": ":10"
+            }
         }
     },
     {
         "Node": "assign",
-        "Identifier": {"Type": "identifier", "Pos": 22, "Value": "b"},
+        "Identifier": {
+            "Type": "identifier",
+            "Pos": 22,
+            "Value": "b"
+        },
         "Value": {
             "Node": "infix expression",
-            "Operator": {"Type": "minus", "Pos": 30, "Value": "-"},
-            "Left": {"Node": "atom", "Value": ":10"},
-            "Right": {"Node": "atom", "Value": ":15"}
+            "Operator": {
+                "Type": "minus",
+                "Pos": 30,
+                "Value": "-"
+            },
+            "Left": {
+                "Node": "atom",
+                "Value": ":10"
+            },
+            "Right": {
+                "Node": "atom",
+                "Value": ":15"
+            }
         }
     },
     {
         "Node": "assign",
-        "Identifier": {"Type": "identifier", "Pos": 41, "Value": "c"},
+        "Identifier": {
+            "Type": "identifier",
+            "Pos": 41,
+            "Value": "c"
+        },
         "Value": {
             "Node": "infix expression",
-            "Operator": {"Type": "multiply", "Pos": 49, "Value": "*"},
-            "Left": {"Node": "atom", "Value": ":15"},
-            "Right": {"Node": "atom", "Value": ":20"}
+            "Operator": {
+                "Type": "multiply",
+                "Pos": 49,
+                "Value": "*"
+            },
+            "Left": {
+                "Node": "atom",
+                "Value": ":15"
+            },
+            "Right": {
+                "Node": "atom",
+                "Value": ":20"
+            }
         }
     },
     {
         "Node": "assign",
-        "Identifier": {"Type": "identifier", "Pos": 60, "Value": "d"},
+        "Identifier": {
+            "Type": "identifier",
+            "Pos": 60,
+            "Value": "d"
+        },
         "Value": {
             "Node": "infix expression",
-            "Operator": {"Type": "divide", "Pos": 68, "Value": "/"},
-            "Left": {"Node": "atom", "Value": ":20"},
-            "Right": {"Node": "atom", "Value": ":10"}
+            "Operator": {
+                "Type": "divide",
+                "Pos": 68,
+                "Value": "/"
+            },
+            "Left": {
+                "Node": "atom",
+                "Value": ":20"
+            },
+            "Right": {
+                "Node": "atom",
+                "Value": ":10"
+            }
         }
     },
     {
         "Node": "assign",
-        "Identifier": {"Type": "identifier", "Pos": 79, "Value": "e"},
+        "Identifier": {
+            "Type": "identifier",
+            "Pos": 79,
+            "Value": "e"
+        },
         "Value": {
             "Node": "infix expression",
-            "Operator": {"Type": "mod", "Pos": 87, "Value": "%"},
-            "Left": {"Node": "atom", "Value": ":10"},
-            "Right": {"Node": "atom", "Value": ":15"}
+            "Operator": {
+                "Type": "mod",
+                "Pos": 87,
+                "Value": "%"
+            },
+            "Left": {
+                "Node": "atom",
+                "Value": ":10"
+            },
+            "Right": {
+                "Node": "atom",
+                "Value": ":15"
+            }
         }
     },
     {
         "Node": "assign",
-        "Identifier": {"Type": "identifier", "Pos": 98, "Value": "f"},
+        "Identifier": {
+            "Type": "identifier",
+            "Pos": 98,
+            "Value": "f"
+        },
         "Value": {
             "Node": "infix expression",
-            "Operator": {"Type": "multiply", "Pos": 114, "Value": "*"},
+            "Operator": {
+                "Type": "multiply",
+                "Pos": 114,
+                "Value": "*"
+            },
             "Left": {
                 "Node": "grouped expression",
                 "Expression": {
                     "Node": "infix expression",
-                    "Operator": {"Type": "plus", "Pos": 107, "Value": "+"},
-                    "Left": {"Node": "atom", "Value": ":1"},
-                    "Right": {"Node": "atom", "Value": ":2"}
+                    "Operator": {
+                        "Type": "plus",
+                        "Pos": 107,
+                        "Value": "+"
+                    },
+                    "Left": {
+                        "Node": "atom",
+                        "Value": ":1"
+                    },
+                    "Right": {
+                        "Node": "atom",
+                        "Value": ":2"
+                    }
                 }
             },
-            "Right": {"Node": "atom", "Value": ":3"}
+            "Right": {
+                "Node": "atom",
+                "Value": ":3"
+            }
         }
     }
 ]

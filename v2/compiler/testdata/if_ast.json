@@ -2,19 +2,30 @@
     {
         "Node": "assign",
         "Identifier": "X",
-        "Value": {"Node": "string", "Value": "\"10\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"10\""
+        }
     },
     {
         "Node": "assign",
         "Identifier": "Y",
-        "Value": {"Node": "string", "Value": "\"20\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"20\""
+        }
     },
     {
         "Node": "assign",
         "Identifier": "Z",
-        "Value": {"Node": "string", "Value": "\"30\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"30\""
+        }
     },
-    {"Node": "new line"},
+    {
+        "Node": "new line"
+    },
     {
         "Node": "if statement",
         "Test": {
@@ -22,8 +33,14 @@
             "Expression": {
                 "Node": "infix expression",
                 "Operator": "-gt",
-                "Left": {"Node": "identifier", "Token": "X"},
-                "Right": {"Node": "string", "Value": "\"0\""}
+                "Left": {
+                    "Node": "identifier",
+                    "Token": "X"
+                },
+                "Right": {
+                    "Node": "string",
+                    "Value": "\"0\""
+                }
             }
         },
         "Body": [
@@ -31,9 +48,14 @@
                 "Node": "execute",
                 "Command": "echo",
                 "Arguments": [
-                    {"Node": "string", "Value": "\"x is positive\""}
+                    {
+                        "Node": "string",
+                        "Value": "\"x is positive\""
+                    }
                 ],
-                "Redirects": [ ">&2" ]
+                "Redirects": [
+                    ">&2"
+                ]
             },
             {
                 "Node": "if statement",
@@ -42,8 +64,14 @@
                     "Expression": {
                         "Node": "infix expression",
                         "Operator": "=",
-                        "Left": {"Node": "identifier", "Token": "Y"},
-                        "Right": {"Node": "string", "Value": "\"20\""}
+                        "Left": {
+                            "Node": "identifier",
+                            "Token": "Y"
+                        },
+                        "Right": {
+                            "Node": "string",
+                            "Value": "\"20\""
+                        }
                     }
                 },
                 "Body": [
@@ -51,9 +79,14 @@
                         "Node": "execute",
                         "Command": "echo",
                         "Arguments": [
-                            {"Node": "string", "Value": "\"y is 20\""}
+                            {
+                                "Node": "string",
+                                "Value": "\"y is 20\""
+                            }
                         ],
-                        "Redirects": [ ">&2" ]
+                        "Redirects": [
+                            ">&2"
+                        ]
                     },
                     {
                         "Node": "if statement",
@@ -62,8 +95,14 @@
                             "Expression": {
                                 "Node": "infix expression",
                                 "Operator": "!=",
-                                "Left": {"Node": "identifier", "Token": "Z"},
-                                "Right": {"Node": "identifier", "Token": "X"}
+                                "Left": {
+                                    "Node": "identifier",
+                                    "Token": "Z"
+                                },
+                                "Right": {
+                                    "Node": "identifier",
+                                    "Token": "X"
+                                }
                             }
                         },
                         "Body": [
@@ -71,9 +110,14 @@
                                 "Node": "execute",
                                 "Command": "echo",
                                 "Arguments": [
-                                    {"Node": "string", "Value": "\"z does not equal x\""}
+                                    {
+                                        "Node": "string",
+                                        "Value": "\"z does not equal x\""
+                                    }
                                 ],
-                                "Redirects": [ ">&2" ]
+                                "Redirects": [
+                                    ">&2"
+                                ]
                             }
                         ],
                         "ElseIfs": [],
@@ -90,9 +134,14 @@
                 "Node": "execute",
                 "Command": "echo",
                 "Arguments": [
-                    {"Node": "string", "Value": "\"x is negative or zero\""}
+                    {
+                        "Node": "string",
+                        "Value": "\"x is negative or zero\""
+                    }
                 ],
-                "Redirects": [ ">&2" ]
+                "Redirects": [
+                    ">&2"
+                ]
             },
             {
                 "Node": "if statement",
@@ -101,8 +150,14 @@
                     "Expression": {
                         "Node": "infix expression",
                         "Operator": "!=",
-                        "Left": {"Node": "identifier", "Token": "Y"},
-                        "Right": {"Node": "string", "Value": "\"20\""}
+                        "Left": {
+                            "Node": "identifier",
+                            "Token": "Y"
+                        },
+                        "Right": {
+                            "Node": "string",
+                            "Value": "\"20\""
+                        }
                     }
                 },
                 "Body": [
@@ -110,9 +165,14 @@
                         "Node": "execute",
                         "Command": "echo",
                         "Arguments": [
-                            {"Node": "string", "Value": "\"y is not 20\""}
+                            {
+                                "Node": "string",
+                                "Value": "\"y is not 20\""
+                            }
                         ],
-                        "Redirects": [ ">&2" ]
+                        "Redirects": [
+                            ">&2"
+                        ]
                     }
                 ],
                 "ElseIfs": [],
@@ -121,15 +181,22 @@
                         "Node": "execute",
                         "Command": "echo",
                         "Arguments": [
-                            {"Node": "string", "Value": "\"y is still 20\""}
+                            {
+                                "Node": "string",
+                                "Value": "\"y is still 20\""
+                            }
                         ],
-                        "Redirects": [ ">&2" ]
+                        "Redirects": [
+                            ">&2"
+                        ]
                     }
                 ]
             }
         ]
     },
-    {"Node": "new line"},
+    {
+        "Node": "new line"
+    },
     {
         "Node": "if statement",
         "Test": {
@@ -137,8 +204,14 @@
             "Expression": {
                 "Node": "infix expression",
                 "Operator": "-lt",
-                "Left": {"Node": "identifier", "Token": "X"},
-                "Right": {"Node": "string", "Value": "\"0\""}
+                "Left": {
+                    "Node": "identifier",
+                    "Token": "X"
+                },
+                "Right": {
+                    "Node": "string",
+                    "Value": "\"0\""
+                }
             }
         },
         "Body": [
@@ -146,9 +219,14 @@
                 "Node": "execute",
                 "Command": "echo",
                 "Arguments": [
-                    {"Node": "string", "Value": "\"x is negative\""}
+                    {
+                        "Node": "string",
+                        "Value": "\"x is negative\""
+                    }
                 ],
-                "Redirects": [ ">&2" ]
+                "Redirects": [
+                    ">&2"
+                ]
             }
         ],
         "ElseIfs": [
@@ -159,8 +237,14 @@
                     "Expression": {
                         "Node": "infix expression",
                         "Operator": "-gt",
-                        "Left": {"Node": "identifier", "Token": "X"},
-                        "Right": {"Node": "string", "Value": "\"1\""}
+                        "Left": {
+                            "Node": "identifier",
+                            "Token": "X"
+                        },
+                        "Right": {
+                            "Node": "string",
+                            "Value": "\"1\""
+                        }
                     }
                 },
                 "Body": [
@@ -168,9 +252,14 @@
                         "Node": "execute",
                         "Command": "echo",
                         "Arguments": [
-                            {"Node": "string", "Value": "\"x is positive\""}
+                            {
+                                "Node": "string",
+                                "Value": "\"x is positive\""
+                            }
                         ],
-                        "Redirects": [ ">&2" ]
+                        "Redirects": [
+                            ">&2"
+                        ]
                     }
                 ]
             },
@@ -181,8 +270,14 @@
                     "Expression": {
                         "Node": "infix expression",
                         "Operator": "=",
-                        "Left": {"Node": "identifier", "Token": "X"},
-                        "Right": {"Node": "string", "Value": "\"1\""}
+                        "Left": {
+                            "Node": "identifier",
+                            "Token": "X"
+                        },
+                        "Right": {
+                            "Node": "string",
+                            "Value": "\"1\""
+                        }
                     }
                 },
                 "Body": [
@@ -190,9 +285,14 @@
                         "Node": "execute",
                         "Command": "echo",
                         "Arguments": [
-                            {"Node": "string", "Value": "\"x is one\""}
+                            {
+                                "Node": "string",
+                                "Value": "\"x is one\""
+                            }
                         ],
-                        "Redirects": [ ">&2" ]
+                        "Redirects": [
+                            ">&2"
+                        ]
                     }
                 ]
             }
@@ -202,9 +302,14 @@
                 "Node": "execute",
                 "Command": "echo",
                 "Arguments": [
-                    {"Node": "string", "Value": "\"x is zero\""}
+                    {
+                        "Node": "string",
+                        "Value": "\"x is zero\""
+                    }
                 ],
-                "Redirects": [ ">&2" ]
+                "Redirects": [
+                    ">&2"
+                ]
             }
         ]
     }

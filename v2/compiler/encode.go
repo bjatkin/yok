@@ -5,207 +5,155 @@ import (
 	"strings"
 
 	"github.com/bjatkin/yok/ast/shast"
+	"github.com/bjatkin/yok/json"
 )
 
 // encodeScript converts a yok script into a json string
 func encodeScript(script *shast.Script) string {
-	encoded := []string{}
+	array := json.Array{}
 	for _, stmt := range script.Statements {
 		node := encodeNode(stmt.(shast.Node))
-		encoded = append(encoded, node)
+		array.AddValue(node)
 	}
 
-	encodedScript := strings.Join(encoded, ",\n")
-	return indentLines("[\n" + encodedScript + "\n]")
+	return array.Render(0)
 }
 
-// indentLines moves through a json string line by line, adding the correct indent.
-// turns out it's easier to do this as a pos-processing step rather than doing it while
-// generating the json structure itself.
-func indentLines(str string) string {
-	lines := strings.Split(str, "\n")
-	depth := 0
-	indentedLines := []string{}
-	for _, line := range lines {
-		if line == "]" ||
-			line == "]," ||
-			line == "}" ||
-			line == "}," {
-			depth--
-		}
-
-		indent := strings.Repeat("    ", depth)
-		indentedLines = append(indentedLines, indent+line)
-
-		if strings.HasSuffix(line, "[") ||
-			strings.HasSuffix(line, "{") {
-			depth++
-		}
-	}
-
-	return strings.Join(indentedLines, "\n")
+// newNode creates a new json.Object where the "Node" field is set to the given name
+// if additional fields are passed they will be added as well
+func newNode(name string, fields ...json.Field) json.Object {
+	nodeField := json.NewField("Node", json.String(name))
+	node := json.NewObject(nodeField)
+	node.AddFields(fields...)
+	return node
 }
 
-// encodeNode encodes shast.Nodes into json strings
-func encodeNode(node shast.Node) string {
+// encodeNode encodes a shast.Node into a json.Value
+func encodeNode(node shast.Node) json.Value {
 	switch node := node.(type) {
 	case *shast.Comment:
 		safeValue := strings.ReplaceAll(node.Value, "\"", "\\\"")
-		return fmt.Sprintf(`{"Node": "comment", "Value": "%s"}`, safeValue)
+		return newNode(
+			"comment",
+			json.NewField("Value", json.String(safeValue)),
+		)
 	case *shast.NewLine:
-		return `{"Node": "new line"}`
+		return newNode("new line")
 	case *shast.Assign:
-		return fmt.Sprintf(`{
-"Node": "assign",
-"Identifier": "%s",
-"Value": %s
-}`,
-			node.Identifier,
-			encodeNode(node.Value),
+		return newNode(
+			"assign",
+			json.NewField("Identifier", json.String(node.Identifier)),
+			json.NewField("Value", encodeNode(node.Value)),
 		)
 	case *shast.StmtExpr:
 		return encodeNode(node.Expression)
 	case *shast.String:
 		safeValue := strings.ReplaceAll(node.Value, "\"", "\\\"")
-		return fmt.Sprintf(`{"Node": "string", "Value": "%s"}`, safeValue)
+		return newNode(
+			"string",
+			json.NewField("Value", json.String(safeValue)),
+		)
 	case *shast.Exec:
-		args := `"Arguments": []`
-		if len(node.Arguments) > 0 {
-			encoded := encodeExprs(node.Arguments)
-			args = fmt.Sprintf(`"Arguments": [
-%s
-]`, encoded)
+		args := encodeExprs(node.Arguments)
+
+		redirects := json.Array{}
+		for _, r := range node.Redirects {
+			redirects.AddValue(json.String(r.String()))
 		}
 
-		redirects := `"Redirects": []`
-		if len(node.Redirects) > 0 {
-			encoded := []string{}
-			for _, redirect := range node.Redirects {
-				encoded = append(encoded, "\""+redirect.String()+"\"")
-			}
-			redirects = fmt.Sprintf(`"Redirects": [ %s ]`, strings.Join(encoded, ", "))
-		}
-
-		return fmt.Sprintf(`{
-"Node": "execute",
-"Command": "%s",
-%s,
-%s
-}`,
-			node.Command,
-			args,
-			redirects,
+		return newNode(
+			"execute",
+			json.NewField("Command", json.String(node.Command)),
+			json.NewField("Arguments", args),
+			json.NewField("Redirects", redirects),
 		)
 	case *shast.Identifier:
-		return fmt.Sprintf(`{"Node": "identifier", "Token": "%s"}`, node.Value)
+		return newNode(
+			"identifier",
+			json.NewField("Token", json.String(node.Value)),
+		)
 	case *shast.ArithmeticCommand:
-		return fmt.Sprintf(`{
-"Node": "arithmetic command",
-"Expression": %s
-}`, encodeNode(node.Expression))
+		expression := encodeNode(node.Expression)
+		return newNode(
+			"arithmetic command",
+			json.NewField("Expression", expression),
+		)
 	case *shast.InfixExpr:
-		return fmt.Sprintf(`{
-"Node": "infix expression",
-"Operator": "%s",
-"Left": %s,
-"Right": %s
-}`,
-			node.Operator,
-			encodeNode(node.Left),
-			encodeNode(node.Right),
+		left := encodeNode(node.Left)
+		right := encodeNode(node.Right)
+		return newNode(
+			"infix expression",
+			json.NewField("Operator", json.String(node.Operator)),
+			json.NewField("Left", left),
+			json.NewField("Right", right),
 		)
 	case *shast.GroupExpr:
-		return fmt.Sprintf(`{
-"Node": "group expression",
-"Expression": %s
-}`,
-			encodeNode(node.Expression))
+		expression := encodeNode(node.Expression)
+		return newNode(
+			"group expression",
+			json.NewField("Expression", expression),
+		)
 	case *shast.If:
-		body := "[]"
-		if len(node.Statements) > 0 {
-			body = fmt.Sprintf(`[
-%s
-]`, encodeStmts(node.Statements))
-		}
+		test := encodeNode(node.Test)
+		body := encodeStmts(node.Statements)
+		elseIfs := encodeElseIfs(node.ElseIfs)
+		elseBody := encodeStmts(node.ElseStatements)
 
-		elseIfs := "[]"
-		if len(node.ElseIfs) > 0 {
-			elseIfs = fmt.Sprintf(`[
-%s
-]`, encodeElseIfs(node.ElseIfs))
-		}
-
-		elseBody := "[]"
-		if len(node.ElseStatements) > 0 {
-			elseBody = fmt.Sprintf(`[
-%s
-]`, encodeStmts(node.ElseStatements))
-		}
-
-		return fmt.Sprintf(`{
-"Node": "if statement",
-"Test": %s,
-"Body": %s,
-"ElseIfs": %s,
-"ElseBody": %s
-}`,
-			encodeNode(node.Test),
-			body,
-			elseIfs,
-			elseBody,
+		return newNode(
+			"if statement",
+			json.NewField("Test", test),
+			json.NewField("Body", body),
+			json.NewField("ElseIfs", elseIfs),
+			json.NewField("ElseBody", elseBody),
 		)
 	case *shast.TestCommand:
-		return fmt.Sprintf(`{
-"Node": "test statement",
-"Expression": %s
-}`, encodeNode(node.Expression))
+		expression := encodeNode(node.Expression)
+		return newNode(
+			"test statement",
+			json.NewField("Expression", expression),
+		)
 	default:
 		panic(fmt.Sprintf("can not encode sh node, unknown node type %T", node))
 	}
 }
 
-// encodeElseIfs encodes a slice of ElseIf nodes into a list of json strings
-func encodeElseIfs(elseIfs []shast.ElseIf) string {
-	encoded := []string{}
+// encodeElseIfs encodes a slice of ElseIf nodes into a json.Array
+func encodeElseIfs(elseIfs []shast.ElseIf) json.Array {
+	array := json.Array{}
 	for _, elseIf := range elseIfs {
-		body := "[]"
-		if len(elseIf.Statements) > 0 {
-			body = fmt.Sprintf(`[
-%s
-]`, encodeStmts(elseIf.Statements))
-		}
-		got := fmt.Sprintf(`{
-"Node": "elif",
-"Test": %s,
-"Body": %s
-}`,
-			encodeNode(elseIf.Test),
-			body,
+		body := encodeStmts(elseIf.Statements)
+		test := encodeNode(elseIf.Test)
+		node := newNode(
+			"elif",
+			json.NewField("Test", test),
+			json.NewField("Body", body),
 		)
-		encoded = append(encoded, got)
+		array.AddValue(node)
 	}
 
-	return strings.Join(encoded, ",\n")
+	return array
 }
 
-// encodeExprs encodes a slice of expressions into a slice of json strings
-func encodeExprs(exprs []shast.Expr) string {
-	encoded := []string{}
+// encodeExprs encodes a slice of expressions into a json.Array
+func encodeExprs(exprs []shast.Expr) json.Array {
+	array := json.Array{}
 	for _, expr := range exprs {
 		node := expr.(shast.Node)
-		encoded = append(encoded, encodeNode(node))
+		encoded := encodeNode(node)
+		array.AddValue(encoded)
 	}
 
-	return strings.Join(encoded, ",\n")
+	return array
 }
 
-// encodeStmts encodes a slice of statements into a slice of json strings
-func encodeStmts(stmts []shast.Stmt) string {
-	encoded := []string{}
+// encodeStmts encodes a slice of statements into a json.Array
+func encodeStmts(stmts []shast.Stmt) json.Array {
+	array := json.Array{}
 	for _, stmt := range stmts {
 		node := stmt.(shast.Node)
-		encoded = append(encoded, encodeNode(node))
+		encoded := encodeNode(node)
+		array.AddValue(encoded)
 	}
 
-	return strings.Join(encoded, ",\n")
+	return array
 }

@@ -516,7 +516,9 @@ func TestLexFile(t *testing.T) {
 				tokens = append(tokens, lex.take())
 			}
 
-			got := encodeTokens(tokens, source)
+			gotJson := encodeTokens(tokens, source)
+			got := gotJson.Render(0)
+
 			wantFile := filepath.Join("testdata", tt.tokenFile)
 			if diffs := diff.AgainstFile(t, got, wantFile); diffs != "" {
 				t.Errorf("LexFile tokens do not match %s:\n%s", tt.tokenFile, diffs)

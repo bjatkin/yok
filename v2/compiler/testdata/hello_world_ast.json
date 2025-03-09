@@ -1,19 +1,38 @@
 [
-    {"Node": "comment", "Value": "# set the subject name"},
+    {
+        "Node": "comment",
+        "Value": "# set the subject name"
+    },
     {
         "Node": "assign",
         "Identifier": "SUBJECT",
-        "Value": {"Node": "string", "Value": "\"world\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"world\""
+        }
     },
-    {"Node": "new line"},
-    {"Node": "comment", "Value": "# say hello to the subject"},
+    {
+        "Node": "new line"
+    },
+    {
+        "Node": "comment",
+        "Value": "# say hello to the subject"
+    },
     {
         "Node": "execute",
         "Command": "echo",
         "Arguments": [
-            {"Node": "string", "Value": "\"Hello\""},
-            {"Node": "identifier", "Token": "SUBJECT"}
+            {
+                "Node": "string",
+                "Value": "\"Hello\""
+            },
+            {
+                "Node": "identifier",
+                "Token": "SUBJECT"
+            }
         ],
-        "Redirects": [ ">&2" ]
+        "Redirects": [
+            ">&2"
+        ]
     }
 ]
