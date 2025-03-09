@@ -7,6 +7,7 @@ import (
 	"github.com/bjatkin/yok/ast/shast"
 )
 
+// Generate takes a shast.Script and renderes it into a well formated shell script
 func Generate(script *shast.Script) string {
 	scriptBuilder := newCodeBuilder("#!/bin/sh")
 	scriptBuilder.addLine("")
@@ -17,6 +18,7 @@ func Generate(script *shast.Script) string {
 	return scriptBuilder.render()
 }
 
+// generateExpr takes an shast.Expr and renders it into a well formated shell string
 func generateExpr(expr shast.Expr) string {
 	switch expr := expr.(type) {
 	case *shast.String:
@@ -61,6 +63,7 @@ func generateExpr(expr shast.Expr) string {
 	}
 }
 
+// generateStmt takes an shast.Stmt and converts it into a codeBuilder
 func generateStmt(stmt shast.Stmt) codeBuilder {
 	switch stmt := stmt.(type) {
 	case *shast.Comment:
@@ -113,6 +116,7 @@ func generateStmt(stmt shast.Stmt) codeBuilder {
 	}
 }
 
+// generateStmts takes a slice of shast.Stmt and converts it into a codeBuilder
 func generateStmts(statements []shast.Stmt) codeBuilder {
 	builder := codeBuilder{}
 	for _, stmt := range statements {

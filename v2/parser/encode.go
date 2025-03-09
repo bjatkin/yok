@@ -9,7 +9,7 @@ import (
 	"github.com/bjatkin/yok/token"
 )
 
-// encodeToken converts a single token into a json string
+// encodeToken converts a single token into a json.Object
 func encodeToken(t token.Token, source []byte) json.Object {
 	value := string(source[t.Pos : int(t.Pos)+t.Len])
 	value = strings.ReplaceAll(value, "\"", "\\\"")
@@ -27,12 +27,12 @@ func encodeToken(t token.Token, source []byte) json.Object {
 	)
 }
 
-// encodeTokens converts a slice of tokens into a json array
+// encodeTokens converts a slice of tokens into a json.Array
 func encodeTokens(tokens []token.Token, source []byte) json.Array {
 	array := json.Array{}
 	for _, t := range tokens {
 		encoded := encodeToken(t, source)
-		array.AddItem(encoded)
+		array.AddValue(encoded)
 	}
 
 	return array
@@ -43,20 +43,22 @@ func encodeScript(script *yokast.Script, source []byte) string {
 	array := json.Array{}
 	for _, stmt := range script.Statements {
 		node := encodeNode(stmt.(yokast.Node), source)
-		array.AddItem(node)
+		array.AddValue(node)
 	}
 
 	return array.Render(0)
 }
 
-func newNode(nodeName string, fields ...json.Field) json.Object {
-	nodeField := json.NewField("Node", json.String(nodeName))
+// newNode cretes a new json.Object where the "Node" field is set to the given name
+// if additional fields are passed they will be added to the object
+func newNode(name string, fields ...json.Field) json.Object {
+	nodeField := json.NewField("Node", json.String(name))
 	node := json.NewObject(nodeField)
 	node.AddFields(fields...)
 	return node
 }
 
-// encodeNode encodes yokast.Nodes into json strings
+// encodeNode encodes a yokast.Node into a json.Value
 func encodeNode(node yokast.Node, source []byte) json.Value {
 	switch node := node.(type) {
 	case *yokast.Comment:
@@ -145,7 +147,7 @@ func encodeNode(node yokast.Node, source []byte) json.Value {
 	}
 }
 
-// encodeElseIfs encodes a slice of ElseIf nodes into a slice of json strings
+// encodeElseIfs encodes a slice of ElseIf nodes into a json.Array
 func encodeElseIfs(elseIfs []yokast.ElseIf, source []byte) json.Array {
 	array := json.Array{}
 	for _, elseIf := range elseIfs {
@@ -156,31 +158,31 @@ func encodeElseIfs(elseIfs []yokast.ElseIf, source []byte) json.Array {
 			json.NewField("Test", test),
 			json.NewField("Body", body),
 		)
-		array.AddItem(node)
+		array.AddValue(node)
 	}
 
 	return array
 }
 
-// encodeExprs encodes a slice of expressions into a slice of json strings
+// encodeExprs encodes a slice of expressions into a json.Array
 func encodeExprs(exprs []yokast.Expr, source []byte) json.Array {
 	array := json.Array{}
 	for _, expr := range exprs {
 		node := expr.(yokast.Node)
 		encoded := encodeNode(node, source)
-		array.AddItem(encoded)
+		array.AddValue(encoded)
 	}
 
 	return array
 }
 
-// encodeStmts encodes a slice of statements into a slice of json strings
+// encodeStmts encodes a slice of statements into a json.Array
 func encodeStmts(stmts []yokast.Stmt, source []byte) json.Array {
 	array := json.Array{}
 	for _, stmt := range stmts {
 		node := stmt.(yokast.Node)
 		encoded := encodeNode(node, source)
-		array.AddItem(encoded)
+		array.AddValue(encoded)
 
 	}
 

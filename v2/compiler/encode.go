@@ -13,20 +13,22 @@ func encodeScript(script *shast.Script) string {
 	array := json.Array{}
 	for _, stmt := range script.Statements {
 		node := encodeNode(stmt.(shast.Node))
-		array.AddItem(node)
+		array.AddValue(node)
 	}
 
 	return array.Render(0)
 }
 
-func newNode(nodeName string, fields ...json.Field) json.Object {
-	nodeField := json.NewField("Node", json.String(nodeName))
+// newNode creates a new json.Object where the "Node" field is set to the given name
+// if additional fields are passed they will be added as well
+func newNode(name string, fields ...json.Field) json.Object {
+	nodeField := json.NewField("Node", json.String(name))
 	node := json.NewObject(nodeField)
 	node.AddFields(fields...)
 	return node
 }
 
-// encodeNode encodes shast.Nodes into json strings
+// encodeNode encodes a shast.Node into a json.Value
 func encodeNode(node shast.Node) json.Value {
 	switch node := node.(type) {
 	case *shast.Comment:
@@ -56,7 +58,7 @@ func encodeNode(node shast.Node) json.Value {
 
 		redirects := json.Array{}
 		for _, r := range node.Redirects {
-			redirects.AddItem(json.String(r.String()))
+			redirects.AddValue(json.String(r.String()))
 		}
 
 		return newNode(
@@ -115,7 +117,7 @@ func encodeNode(node shast.Node) json.Value {
 	}
 }
 
-// encodeElseIfs encodes a slice of ElseIf nodes into a list of json strings
+// encodeElseIfs encodes a slice of ElseIf nodes into a json.Array
 func encodeElseIfs(elseIfs []shast.ElseIf) json.Array {
 	array := json.Array{}
 	for _, elseIf := range elseIfs {
@@ -126,31 +128,31 @@ func encodeElseIfs(elseIfs []shast.ElseIf) json.Array {
 			json.NewField("Test", test),
 			json.NewField("Body", body),
 		)
-		array.AddItem(node)
+		array.AddValue(node)
 	}
 
 	return array
 }
 
-// encodeExprs encodes a slice of expressions into a slice of json strings
+// encodeExprs encodes a slice of expressions into a json.Array
 func encodeExprs(exprs []shast.Expr) json.Array {
 	array := json.Array{}
 	for _, expr := range exprs {
 		node := expr.(shast.Node)
 		encoded := encodeNode(node)
-		array.AddItem(encoded)
+		array.AddValue(encoded)
 	}
 
 	return array
 }
 
-// encodeStmts encodes a slice of statements into a slice of json strings
+// encodeStmts encodes a slice of statements into a json.Array
 func encodeStmts(stmts []shast.Stmt) json.Array {
 	array := json.Array{}
 	for _, stmt := range stmts {
 		node := stmt.(shast.Node)
 		encoded := encodeNode(node)
-		array.AddItem(encoded)
+		array.AddValue(encoded)
 	}
 
 	return array

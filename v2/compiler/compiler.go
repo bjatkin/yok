@@ -26,6 +26,7 @@ func New(source []byte) *Compiler {
 	}
 }
 
+// Compile creates an shast.Script from the given yokast.Script
 func (c *Compiler) Compile(script *yokast.Script) (*shast.Script, error) {
 	ret := &shast.Script{}
 	for _, stmt := range script.Statements {
@@ -40,6 +41,7 @@ func (c *Compiler) Compile(script *yokast.Script) (*shast.Script, error) {
 	return ret, nil
 }
 
+// complieNode converts a yokast.Node into it's equivilant shast.Node
 func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 	switch node := node.(type) {
 	case *yokast.Script:
@@ -306,6 +308,7 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 	}
 }
 
+// compileCall compiles a yokast.Call into it's equivilant shast.Node
 func (c *Compiler) compileCall(call *yokast.Call) (shast.Node, error) {
 	command := call.Identifier.Token.Value(c.source)
 	args := []shast.Expr{}
