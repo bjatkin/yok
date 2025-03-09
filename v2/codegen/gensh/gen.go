@@ -7,16 +7,14 @@ import (
 	"github.com/bjatkin/yok/ast/shast"
 )
 
-const indentToken = "    "
-
 func Generate(script *shast.Script) string {
-	scriptLines := []string{"#!/bin/sh", ""}
-	for _, stmt := range script.Statements {
-		node := generateStmt(stmt, 0)
-		scriptLines = append(scriptLines, node)
-	}
+	scriptBuilder := newCodeBuilder("#!/bin/sh")
+	scriptBuilder.addLine("")
 
-	return strings.Join(scriptLines, "\n")
+	bodyBuilder := generateStmts(script.Statements)
+	scriptBuilder.addUnits(bodyBuilder.units)
+
+	return scriptBuilder.render()
 }
 
 func generateExpr(expr shast.Expr) string {
@@ -63,101 +61,63 @@ func generateExpr(expr shast.Expr) string {
 	}
 }
 
-func generateStmt(stmt shast.Stmt, indentDepth int) string {
-	indent := strings.Repeat(indentToken, indentDepth)
+func generateStmt(stmt shast.Stmt) codeBuilder {
 	switch stmt := stmt.(type) {
 	case *shast.Comment:
-		return indent + stmt.Value
+		return newCodeBuilder(stmt.Value)
 	case *shast.NewLine:
-		return ""
+		return newCodeBuilder("")
 	case *shast.Assign:
 		value := generateExpr(stmt.Value)
-		return indent + stmt.Identifier + "=" + value
+		return newCodeBuilder(stmt.Identifier + "=" + value)
 	case *shast.StmtExpr:
-		return indent + generateExpr(stmt.Expression)
+		expr := generateExpr(stmt.Expression)
+		return newCodeBuilder(expr)
 	case *shast.If:
-		// TODO: clean all this code up, there's got to be a better way to genrate code with correct
-		// levels of indentation than these messy format strings!
-		test := generateStmt(stmt.Test, indentDepth)
+		test := generateStmt(stmt.Test)
+		ifUnit := newCodeUnitf("if %s; then", test.render())
 
-		body := []string{}
 		for _, stmt := range stmt.Statements {
-			line := generateStmt(stmt, indentDepth+1)
-			body = append(body, line)
+			line := generateStmt(stmt)
+			ifUnit.addChildren(line.units)
 		}
 
-		if len(stmt.ElseIfs) == 0 && len(stmt.ElseStatements) == 0 {
-			return fmt.Sprintf(
-				"%sif %s; then\n%s\n%sfi",
-				indent,
-				test,
-				strings.Join(body, "\n"),
-				indent,
-			)
-		}
-
-		elseIfs := []string{}
+		ifBuilder := codeBuilder{}
+		ifBuilder.addUnit(ifUnit)
 		for _, elseIf := range stmt.ElseIfs {
-			test := generateStmt(elseIf.Test, indentDepth)
-			body := []string{}
-			for _, stmt := range stmt.Statements {
-				line := generateStmt(stmt, indentDepth+1)
-				body = append(body, line)
-			}
+			test := generateStmt(elseIf.Test)
+			elseIfUnit := newCodeUnitf("elif %s; then", test.render())
 
-			elseIfs = append(elseIfs, fmt.Sprintf(
-				"%selif %s; then\n%s",
-				indent,
-				test,
-				strings.Join(body, "\n"),
-			))
+			bodyBuilder := generateStmts(stmt.Statements)
+			elseIfUnit.addChildren(bodyBuilder.units)
+
+			ifBuilder.addUnit(elseIfUnit)
 		}
 
-		if len(stmt.ElseStatements) == 0 {
-			return fmt.Sprintf(
-				"%sif %s; then\n%s%s%s\n%sfi",
-				indent,
-				test,
-				strings.Join(body, "\n"),
-				indent,
-				strings.Join(elseIfs, "\n"),
-				indent,
-			)
+		if stmt.ElseStatements != nil {
+			elseUnit := codeUnit{line: "else"}
+			bodyBuilder := generateStmts(stmt.ElseStatements)
+			elseUnit.addChildren(bodyBuilder.units)
+
+			ifBuilder.addUnit(elseUnit)
 		}
 
-		elseBody := []string{}
-		for _, stmt := range stmt.ElseStatements {
-			line := generateStmt(stmt, indentDepth+1)
-			elseBody = append(elseBody, line)
-		}
+		ifBuilder.addLine("fi")
+		return ifBuilder
 
-		if len(stmt.ElseIfs) == 0 {
-			return fmt.Sprintf(
-				"%sif %s; then\n%s\n%selse\n%s\n%sfi",
-				indent,
-				test,
-				strings.Join(body, "\n"),
-				indent,
-				strings.Join(elseBody, "\n"),
-				indent,
-			)
-		}
-
-		return fmt.Sprintf(
-			"%sif %s; then\n%s\n%s%s\n%selse\n%s\n%sfi",
-			indent,
-			test,
-			strings.Join(body, "\n"),
-			indent,
-			strings.Join(elseIfs, "\n"),
-			indent,
-			strings.Join(elseBody, "\n"),
-			indent,
-		)
 	case *shast.TestCommand:
 		expr := generateExpr(stmt.Expression)
-		return "[ " + expr + " ]"
+		return newCodeBuilder("[ " + expr + " ]")
 	default:
 		panic(fmt.Sprintf("can not gen sh code, unknown stmt type %T", stmt))
 	}
+}
+
+func generateStmts(statements []shast.Stmt) codeBuilder {
+	builder := codeBuilder{}
+	for _, stmt := range statements {
+		line := generateStmt(stmt)
+		builder.addUnits(line.units)
+	}
+	return builder
 }
