@@ -1,42 +1,76 @@
 [
-    {"Node": "comment", "Value": "# atom values"},
+    {
+        "Node": "comment",
+        "Value": "# atom values"
+    },
     {
         "Node": "assign",
         "Identifier": "A",
-        "Value": {"Node": "string", "Value": "\"10\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"10\""
+        }
     },
     {
         "Node": "assign",
         "Identifier": "B",
-        "Value": {"Node": "string", "Value": "\"20\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"20\""
+        }
     },
     {
         "Node": "assign",
         "Identifier": "STATUS",
-        "Value": {"Node": "string", "Value": "\"ok\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"ok\""
+        }
     },
-    {"Node": "new line"},
-    {"Node": "comment", "Value": "# string values"},
+    {
+        "Node": "new line"
+    },
+    {
+        "Node": "comment",
+        "Value": "# string values"
+    },
     {
         "Node": "assign",
         "Identifier": "PET",
-        "Value": {"Node": "string", "Value": "\"dog\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"dog\""
+        }
     },
     {
         "Node": "assign",
         "Identifier": "COLOR",
-        "Value": {"Node": "string", "Value": "\"red\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"red\""
+        }
     },
-    {"Node": "new line"},
-    {"Node": "comment", "Value": "# file paths"},
+    {
+        "Node": "new line"
+    },
+    {
+        "Node": "comment",
+        "Value": "# file paths"
+    },
     {
         "Node": "assign",
         "Identifier": "MY_FILE",
-        "Value": {"Node": "string", "Value": "\"/my/file.txt\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"/my/file.txt\""
+        }
     },
     {
         "Node": "assign",
         "Identifier": "MY_DIR",
-        "Value": {"Node": "string", "Value": "\"my/relative/dir\""}
+        "Value": {
+            "Node": "string",
+            "Value": "\"my/relative/dir\""
+        }
     }
 ]

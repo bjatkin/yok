@@ -46,13 +46,6 @@ func (s *codeBuilder) addLine(line string) *codeUnit {
 	return &unit
 }
 
-func (s *codeBuilder) addLinef(format string, a ...any) *codeUnit {
-	line := fmt.Sprintf(format, a...)
-	unit := codeUnit{line: line}
-	s.units = append(s.units, unit)
-	return &unit
-}
-
 func (s *codeBuilder) addUnit(unit codeUnit) {
 	s.units = append(s.units, unit)
 }

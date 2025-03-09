@@ -7,8 +7,14 @@
             "Expression": {
                 "Node": "infix expression",
                 "Operator": "+",
-                "Left": {"Node": "string", "Value": "\"5\""},
-                "Right": {"Node": "string", "Value": "\"10\""}
+                "Left": {
+                    "Node": "string",
+                    "Value": "\"5\""
+                },
+                "Right": {
+                    "Node": "string",
+                    "Value": "\"10\""
+                }
             }
         }
     },
@@ -20,8 +26,14 @@
             "Expression": {
                 "Node": "infix expression",
                 "Operator": "-",
-                "Left": {"Node": "string", "Value": "\"10\""},
-                "Right": {"Node": "string", "Value": "\"15\""}
+                "Left": {
+                    "Node": "string",
+                    "Value": "\"10\""
+                },
+                "Right": {
+                    "Node": "string",
+                    "Value": "\"15\""
+                }
             }
         }
     },
@@ -33,8 +45,14 @@
             "Expression": {
                 "Node": "infix expression",
                 "Operator": "*",
-                "Left": {"Node": "string", "Value": "\"15\""},
-                "Right": {"Node": "string", "Value": "\"20\""}
+                "Left": {
+                    "Node": "string",
+                    "Value": "\"15\""
+                },
+                "Right": {
+                    "Node": "string",
+                    "Value": "\"20\""
+                }
             }
         }
     },
@@ -46,8 +64,14 @@
             "Expression": {
                 "Node": "infix expression",
                 "Operator": "/",
-                "Left": {"Node": "string", "Value": "\"20\""},
-                "Right": {"Node": "string", "Value": "\"10\""}
+                "Left": {
+                    "Node": "string",
+                    "Value": "\"20\""
+                },
+                "Right": {
+                    "Node": "string",
+                    "Value": "\"10\""
+                }
             }
         }
     },
@@ -59,8 +83,14 @@
             "Expression": {
                 "Node": "infix expression",
                 "Operator": "%",
-                "Left": {"Node": "string", "Value": "\"10\""},
-                "Right": {"Node": "string", "Value": "\"15\""}
+                "Left": {
+                    "Node": "string",
+                    "Value": "\"10\""
+                },
+                "Right": {
+                    "Node": "string",
+                    "Value": "\"15\""
+                }
             }
         }
     },
@@ -77,11 +107,20 @@
                     "Expression": {
                         "Node": "infix expression",
                         "Operator": "+",
-                        "Left": {"Node": "string", "Value": "\"1\""},
-                        "Right": {"Node": "string", "Value": "\"2\""}
+                        "Left": {
+                            "Node": "string",
+                            "Value": "\"1\""
+                        },
+                        "Right": {
+                            "Node": "string",
+                            "Value": "\"2\""
+                        }
                     }
                 },
-                "Right": {"Node": "string", "Value": "\"3\""}
+                "Right": {
+                    "Node": "string",
+                    "Value": "\"3\""
+                }
             }
         }
     }

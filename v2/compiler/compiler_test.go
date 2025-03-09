@@ -61,6 +61,9 @@ func TestCompiler_Compile(t *testing.T) {
 
 			got := encodeScript(shScript)
 			wantFile := filepath.Join("testdata", tt.astFile)
+			// err = os.WriteFile(wantFile, []byte(got), 0o0655)
+			// t.Fatal("updated test: ", err)
+
 			if diffs := diff.AgainstFile(t, got, wantFile); diffs != "" {
 				t.Errorf("Compiler.Compile() ast does not match %s:\n%s", tt.astFile, diffs)
 			}
