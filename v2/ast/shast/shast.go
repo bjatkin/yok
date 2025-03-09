@@ -129,3 +129,38 @@ type GroupExpr struct {
 	Expr
 	Expression Expr
 }
+
+// ParamaterExpr is a valid Expression that can appear in a ParameterExpansion expression
+type ParamaterExpr interface {
+	Node
+	parameterExpr()
+}
+
+// ParameterExpations is a paramater expasion shell call
+type ParamaterExpansion struct {
+	Expr
+	Expression ParamaterExpr
+}
+
+// ParameterLength is a ParamaterExpr used to determine the length of the given paramater
+type ParameterLength struct {
+	ParamaterExpr
+	Paramater *Identifier
+}
+
+// ParameterReplace is a ParamaterExpr used to do a find and replace on the given paramater
+type ParamaterReplace struct {
+	ParamaterExpr
+	ReplaceAll bool
+	Paramater  *Identifier
+	Find       Expr
+	Replace    Expr
+}
+
+// ParamaterRemoveFix is a ParamaterExpr used to remove the prefix or suffix of a string
+type ParamaterRemoveFix struct {
+	ParamaterExpr
+	RemovePrefix bool
+	Paramater    *Identifier
+	Remove       Expr
+}

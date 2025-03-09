@@ -5,12 +5,12 @@ import (
 	"strings"
 
 	"github.com/bjatkin/yok/ast/shast"
-	"github.com/bjatkin/yok/json"
+	"github.com/bjatkin/yok/repr"
 )
 
-// encodeScript converts a yok script into a json string
+// encodeScript converts a yok script into a repr string
 func encodeScript(script *shast.Script) string {
-	array := json.Array{}
+	array := repr.Array{}
 	for _, stmt := range script.Statements {
 		node := encodeNode(stmt.(shast.Node))
 		array.AddValue(node)
@@ -19,79 +19,70 @@ func encodeScript(script *shast.Script) string {
 	return array.Render(0)
 }
 
-// newNode creates a new json.Object where the "Node" field is set to the given name
-// if additional fields are passed they will be added as well
-func newNode(name string, fields ...json.Field) json.Object {
-	nodeField := json.NewField("Node", json.String(name))
-	node := json.NewObject(nodeField)
-	node.AddFields(fields...)
-	return node
-}
-
-// encodeNode encodes a shast.Node into a json.Value
-func encodeNode(node shast.Node) json.Value {
+// encodeNode encodes a shast.Node into a repr.Value
+func encodeNode(node shast.Node) repr.Value {
 	switch node := node.(type) {
 	case *shast.Comment:
 		safeValue := strings.ReplaceAll(node.Value, "\"", "\\\"")
-		return newNode(
-			"comment",
-			json.NewField("Value", json.String(safeValue)),
+		return repr.NewObject(
+			"Comment",
+			repr.NewField("Value", repr.String(safeValue)),
 		)
 	case *shast.NewLine:
-		return newNode("new line")
+		return repr.NewObject("NewLine")
 	case *shast.Assign:
-		return newNode(
-			"assign",
-			json.NewField("Identifier", json.String(node.Identifier)),
-			json.NewField("Value", encodeNode(node.Value)),
+		return repr.NewObject(
+			"Assign",
+			repr.NewField("Identifier", repr.String(node.Identifier)),
+			repr.NewField("Value", encodeNode(node.Value)),
 		)
 	case *shast.StmtExpr:
 		return encodeNode(node.Expression)
 	case *shast.String:
 		safeValue := strings.ReplaceAll(node.Value, "\"", "\\\"")
-		return newNode(
-			"string",
-			json.NewField("Value", json.String(safeValue)),
+		return repr.NewObject(
+			"String",
+			repr.NewField("Value", repr.String(safeValue)),
 		)
 	case *shast.Exec:
 		args := encodeExprs(node.Arguments)
 
-		redirects := json.Array{}
+		redirects := repr.Array{}
 		for _, r := range node.Redirects {
-			redirects.AddValue(json.String(r.String()))
+			redirects.AddValue(repr.String(r.String()))
 		}
 
-		return newNode(
-			"execute",
-			json.NewField("Command", json.String(node.Command)),
-			json.NewField("Arguments", args),
-			json.NewField("Redirects", redirects),
+		return repr.NewObject(
+			"Execute",
+			repr.NewField("Command", repr.String(node.Command)),
+			repr.NewField("Arguments", args),
+			repr.NewField("Redirects", redirects),
 		)
 	case *shast.Identifier:
-		return newNode(
-			"identifier",
-			json.NewField("Token", json.String(node.Value)),
+		return repr.NewObject(
+			"Identifier",
+			repr.NewField("Token", repr.String(node.Value)),
 		)
 	case *shast.ArithmeticCommand:
 		expression := encodeNode(node.Expression)
-		return newNode(
-			"arithmetic command",
-			json.NewField("Expression", expression),
+		return repr.NewObject(
+			"ArithmeticCommand",
+			repr.NewField("Expression", expression),
 		)
 	case *shast.InfixExpr:
 		left := encodeNode(node.Left)
 		right := encodeNode(node.Right)
-		return newNode(
-			"infix expression",
-			json.NewField("Operator", json.String(node.Operator)),
-			json.NewField("Left", left),
-			json.NewField("Right", right),
+		return repr.NewObject(
+			"InfixExpression",
+			repr.NewField("Operator", repr.String(node.Operator)),
+			repr.NewField("Left", left),
+			repr.NewField("Right", right),
 		)
 	case *shast.GroupExpr:
 		expression := encodeNode(node.Expression)
-		return newNode(
-			"group expression",
-			json.NewField("Expression", expression),
+		return repr.NewObject(
+			"GroupExpression",
+			repr.NewField("Expression", expression),
 		)
 	case *shast.If:
 		test := encodeNode(node.Test)
@@ -99,34 +90,66 @@ func encodeNode(node shast.Node) json.Value {
 		elseIfs := encodeElseIfs(node.ElseIfs)
 		elseBody := encodeStmts(node.ElseStatements)
 
-		return newNode(
-			"if statement",
-			json.NewField("Test", test),
-			json.NewField("Body", body),
-			json.NewField("ElseIfs", elseIfs),
-			json.NewField("ElseBody", elseBody),
+		return repr.NewObject(
+			"IfStatement",
+			repr.NewField("Test", test),
+			repr.NewField("Body", body),
+			repr.NewField("ElseIfs", elseIfs),
+			repr.NewField("ElseBody", elseBody),
 		)
 	case *shast.TestCommand:
 		expression := encodeNode(node.Expression)
-		return newNode(
-			"test statement",
-			json.NewField("Expression", expression),
+		return repr.NewObject(
+			"TestStatement",
+			repr.NewField("Expression", expression),
+		)
+	case *shast.ParamaterExpansion:
+		expression := encodeNode(node.Expression)
+		return repr.NewObject(
+			"ParamaterExpansion",
+			repr.NewField("Expression", expression),
+		)
+	case *shast.ParameterLength:
+		paramater := encodeNode(node.Paramater)
+		return repr.NewObject(
+			"ParamaterLenght",
+			repr.NewField("Paramater", paramater),
+		)
+	case *shast.ParamaterReplace:
+		paramater := encodeNode(node.Paramater)
+		find := encodeNode(node.Find)
+		replace := encodeNode(node.Replace)
+		return repr.NewObject(
+			"ParamaterReplace",
+			repr.NewField("ReplaceAll", repr.Bool(node.ReplaceAll)),
+			repr.NewField("Paramater", paramater),
+			repr.NewField("Find", find),
+			repr.NewField("Replace", replace),
+		)
+	case *shast.ParamaterRemoveFix:
+		paramater := encodeNode(node.Paramater)
+		remove := encodeNode(node.Remove)
+		return repr.NewObject(
+			"ParamaterRemoveFix",
+			repr.NewField("RemovePrefix", repr.Bool(node.RemovePrefix)),
+			repr.NewField("Paramater", paramater),
+			repr.NewField("Remove", remove),
 		)
 	default:
 		panic(fmt.Sprintf("can not encode sh node, unknown node type %T", node))
 	}
 }
 
-// encodeElseIfs encodes a slice of ElseIf nodes into a json.Array
-func encodeElseIfs(elseIfs []shast.ElseIf) json.Array {
-	array := json.Array{}
+// encodeElseIfs encodes a slice of ElseIf nodes into a repr.Array
+func encodeElseIfs(elseIfs []shast.ElseIf) repr.Array {
+	array := repr.Array{}
 	for _, elseIf := range elseIfs {
 		body := encodeStmts(elseIf.Statements)
 		test := encodeNode(elseIf.Test)
-		node := newNode(
-			"elif",
-			json.NewField("Test", test),
-			json.NewField("Body", body),
+		node := repr.NewObject(
+			"Elif",
+			repr.NewField("Test", test),
+			repr.NewField("Body", body),
 		)
 		array.AddValue(node)
 	}
@@ -134,9 +157,9 @@ func encodeElseIfs(elseIfs []shast.ElseIf) json.Array {
 	return array
 }
 
-// encodeExprs encodes a slice of expressions into a json.Array
-func encodeExprs(exprs []shast.Expr) json.Array {
-	array := json.Array{}
+// encodeExprs encodes a slice of expressions into a repr.Array
+func encodeExprs(exprs []shast.Expr) repr.Array {
+	array := repr.Array{}
 	for _, expr := range exprs {
 		node := expr.(shast.Node)
 		encoded := encodeNode(node)
@@ -146,9 +169,9 @@ func encodeExprs(exprs []shast.Expr) json.Array {
 	return array
 }
 
-// encodeStmts encodes a slice of statements into a json.Array
-func encodeStmts(stmts []shast.Stmt) json.Array {
-	array := json.Array{}
+// encodeStmts encodes a slice of statements into a repr.Array
+func encodeStmts(stmts []shast.Stmt) repr.Array {
+	array := repr.Array{}
 	for _, stmt := range stmts {
 		node := stmt.(shast.Node)
 		encoded := encodeNode(node)
