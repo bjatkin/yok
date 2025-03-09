@@ -208,65 +208,26 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 			}, nil
 		}
 	case *yokast.If:
-		// TODO: there are several different functions in here that could be extracted out to simplify the code.
-		c.inTest = true
-
-		testNode, err := c.compileNode(node.Test)
+		test, err := c.complieTestCommand(node.Test)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("failed to compile test for if stmt %v", err))
+			return nil, err
 		}
 
-		c.inTest = false
-
-		test, ok := testNode.(*shast.TestCommand)
-		if !ok {
-			return nil, errors.New("test must be a valid test command")
-		}
-
-		stmts := []shast.Stmt{}
-		for _, yokStmt := range node.Body.Statements {
-			stmtNode, err := c.compileNode(yokStmt)
-			if err != nil {
-				return nil, errors.New(fmt.Sprintf("failed to compile stmt in yok body %v", err))
-			}
-
-			stmt, ok := stmtNode.(shast.Stmt)
-			if !ok {
-				return nil, errors.New("line in body was not a stmt")
-			}
-
-			stmts = append(stmts, stmt)
+		stmts, err := c.compileStatements(node.Body.Statements)
+		if err != nil {
+			return nil, err
 		}
 
 		elseIfs := []shast.ElseIf{}
 		for _, elseIf := range node.ElseIfs {
-			c.inTest = true
-
-			testNode, err := c.compileNode(elseIf.Test)
+			test, err := c.complieTestCommand(elseIf.Test)
 			if err != nil {
-				return nil, errors.New(fmt.Sprintf("failed to compile test for elif stmt %v", err))
+				return nil, err
 			}
 
-			c.inTest = false
-
-			test, ok := testNode.(*shast.TestCommand)
-			if !ok {
-				return nil, errors.New("test must be a valid test command")
-			}
-
-			stmts := []shast.Stmt{}
-			for _, yokStmt := range elseIf.Body.Statements {
-				stmtNode, err := c.compileNode(yokStmt)
-				if err != nil {
-					return nil, errors.New(fmt.Sprintf("failed to complie stmt in elif body %v", err))
-				}
-
-				stmt, ok := stmtNode.(shast.Stmt)
-				if !ok {
-					return nil, errors.New("line in body was not a stmt")
-				}
-
-				stmts = append(stmts, stmt)
+			stmts, err := c.compileStatements(elseIf.Body.Statements)
+			if err != nil {
+				return nil, err
 			}
 
 			elseIfs = append(elseIfs, shast.ElseIf{Test: test, Statements: stmts})
@@ -281,20 +242,9 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 
 		}
 
-		elseStmts := []shast.Stmt{}
-		// TODO: I should probably make a dedicated function for compiling bodies into statement slices
-		for _, yokStmt := range node.ElseBody.Statements {
-			stmtNode, err := c.compileNode(yokStmt)
-			if err != nil {
-				return nil, errors.New(fmt.Sprintf("failed to compile stmt in yok body %v", err))
-			}
-
-			stmt, ok := stmtNode.(shast.Stmt)
-			if !ok {
-				return nil, errors.New("line in body was not a stmt")
-			}
-
-			elseStmts = append(elseStmts, stmt)
+		elseStmts, err := c.compileStatements(node.ElseBody.Statements)
+		if err != nil {
+			return nil, err
 		}
 
 		return &shast.If{
@@ -306,6 +256,45 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 	default:
 		return nil, errors.New(fmt.Sprintf("Unknown node %T", node))
 	}
+}
+
+// compileStatements compiles a slice of yokast.Stmts into a list of shast.Stmts
+func (c *Compiler) compileStatements(statements []yokast.Stmt) ([]shast.Stmt, error) {
+	stmts := []shast.Stmt{}
+	for _, yokStmt := range statements {
+		stmtNode, err := c.compileNode(yokStmt)
+		if err != nil {
+			return nil, errors.New(fmt.Sprintf("failed to complie stmt in elif body %v", err))
+		}
+
+		stmt, ok := stmtNode.(shast.Stmt)
+		if !ok {
+			return nil, errors.New("line in body was not a stmt")
+		}
+
+		stmts = append(stmts, stmt)
+	}
+
+	return stmts, nil
+}
+
+// complieTestCommand complies the given test into an shast.TestCommand
+func (c *Compiler) complieTestCommand(test yokast.Expr) (*shast.TestCommand, error) {
+	c.inTest = true
+
+	testNode, err := c.compileNode(test)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("failed to compile test for if stmt %v", err))
+	}
+
+	c.inTest = false
+
+	testCommand, ok := testNode.(*shast.TestCommand)
+	if !ok {
+		return nil, errors.New("test must be a valid test command")
+	}
+
+	return testCommand, nil
 }
 
 // compileCall compiles a yokast.Call into it's equivilant shast.Node
