@@ -1,0 +1,19 @@
+[
+    Token(Type="comment", Pos=0, Value="# set the subject name"),
+    Token(Type="new_line", Pos=22, Value="\r\n"),
+    Token(Type="let", Pos=24, Value="let"),
+    Token(Type="identifier", Pos=28, Value="subject"),
+    Token(Type="assign", Pos=36, Value="="),
+    Token(Type="atom", Pos=38, Value=":world"),
+    Token(Type="new_line", Pos=44, Value="\r\n"),
+    Token(Type="new_line", Pos=46, Value="\r\n"),
+    Token(Type="comment", Pos=48, Value="# say hello to the subject"),
+    Token(Type="new_line", Pos=74, Value="\r\n"),
+    Token(Type="identifier", Pos=76, Value="print"),
+    Token(Type="open_paren", Pos=81, Value="("),
+    Token(Type="string", Pos=82, Value="\"Hello\""),
+    Token(Type="comma", Pos=89, Value=","),
+    Token(Type="identifier", Pos=91, Value="subject"),
+    Token(Type="close_paren", Pos=98, Value=")"),
+    Token(Type="new_line", Pos=99, Value="\r\n")
+]

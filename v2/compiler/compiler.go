@@ -73,7 +73,9 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 
 		expr, ok := value.(shast.Expr)
 		if !ok {
-			return nil, errors.New("value must be an expression")
+			fmt.Printf("identifier: %#v, %T\n", identifier, identifier)
+			fmt.Printf("value: %#v, %T\n", value, value)
+			return nil, errors.New("assignment value must be an expression")
 		}
 
 		return &shast.Assign{
@@ -88,7 +90,7 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 
 		expr, ok := value.(shast.Expr)
 		if !ok {
-			return nil, errors.New("value must be an expression")
+			return nil, errors.New("statement expression value must be an expression")
 		}
 
 		return &shast.StmtExpr{
@@ -298,7 +300,7 @@ func (c *Compiler) complieTestCommand(test yokast.Expr) (*shast.TestCommand, err
 }
 
 // compileCall compiles a yokast.Call into it's equivilant shast.Node
-func (c *Compiler) compileCall(call *yokast.Call) (shast.Node, error) {
+func (c *Compiler) compileCall(call *yokast.Call) (shast.Expr, error) {
 	command := call.Identifier.Token.Value(c.source)
 	args := []shast.Expr{}
 	for _, arg := range call.Arguments {
@@ -322,32 +324,15 @@ func (c *Compiler) compileCall(call *yokast.Call) (shast.Node, error) {
 			Redirects: []shast.Redirect{{RightFd: "2"}},
 		}, nil
 	case "len":
-		if len(args) != 1 {
-			return nil, errors.New("len() takes only a single argument")
-		}
-		identifier, isIdentifier := args[0].(*shast.Identifier)
-		_, isLiteral := args[0].(*shast.String)
-		if !isIdentifier && !isLiteral {
-			return nil, errors.New("len() takes an identifier or a string literal")
-		}
-
-		if isIdentifier {
-			return &shast.ParameterExpansion{
-				PrefixOperator: "#",
-				Parameter:      identifier,
-			}, nil
-		}
-
-		// TODO: i'll need to grab a temporary var name from a pool so that I don't
-		// end up with any conflicts. Then I'll need to store the string in that
-		// identifier and maybe add that to the AST somehow?
-		// then I'll need to build the ParameterExpansion and return both the
-		// new identifier and the expansion.
-		//
-		// Honestly, this may be a sign that this is the wrong place to do this.
-		// I could do a pass on the yok tree to fix it up for this case.
-		// that would to prevent this from ever happening.
-		return nil, errors.New("len() for string literals is not yet implemented")
+		return compileLen(args)
+	case "replace":
+		return compileReplace(args, false)
+	case "replace_all":
+		return compileReplace(args, true)
+	case "remove_prefix":
+		return compileRemoveFix(args, true)
+	case "remove_suffix":
+		return compileRemoveFix(args, false)
 	default:
 		return &shast.Exec{
 			Command:   command,
@@ -374,4 +359,108 @@ func convertOperator(operator string) string {
 	default:
 		return operator
 	}
+}
+
+// compileLen takes in a list of arguments and complies a call to the len() builtin
+func compileLen(args []shast.Expr) (shast.Expr, error) {
+	stmtSlice := shast.StmtSlice{}
+	if len(args) != 1 {
+		return nil, errors.New("len() takes only a single argument")
+	}
+
+	identifier, ok := args[0].(*shast.Identifier)
+	if !ok {
+		identifier = &shast.Identifier{Value: "_TMP"}
+		stmtSlice.Statements = append(
+			stmtSlice.Statements,
+			&shast.Assign{
+				Identifier: identifier.Value,
+				Value:      args[0],
+			})
+	}
+
+	stmtSlice.Statements = append(
+		stmtSlice.Statements,
+		&shast.StmtExpr{
+			Expression: &shast.ParamaterExpansion{
+				Expression: &shast.ParameterLength{
+					Paramater: *identifier,
+				},
+			},
+		},
+	)
+
+	// TODO: fix this
+	return nil, nil
+}
+
+// compileReplace takes in a list of arguments and compiles a call to the replace() builtin
+func compileReplace(args []shast.Expr, replaceAll bool) (shast.Expr, error) {
+	stmtSlice := shast.StmtSlice{}
+	if len(args) != 3 {
+		return nil, errors.New("replace() takes 3 arguments")
+	}
+	identifier, ok := args[0].(*shast.Identifier)
+	if !ok {
+		identifier = &shast.Identifier{Value: "_TMP"}
+		stmtSlice.Statements = append(
+			stmtSlice.Statements,
+			&shast.Assign{
+				Identifier: identifier.Value,
+				Value:      args[0],
+			},
+		)
+	}
+
+	stmtSlice.Statements = append(
+		stmtSlice.Statements,
+		&shast.StmtExpr{
+			Expression: &shast.ParamaterExpansion{
+				Expression: &shast.ParamaterReplace{
+					ReplaceAll: replaceAll,
+					Paramater:  *identifier,
+					Find:       args[1],
+					Replace:    args[2],
+				},
+			},
+		},
+	)
+
+	// TODO: fix this
+	return nil, nil
+}
+
+// compileRemoveFix takes a list of arguments and compiles a call to the remove_suffix() builtin
+func compileRemoveFix(args []shast.Expr, prefix bool) (shast.Expr, error) {
+	stmtSlice := shast.StmtSlice{}
+	if len(args) != 2 {
+		return nil, errors.New("remove_suffix() takes 3 arguments")
+	}
+	identifier, ok := args[0].(*shast.Identifier)
+	if !ok {
+		identifier = &shast.Identifier{Value: "_TMP"}
+		stmtSlice.Statements = append(
+			stmtSlice.Statements,
+			&shast.Assign{
+				Identifier: identifier.Value,
+				Value:      args[0],
+			},
+		)
+	}
+
+	stmtSlice.Statements = append(
+		stmtSlice.Statements,
+		&shast.StmtExpr{
+			Expression: &shast.ParamaterExpansion{
+				Expression: &shast.ParamaterRemoveFix{
+					RemovePrefix: prefix,
+					Paramater:    *identifier,
+					Remove:       args[1],
+				},
+			},
+		},
+	)
+
+	// TODO: fix this
+	return nil, nil
 }

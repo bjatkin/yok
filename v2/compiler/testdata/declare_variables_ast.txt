@@ -1,0 +1,14 @@
+[
+    Comment(Value="# atom values"),
+    Assign(Identifier="A", Value=String(Value="\"10\"")),
+    Assign(Identifier="B", Value=String(Value="\"20\"")),
+    Assign(Identifier="STATUS", Value=String(Value="\"ok\"")),
+    NewLine(),
+    Comment(Value="# string values"),
+    Assign(Identifier="PET", Value=String(Value="\"dog\"")),
+    Assign(Identifier="COLOR", Value=String(Value="\"red\"")),
+    NewLine(),
+    Comment(Value="# file paths"),
+    Assign(Identifier="MY_FILE", Value=String(Value="\"/my/file.txt\"")),
+    Assign(Identifier="MY_DIR", Value=String(Value="\"my/relative/dir\""))
+]
