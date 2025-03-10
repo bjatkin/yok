@@ -480,22 +480,27 @@ func TestLexFile(t *testing.T) {
 		{
 			name:       "hello world",
 			sourceFile: "hello_world.yok",
-			tokenFile:  "hello_world_tokens.json",
+			tokenFile:  "hello_world_tokens.txt",
 		},
 		{
 			name:       "declare variables",
 			sourceFile: "declare_variables.yok",
-			tokenFile:  "declare_variables_tokens.json",
+			tokenFile:  "declare_variables_tokens.txt",
 		},
 		{
 			name:       "math",
 			sourceFile: "math.yok",
-			tokenFile:  "math_tokens.json",
+			tokenFile:  "math_tokens.txt",
 		},
 		{
 			name:       "if",
 			sourceFile: "if.yok",
-			tokenFile:  "if_tokens.json",
+			tokenFile:  "if_tokens.txt",
+		},
+		{
+			name:       "builtin string functions",
+			sourceFile: "string_builtins.yok",
+			tokenFile:  "string_builtins_tokens.txt",
 		},
 	}
 

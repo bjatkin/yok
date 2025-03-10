@@ -1,0 +1,20 @@
+[
+    Comment(Value="# atom values"),
+    Assign(Identifier=Token(Type="identifier", Pos=19, Value="a"), Value=Atom(Value=":10")),
+    Assign(Identifier=Token(Type="identifier", Pos=32, Value="b"), Value=Atom(Value=":20")),
+    Assign(Identifier=Token(Type="identifier", Pos=45, Value="status"), Value=Atom(Value=":ok")),
+    NewLine(),
+    Comment(Value="# string values"),
+    Assign(Identifier=Token(Type="identifier", Pos=82, Value="pet"), Value=String(Value="\"dog\"")),
+    Assign(Identifier=Token(Type="identifier", Pos=99, Value="color"), Value=String(Value="\"red\"")),
+    NewLine(),
+    Comment(Value="# file paths"),
+    Assign(
+        Identifier=Token(Type="identifier", Pos=134, Value="my_file"),
+        Value=Atom(Value=":/my/file.txt"),
+    ),
+    Assign(
+        Identifier=Token(Type="identifier", Pos=163, Value="my_dir"),
+        Value=Atom(Value=":my/relative/dir"),
+    )
+]

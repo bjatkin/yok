@@ -57,8 +57,50 @@ func generateExpr(expr shast.Expr) string {
 	case *shast.GroupExpr:
 		inner := generateExpr(expr.Expression)
 		return "( " + inner + " )"
+	case *shast.ParamaterExpansion:
+		expression := generateParamaterExpr(expr.Expression)
+		return "${" + expression + "}"
 	default:
 		panic(fmt.Sprintf("can not gen sh code, unknown expr type %T", expr))
+	}
+}
+
+func generateParamaterExpr(expr shast.ParamaterExpr) string {
+	switch expr := expr.(type) {
+	case *shast.ParameterLength:
+		return "#" + expr.Paramater.Value
+	case *shast.ParamaterReplace:
+		find := generateExpr(expr.Find)
+		_, ok := expr.Find.(*shast.String)
+		if !ok {
+			find = fmt.Sprintf("$(echo -n %s)", find)
+		}
+
+		replace := generateExpr(expr.Replace)
+		_, ok = expr.Replace.(*shast.String)
+		if !ok {
+			replace = fmt.Sprintf("$(echo -n %s)", replace)
+		}
+
+		if expr.ReplaceAll {
+			return expr.Paramater.Value + "//" + find + "/" + replace
+		}
+
+		return expr.Paramater.Value + "/" + find + "/" + replace
+	case *shast.ParamaterRemoveFix:
+		remove := generateExpr(expr.Remove)
+		_, ok := expr.Remove.(*shast.String)
+		if !ok {
+			remove = fmt.Sprintf("$(echo -n %s)", remove)
+		}
+
+		if expr.RemovePrefix {
+			return expr.Paramater.Value + "##" + remove
+		}
+
+		return expr.Paramater.Value + "%%" + remove
+	default:
+		panic(fmt.Sprintf("can not get sh code, unknown paramater expr type %T", expr))
 	}
 }
 

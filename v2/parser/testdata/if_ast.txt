@@ -1,0 +1,146 @@
+[
+    Assign(Identifier=Token(Type="identifier", Pos=4, Value="x"), Value=Atom(Value=":10")),
+    Assign(Identifier=Token(Type="identifier", Pos=17, Value="y"), Value=Atom(Value=":20")),
+    Assign(Identifier=Token(Type="identifier", Pos=30, Value="z"), Value=Atom(Value=":30")),
+    NewLine(),
+    IfStatement(
+        Test=InfixExpression(
+            Operator=Token(Type="greater_than", Pos=46, Value=">"),
+            Left=Identifier(Token=Token(Type="identifier", Pos=44, Value="x")),
+            Right=Atom(Value=":0"),
+        ),
+        Body=Block(
+            Statements=[
+                FunctionCall(
+                    Identifier=Identifier(Token=Token(Type="identifier", Pos=58, Value="print")),
+                    Arguments=[ String(Value="\"x is positive\"") ],
+                ),
+                IfStatement(
+                    Test=InfixExpression(
+                        Operator=Token(Type="equal_equal", Pos=91, Value="=="),
+                        Left=Identifier(Token=Token(Type="identifier", Pos=89, Value="y")),
+                        Right=Atom(Value=":20"),
+                    ),
+                    Body=Block(
+                        Statements=[
+                            FunctionCall(
+                                Identifier=Identifier(Token=Token(Type="identifier", Pos=109, Value="print")),
+                                Arguments=[ String(Value="\"y is 20\"") ],
+                            ),
+                            IfStatement(
+                                Test=InfixExpression(
+                                    Operator=Token(Type="not_equal", Pos=140, Value="!="),
+                                    Left=Identifier(Token=Token(Type="identifier", Pos=138, Value="z")),
+                                    Right=Identifier(Token=Token(Type="identifier", Pos=143, Value="x")),
+                                ),
+                                Body=Block(
+                                    Statements=[
+                                        FunctionCall(
+                                            Identifier=Identifier(
+                                                Token=Token(Type="identifier", Pos=160, Value="print"),
+                                            ),
+                                            Arguments=[ String(Value="\"z does not equal x\"") ],
+                                        )
+                                    ],
+                                ),
+                                ElseIfs=[],
+                                ElseBody=nil,
+                            )
+                        ],
+                    ),
+                    ElseIfs=[],
+                    ElseBody=nil,
+                )
+            ],
+        ),
+        ElseIfs=[],
+        ElseBody=Block(
+            Statements=[
+                FunctionCall(
+                    Identifier=Identifier(Token=Token(Type="identifier", Pos=221, Value="print")),
+                    Arguments=[ String(Value="\"x is negative or zero\"") ],
+                ),
+                IfStatement(
+                    Test=InfixExpression(
+                        Operator=Token(Type="not_equal", Pos=262, Value="!="),
+                        Left=Identifier(Token=Token(Type="identifier", Pos=260, Value="y")),
+                        Right=Atom(Value=":20"),
+                    ),
+                    Body=Block(
+                        Statements=[
+                            FunctionCall(
+                                Identifier=Identifier(Token=Token(Type="identifier", Pos=280, Value="print")),
+                                Arguments=[ String(Value="\"y is not 20\"") ],
+                            )
+                        ],
+                    ),
+                    ElseIfs=[],
+                    ElseBody=Block(
+                        Statements=[
+                            FunctionCall(
+                                Identifier=Identifier(Token=Token(Type="identifier", Pos=324, Value="print")),
+                                Arguments=[ String(Value="\"y is still 20\"") ],
+                            )
+                        ],
+                    ),
+                )
+            ],
+        ),
+    ),
+    NewLine(),
+    IfStatement(
+        Test=InfixExpression(
+            Operator=Token(Type="less_than", Pos=365, Value="<"),
+            Left=Identifier(Token=Token(Type="identifier", Pos=363, Value="x")),
+            Right=Atom(Value=":0"),
+        ),
+        Body=Block(
+            Statements=[
+                FunctionCall(
+                    Identifier=Identifier(Token=Token(Type="identifier", Pos=377, Value="print")),
+                    Arguments=[ String(Value="\"x is negative\"") ],
+                )
+            ],
+        ),
+        ElseIfs=[
+            ElseIf(
+                Test=InfixExpression(
+                    Operator=Token(Type="greater_than", Pos=413, Value=">"),
+                    Left=Identifier(Token=Token(Type="identifier", Pos=411, Value="x")),
+                    Right=Atom(Value=":1"),
+                ),
+                Body=Block(
+                    Statements=[
+                        FunctionCall(
+                            Identifier=Identifier(Token=Token(Type="identifier", Pos=425, Value="print")),
+                            Arguments=[ String(Value="\"x is positive\"") ],
+                        )
+                    ],
+                ),
+            ),
+            ElseIf(
+                Test=InfixExpression(
+                    Operator=Token(Type="equal_equal", Pos=461, Value="=="),
+                    Left=Identifier(Token=Token(Type="identifier", Pos=459, Value="x")),
+                    Right=Atom(Value=":1"),
+                ),
+                Body=Block(
+                    Statements=[
+                        FunctionCall(
+                            Identifier=Identifier(Token=Token(Type="identifier", Pos=474, Value="print")),
+                            Arguments=[ String(Value="\"x is one\"") ],
+                        )
+                    ],
+                ),
+            )
+        ],
+        ElseBody=Block(
+            Statements=[
+                FunctionCall(
+                    Identifier=Identifier(Token=Token(Type="identifier", Pos=507, Value="print")),
+                    Arguments=[ String(Value="\"x is zero\"") ],
+                )
+            ],
+        ),
+    )
+]

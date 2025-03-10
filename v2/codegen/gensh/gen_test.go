@@ -36,6 +36,11 @@ func TestGenerate(t *testing.T) {
 			yokFile: "if.yok",
 			shFile:  "if.sh",
 		},
+		{
+			name:    "builtin string functions",
+			yokFile: "string_builtins.yok",
+			shFile:  "string_builtins.sh",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

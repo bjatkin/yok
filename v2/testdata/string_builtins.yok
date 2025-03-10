@@ -1,0 +1,6 @@
+let greet = "hello world"
+let greet_len = len(greet)
+let greet_friend = replace(greet, "world", "friend")
+let strange_greeting = replace_all(greet, "l", "i")
+let place = remove_prefix(greet, "hello ")
+let short_greet = remove_suffix(greet, " world")
