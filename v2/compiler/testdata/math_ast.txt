@@ -1,0 +1,44 @@
+[
+    Assign(
+        Identifier="A",
+        Value=ArithmeticCommand(
+            Expression=InfixExpression(Operator="+", Left=String(Value="\"5\""), Right=String(Value="\"10\"")),
+        ),
+    ),
+    Assign(
+        Identifier="B",
+        Value=ArithmeticCommand(
+            Expression=InfixExpression(Operator="-", Left=String(Value="\"10\""), Right=String(Value="\"15\"")),
+        ),
+    ),
+    Assign(
+        Identifier="C",
+        Value=ArithmeticCommand(
+            Expression=InfixExpression(Operator="*", Left=String(Value="\"15\""), Right=String(Value="\"20\"")),
+        ),
+    ),
+    Assign(
+        Identifier="D",
+        Value=ArithmeticCommand(
+            Expression=InfixExpression(Operator="/", Left=String(Value="\"20\""), Right=String(Value="\"10\"")),
+        ),
+    ),
+    Assign(
+        Identifier="E",
+        Value=ArithmeticCommand(
+            Expression=InfixExpression(Operator="%", Left=String(Value="\"10\""), Right=String(Value="\"15\"")),
+        ),
+    ),
+    Assign(
+        Identifier="F",
+        Value=ArithmeticCommand(
+            Expression=InfixExpression(
+                Operator="*",
+                Left=GroupExpression(
+                    Expression=InfixExpression(Operator="+", Left=String(Value="\"1\""), Right=String(Value="\"2\"")),
+                ),
+                Right=String(Value="\"3\""),
+            ),
+        ),
+    )
+]

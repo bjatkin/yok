@@ -17,22 +17,27 @@ func TestParser_Parse(t *testing.T) {
 		{
 			name:       "hello world",
 			sourceFile: "hello_world.yok",
-			astFile:    "hello_world_ast.json",
+			astFile:    "hello_world_ast.txt",
 		},
 		{
 			name:       "declare variables",
 			sourceFile: "declare_variables.yok",
-			astFile:    "declare_variables_ast.json",
+			astFile:    "declare_variables_ast.txt",
 		},
 		{
 			name:       "math variables",
 			sourceFile: "math.yok",
-			astFile:    "math_ast.json",
+			astFile:    "math_ast.txt",
 		},
 		{
 			name:       "if",
 			sourceFile: "if.yok",
-			astFile:    "if_ast.json",
+			astFile:    "if_ast.txt",
+		},
+		{
+			name:       "builtin string functions",
+			sourceFile: "string_builtins.yok",
+			astFile:    "string_builtins_ast.txt",
 		},
 	}
 	for _, tt := range tests {

@@ -1,0 +1,49 @@
+[
+    Assign(Identifier="GREET", Value=String(Value="\"hello world\"")),
+    Assign(
+        Identifier="GREET_LEN",
+        Value=ParamaterExpansion(Expression=ParamaterLenght(Paramater=Identifier(Token="GREET"))),
+    ),
+    Assign(
+        Identifier="GREET_FRIEND",
+        Value=ParamaterExpansion(
+            Expression=ParamaterReplace(
+                ReplaceAll=false,
+                Paramater=Identifier(Token="GREET"),
+                Find=String(Value="\"world\""),
+                Replace=String(Value="\"friend\""),
+            ),
+        ),
+    ),
+    Assign(
+        Identifier="STRANGE_GREETING",
+        Value=ParamaterExpansion(
+            Expression=ParamaterReplace(
+                ReplaceAll=true,
+                Paramater=Identifier(Token="GREET"),
+                Find=String(Value="\"l\""),
+                Replace=String(Value="\"i\""),
+            ),
+        ),
+    ),
+    Assign(
+        Identifier="PLACE",
+        Value=ParamaterExpansion(
+            Expression=ParamaterRemoveFix(
+                RemovePrefix=true,
+                Paramater=Identifier(Token="GREET"),
+                Remove=String(Value="\"hello \""),
+            ),
+        ),
+    ),
+    Assign(
+        Identifier="SHORT_GREET",
+        Value=ParamaterExpansion(
+            Expression=ParamaterRemoveFix(
+                RemovePrefix=false,
+                Paramater=Identifier(Token="GREET"),
+                Remove=String(Value="\" world\""),
+            ),
+        ),
+    )
+]

@@ -1,0 +1,120 @@
+[
+    Assign(Identifier="X", Value=String(Value="\"10\"")),
+    Assign(Identifier="Y", Value=String(Value="\"20\"")),
+    Assign(Identifier="Z", Value=String(Value="\"30\"")),
+    NewLine(),
+    IfStatement(
+        Test=TestStatement(
+            Expression=InfixExpression(Operator="-gt", Left=Identifier(Token="X"), Right=String(Value="\"0\"")),
+        ),
+        Body=[
+            Execute(
+                Command="echo",
+                Arguments=[ String(Value="\"x is positive\"") ],
+                Redirects=[ ">&2" ],
+            ),
+            IfStatement(
+                Test=TestStatement(
+                    Expression=InfixExpression(Operator="=", Left=Identifier(Token="Y"), Right=String(Value="\"20\"")),
+                ),
+                Body=[
+                    Execute(
+                        Command="echo",
+                        Arguments=[ String(Value="\"y is 20\"") ],
+                        Redirects=[ ">&2" ],
+                    ),
+                    IfStatement(
+                        Test=TestStatement(
+                            Expression=InfixExpression(
+                                Operator="!=",
+                                Left=Identifier(Token="Z"),
+                                Right=Identifier(Token="X"),
+                            ),
+                        ),
+                        Body=[
+                            Execute(
+                                Command="echo",
+                                Arguments=[ String(Value="\"z does not equal x\"") ],
+                                Redirects=[ ">&2" ],
+                            )
+                        ],
+                        ElseIfs=[],
+                        ElseBody=[],
+                    )
+                ],
+                ElseIfs=[],
+                ElseBody=[],
+            )
+        ],
+        ElseIfs=[],
+        ElseBody=[
+            Execute(
+                Command="echo",
+                Arguments=[ String(Value="\"x is negative or zero\"") ],
+                Redirects=[ ">&2" ],
+            ),
+            IfStatement(
+                Test=TestStatement(
+                    Expression=InfixExpression(Operator="!=", Left=Identifier(Token="Y"), Right=String(Value="\"20\"")),
+                ),
+                Body=[
+                    Execute(
+                        Command="echo",
+                        Arguments=[ String(Value="\"y is not 20\"") ],
+                        Redirects=[ ">&2" ],
+                    )
+                ],
+                ElseIfs=[],
+                ElseBody=[
+                    Execute(
+                        Command="echo",
+                        Arguments=[ String(Value="\"y is still 20\"") ],
+                        Redirects=[ ">&2" ],
+                    )
+                ],
+            )
+        ],
+    ),
+    NewLine(),
+    IfStatement(
+        Test=TestStatement(
+            Expression=InfixExpression(Operator="-lt", Left=Identifier(Token="X"), Right=String(Value="\"0\"")),
+        ),
+        Body=[
+            Execute(
+                Command="echo",
+                Arguments=[ String(Value="\"x is negative\"") ],
+                Redirects=[ ">&2" ],
+            )
+        ],
+        ElseIfs=[
+            Elif(
+                Test=TestStatement(
+                    Expression=InfixExpression(Operator="-gt", Left=Identifier(Token="X"), Right=String(Value="\"1\"")),
+                ),
+                Body=[
+                    Execute(
+                        Command="echo",
+                        Arguments=[ String(Value="\"x is positive\"") ],
+                        Redirects=[ ">&2" ],
+                    )
+                ],
+            ),
+            Elif(
+                Test=TestStatement(
+                    Expression=InfixExpression(Operator="=", Left=Identifier(Token="X"), Right=String(Value="\"1\"")),
+                ),
+                Body=[
+                    Execute(
+                        Command="echo",
+                        Arguments=[ String(Value="\"x is one\"") ],
+                        Redirects=[ ">&2" ],
+                    )
+                ],
+            )
+        ],
+        ElseBody=[
+            Execute(Command="echo", Arguments=[ String(Value="\"x is zero\"") ], Redirects=[ ">&2" ])
+        ],
+    )
+]

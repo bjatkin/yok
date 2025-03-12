@@ -73,7 +73,7 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 
 		expr, ok := value.(shast.Expr)
 		if !ok {
-			return nil, errors.New("value must be an expression")
+			return nil, errors.New("assignment value must be an expression")
 		}
 
 		return &shast.Assign{
@@ -88,7 +88,7 @@ func (c *Compiler) compileNode(node yokast.Node) (shast.Node, error) {
 
 		expr, ok := value.(shast.Expr)
 		if !ok {
-			return nil, errors.New("value must be an expression")
+			return nil, errors.New("statement expression value must be an expression")
 		}
 
 		return &shast.StmtExpr{
@@ -298,7 +298,7 @@ func (c *Compiler) complieTestCommand(test yokast.Expr) (*shast.TestCommand, err
 }
 
 // compileCall compiles a yokast.Call into it's equivilant shast.Node
-func (c *Compiler) compileCall(call *yokast.Call) (shast.Node, error) {
+func (c *Compiler) compileCall(call *yokast.Call) (shast.Expr, error) {
 	command := call.Identifier.Token.Value(c.source)
 	args := []shast.Expr{}
 	for _, arg := range call.Arguments {
@@ -321,6 +321,16 @@ func (c *Compiler) compileCall(call *yokast.Call) (shast.Node, error) {
 			Arguments: args,
 			Redirects: []shast.Redirect{{RightFd: "2"}},
 		}, nil
+	case "len":
+		return compileLen(args)
+	case "replace":
+		return compileReplace(args, false)
+	case "replace_all":
+		return compileReplace(args, true)
+	case "remove_prefix":
+		return compileRemoveFix(args, true)
+	case "remove_suffix":
+		return compileRemoveFix(args, false)
 	default:
 		return &shast.Exec{
 			Command:   command,
@@ -347,4 +357,80 @@ func convertOperator(operator string) string {
 	default:
 		return operator
 	}
+}
+
+// compileLen takes in a list of arguments and complies a call to the len() builtin
+func compileLen(args []shast.Expr) (shast.Expr, error) {
+	if len(args) != 1 {
+		return nil, errors.New("len() takes only a single argument")
+	}
+
+	identifier, ok := args[0].(*shast.Identifier)
+	if !ok {
+		return nil, errors.New("len() only supports identifiers")
+	}
+
+	// TODO: fix this to support expressions other than identifiers
+	return &shast.ParamaterExpansion{
+		Expression: &shast.ParameterLength{
+			Paramater: identifier,
+		},
+	}, nil
+}
+
+// compileReplace takes in a list of arguments and compiles a call to the replace() builtin
+func compileReplace(args []shast.Expr, replaceAll bool) (shast.Expr, error) {
+	if len(args) != 3 {
+		return nil, errors.New("replace() takes 3 arguments")
+	}
+
+	identifier, ok := args[0].(*shast.Identifier)
+	if !ok {
+		return nil, errors.New("replace() first argument must be an identifier")
+	}
+
+	find, ok := args[1].(*shast.String)
+	if !ok {
+		return nil, errors.New("replace() second argument must be a string")
+	}
+
+	replace, ok := args[2].(*shast.String)
+	if !ok {
+		return nil, errors.New("replace() third arguments must be a string")
+	}
+
+	return &shast.ParamaterExpansion{
+		Expression: &shast.ParamaterReplace{
+			ReplaceAll: replaceAll,
+			Paramater:  identifier,
+			Find:       find,
+			Replace:    replace,
+		},
+	}, nil
+
+}
+
+// compileRemoveFix takes a list of arguments and compiles a call to the remove_suffix() builtin
+func compileRemoveFix(args []shast.Expr, prefix bool) (shast.Expr, error) {
+	if len(args) != 2 {
+		return nil, errors.New("remove_suffix() takes 2 arguments")
+	}
+
+	identifier, ok := args[0].(*shast.Identifier)
+	if !ok {
+		return nil, errors.New("remove_suffix() first argument must be an identifier")
+	}
+
+	remove, ok := args[1].(*shast.String)
+	if !ok {
+		return nil, errors.New("remove_suffix() second argument must be string")
+	}
+
+	return &shast.ParamaterExpansion{
+		Expression: &shast.ParamaterRemoveFix{
+			RemovePrefix: prefix,
+			Paramater:    identifier,
+			Remove:       remove,
+		},
+	}, nil
 }

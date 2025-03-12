@@ -1,0 +1,55 @@
+[
+    Assign(
+        Identifier=Token(Type="identifier", Pos=4, Value="greet"),
+        Value=String(Value="\"hello world\""),
+    ),
+    Assign(
+        Identifier=Token(Type="identifier", Pos=30, Value="greet_len"),
+        Value=FunctionCall(
+            Identifier=Identifier(Token=Token(Type="identifier", Pos=42, Value="len")),
+            Arguments=[ Identifier(Token=Token(Type="identifier", Pos=46, Value="greet")) ],
+        ),
+    ),
+    Assign(
+        Identifier=Token(Type="identifier", Pos=57, Value="greet_friend"),
+        Value=FunctionCall(
+            Identifier=Identifier(Token=Token(Type="identifier", Pos=72, Value="replace")),
+            Arguments=[
+                Identifier(Token=Token(Type="identifier", Pos=80, Value="greet")),
+                String(Value="\"world\""),
+                String(Value="\"friend\"")
+            ],
+        ),
+    ),
+    Assign(
+        Identifier=Token(Type="identifier", Pos=110, Value="strange_greeting"),
+        Value=FunctionCall(
+            Identifier=Identifier(Token=Token(Type="identifier", Pos=129, Value="replace_all")),
+            Arguments=[
+                Identifier(Token=Token(Type="identifier", Pos=141, Value="greet")),
+                String(Value="\"l\""),
+                String(Value="\"i\"")
+            ],
+        ),
+    ),
+    Assign(
+        Identifier=Token(Type="identifier", Pos=162, Value="place"),
+        Value=FunctionCall(
+            Identifier=Identifier(Token=Token(Type="identifier", Pos=170, Value="remove_prefix")),
+            Arguments=[
+                Identifier(Token=Token(Type="identifier", Pos=184, Value="greet")),
+                String(Value="\"hello \"")
+            ],
+        ),
+    ),
+    Assign(
+        Identifier=Token(Type="identifier", Pos=205, Value="short_greet"),
+        Value=FunctionCall(
+            Identifier=Identifier(Token=Token(Type="identifier", Pos=219, Value="remove_suffix")),
+            Arguments=[
+                Identifier(Token=Token(Type="identifier", Pos=233, Value="greet")),
+                String(Value="\" world\"")
+            ],
+        ),
+    )
+]
