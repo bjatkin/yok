@@ -54,7 +54,7 @@ func encodeScript(script *yokast.Script, source []byte) string {
 func encodeNode(node yokast.Node, source []byte) repr.Value {
 	switch node := node.(type) {
 	case *yokast.Comment:
-		safeValue := strings.ReplaceAll(node.Value, "\"", "\\\"")
+		safeValue := strings.ReplaceAll(node.Token.Value(source), "\"", "\\\"")
 		return repr.NewObject(
 			"Comment",
 			repr.NewField("Value", repr.String(safeValue)),
@@ -72,7 +72,7 @@ func encodeNode(node yokast.Node, source []byte) repr.Value {
 	case *yokast.StmtExpr:
 		return encodeNode(node.Expression, source)
 	case *yokast.String:
-		safeValue := strings.ReplaceAll(node.Value, "\"", "\\\"")
+		safeValue := strings.ReplaceAll(node.Token.Value(source), "\"", "\\\"")
 		return repr.NewObject(
 			"String",
 			repr.NewField("Value", repr.String(safeValue)),
@@ -80,7 +80,7 @@ func encodeNode(node yokast.Node, source []byte) repr.Value {
 	case *yokast.Atom:
 		return repr.NewObject(
 			"Atom",
-			repr.NewField("Value", repr.String(node.Value)),
+			repr.NewField("Value", repr.String(node.Token.Value(source))),
 		)
 	case *yokast.Call:
 		identifier := encodeNode(node.Identifier, source)

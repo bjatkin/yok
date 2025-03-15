@@ -24,7 +24,7 @@ type Script struct {
 // Comment is a line comment
 type Comment struct {
 	Stmt
-	Value string
+	Token token.Token
 }
 
 // NewLine is a solo new line
@@ -72,17 +72,13 @@ type Expr interface {
 // String is a string literal
 type String struct {
 	Expr
-	// TODO: should these be copied strings?
-	// It would be faster to just have these point to a tokens location.
-	Value string
+	Token token.Token
 }
 
 // Atom is an atom
 type Atom struct {
 	Expr
-	// TODO: should these be copied strings?
-	// It would be faster to just have these point to a tokens location.
-	Value string
+	Token token.Token
 }
 
 // Call is a call expression

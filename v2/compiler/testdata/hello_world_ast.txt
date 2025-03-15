@@ -5,7 +5,7 @@
     Comment(Value="# say hello to the subject"),
     Execute(
         Command="echo",
-        Arguments=[ String(Value="\"Hello\""), Identifier(Token="SUBJECT") ],
+        Arguments=[ String(Value="\"Hello\""), Identifier(Token="SUBJECT", Quoted=false) ],
         Redirects=[ ">&2" ],
     )
 ]

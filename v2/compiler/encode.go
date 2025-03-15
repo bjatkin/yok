@@ -62,6 +62,7 @@ func encodeNode(node shast.Node) repr.Value {
 		return repr.NewObject(
 			"Identifier",
 			repr.NewField("Token", repr.String(node.Value)),
+			repr.NewField("Quoted", repr.Bool(node.Quoted)),
 		)
 	case *shast.ArithmeticCommand:
 		expression := encodeNode(node.Expression)

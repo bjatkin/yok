@@ -5,7 +5,11 @@
     NewLine(),
     IfStatement(
         Test=TestStatement(
-            Expression=InfixExpression(Operator="-gt", Left=Identifier(Token="X"), Right=String(Value="\"0\"")),
+            Expression=InfixExpression(
+                Operator="-gt",
+                Left=Identifier(Token="X", Quoted=true),
+                Right=String(Value="\"0\""),
+            ),
         ),
         Body=[
             Execute(
@@ -15,7 +19,11 @@
             ),
             IfStatement(
                 Test=TestStatement(
-                    Expression=InfixExpression(Operator="=", Left=Identifier(Token="Y"), Right=String(Value="\"20\"")),
+                    Expression=InfixExpression(
+                        Operator="=",
+                        Left=Identifier(Token="Y", Quoted=true),
+                        Right=String(Value="\"20\""),
+                    ),
                 ),
                 Body=[
                     Execute(
@@ -27,8 +35,8 @@
                         Test=TestStatement(
                             Expression=InfixExpression(
                                 Operator="!=",
-                                Left=Identifier(Token="Z"),
-                                Right=Identifier(Token="X"),
+                                Left=Identifier(Token="Z", Quoted=true),
+                                Right=Identifier(Token="X", Quoted=true),
                             ),
                         ),
                         Body=[
@@ -55,7 +63,11 @@
             ),
             IfStatement(
                 Test=TestStatement(
-                    Expression=InfixExpression(Operator="!=", Left=Identifier(Token="Y"), Right=String(Value="\"20\"")),
+                    Expression=InfixExpression(
+                        Operator="!=",
+                        Left=Identifier(Token="Y", Quoted=true),
+                        Right=String(Value="\"20\""),
+                    ),
                 ),
                 Body=[
                     Execute(
@@ -78,7 +90,11 @@
     NewLine(),
     IfStatement(
         Test=TestStatement(
-            Expression=InfixExpression(Operator="-lt", Left=Identifier(Token="X"), Right=String(Value="\"0\"")),
+            Expression=InfixExpression(
+                Operator="-lt",
+                Left=Identifier(Token="X", Quoted=true),
+                Right=String(Value="\"0\""),
+            ),
         ),
         Body=[
             Execute(
@@ -90,7 +106,11 @@
         ElseIfs=[
             Elif(
                 Test=TestStatement(
-                    Expression=InfixExpression(Operator="-gt", Left=Identifier(Token="X"), Right=String(Value="\"1\"")),
+                    Expression=InfixExpression(
+                        Operator="-gt",
+                        Left=Identifier(Token="X", Quoted=true),
+                        Right=String(Value="\"1\""),
+                    ),
                 ),
                 Body=[
                     Execute(
@@ -102,7 +122,11 @@
             ),
             Elif(
                 Test=TestStatement(
-                    Expression=InfixExpression(Operator="=", Left=Identifier(Token="X"), Right=String(Value="\"1\"")),
+                    Expression=InfixExpression(
+                        Operator="=",
+                        Left=Identifier(Token="X", Quoted=true),
+                        Right=String(Value="\"1\""),
+                    ),
                 ),
                 Body=[
                     Execute(

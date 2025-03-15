@@ -40,12 +40,6 @@ type Assign struct {
 	Value      Expr
 }
 
-// TestCommand is the sh test command
-type TestCommand struct {
-	Stmt
-	Expression Expr
-}
-
 // If is an sh if statement
 type If struct {
 	Stmt
@@ -106,8 +100,14 @@ type Exec struct {
 // Identifier is a sh identifier
 type Identifier struct {
 	Expr
-	AsString bool
-	Value    string
+	Quoted bool
+	Value  string
+}
+
+// TestCommand is the sh test command
+type TestCommand struct {
+	Expr
+	Expression Expr
 }
 
 // ArithmeticCommand represents an arithmetic expression in sh
