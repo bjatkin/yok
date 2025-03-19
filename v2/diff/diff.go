@@ -7,6 +7,10 @@ import (
 	"testing"
 )
 
+type Diff struct {
+	lines []line
+}
+
 // AgainstFile is a testing helper function that takes the got string and want file
 // and diffs the got string against the contents of the want file.
 // if got and want are the same an empty string is returned
@@ -24,7 +28,8 @@ func AgainstFile(t *testing.T, got, wantFilePath string) string {
 		return ""
 	}
 
-	return Lines(got, want)
+	diff := NewDiff(got, want)
+	return PrettyPrint(diff)
 }
 
 // UpdateFile updates the want file to match the got file contents.
@@ -39,40 +44,157 @@ func UpdateFile(t *testing.T, got, wantFilePath string) {
 	t.Errorf("File Successfully updated, please remove UpdateFile()")
 }
 
-// Lines takes got and want, splits them into lines and combines them into
-// a nice diff using colors and line numbers
-func Lines(got, want string) string {
-	gotLines := strings.Split(got, "\n")
-	wantLines := strings.Split(want, "\n")
-	lines := max(len(gotLines), len(wantLines))
+// lineStatus is the status of the line diff
+type lineStatus int
 
-	diff := []string{}
-	for i := 0; i < lines; i++ {
-		a := "\033[3m[empty\033[0m \033[3mline]\033[0m"
-		b := "\033[3m[empty\033[0m \033[3mline]\033[0m"
-		if len(gotLines) > i {
-			a = gotLines[i]
-		}
-		if len(wantLines) > i {
-			b = wantLines[i]
-		}
+const (
+	match = lineStatus(iota)
+	added
+	removed
+	modified
+)
 
-		a = strings.ReplaceAll(a, " ", "\033[90m·\033[0m")
-		b = strings.ReplaceAll(b, " ", "\033[90m·\033[0m")
-		a = strings.ReplaceAll(a, "\t", "\033[90m↦\033[0m")
-		b = strings.ReplaceAll(b, "\t", "\033[90m↦\033[0m")
+// line is a line in the diff
+type line struct {
+	number  int
+	content string
+	status  lineStatus
+}
 
-		if a == b {
-			a = fmt.Sprintf("\033[90m%3d\033[0m %s", i+1, a)
-			diff = append(diff, a)
+// toLines converts a string into diff lines
+func toLines(s string) []line {
+	splitLines := strings.Split(s, "\n")
+	lines := []line{}
+	for i, l := range splitLines {
+		lines = append(lines, line{number: i + 1, content: l})
+	}
+
+	return lines
+}
+
+// NewDiff creates a new diff from two strings
+func NewDiff(got, want string) Diff {
+	gotLines := toLines(got)
+	wantLines := toLines(want)
+
+	offset := 0
+	combined := []line{}
+	for i := range gotLines {
+		a := gotLines[i]
+
+		if i+offset >= len(wantLines) {
+			a.status = added
+			combined = append(combined, a)
 			continue
 		}
 
-		a = fmt.Sprintf("\033[90m%3d    \033[0m \033[31;1m got\033[0m %s", i+1, a)
-		diff = append(diff, a)
-		b = fmt.Sprintf("\033[90m    %3d\033[0m \033[32;1mwant\033[0m %s", i+1, b)
-		diff = append(diff, "\033[32m"+b+"\033[0m")
+		b := wantLines[i+offset]
+		if a == b {
+			combined = append(combined, a)
+			continue
+		}
+
+		// look for the got line in the remaining wantLines
+		// if we can find it, then the lines we skipped were removed
+		found := findMatchingLine(a, wantLines[i+offset:])
+		for j := 0; j < found; j++ {
+			b := wantLines[i+j+offset]
+			b.status = removed
+			combined = append(combined, b)
+		}
+		if found != -1 {
+			combined = append(combined, a)
+			offset += found
+			continue
+		}
+
+		// look for the want line in the remaining gotLines
+		// if we can find it, then the current line is a newly added
+		found = findMatchingLine(b, gotLines[i:])
+		if found != -1 {
+			a.status = added
+			combined = append(combined, a)
+			offset -= 1
+			continue
+		}
+
+		// if the line isn't added or deleted, it's modified
+		a.status = modified
+		combined = append(combined, a)
+		b.status = modified
+		combined = append(combined, b)
 	}
 
-	return strings.Join(diff, "\n")
+	for i := offset + len(gotLines); i < len(wantLines); i++ {
+		b := wantLines[i]
+		b.status = removed
+		combined = append(combined, b)
+	}
+
+	return Diff{lines: combined}
+}
+
+// findMatchingLine searches in search to find want. If it can't be found it returns -1
+func findMatchingLine(want line, search []line) int {
+	for i, s := range search {
+		if want.content == s.content {
+			return i
+		}
+	}
+
+	return -1
+}
+
+// PrettyPrint converts the diff into a colored string
+func PrettyPrint(diff Diff) string {
+	diffs := []string{}
+	for _, line := range diff.lines {
+		s := fmt.Sprintf("%03d    %s", line.number, line.content)
+		switch line.status {
+		case match:
+			s = colorLine(s, 250, 235)
+		case added:
+			s = colorLine(s, 28, 22)
+		case removed:
+			s = colorLine(s, 160, 52)
+		case modified:
+			s = colorLine(s, 226, 235)
+		}
+
+		diffs = append(diffs, s)
+	}
+
+	return strings.Join(diffs, "\n")
+}
+
+// colorLine colors the line with primaryColors for regular characters and
+// the secondaryColor for space characters
+// https://gist.github.com/fnky/458719343aabd01cfb17a3a4f7296797
+func colorLine(line string, primaryColor, secondaryColor int) string {
+	newLine := ""
+	color := false
+	for _, r := range line {
+		switch r {
+		case ' ':
+			if color {
+				newLine += fmt.Sprintf("\033[0m\033[38;5;%dm", secondaryColor)
+			}
+			color = false
+			newLine += "·"
+		case '\t':
+			if color {
+				newLine += fmt.Sprintf("\033[0m\033[38;5;%dm", secondaryColor)
+			}
+			color = false
+			newLine += "■■■■"
+		default:
+			if !color {
+				newLine += fmt.Sprintf("\033[0m\033[38;5;%dm", primaryColor)
+			}
+			color = true
+			newLine += string(r)
+		}
+	}
+
+	return newLine[4:] + "\033[0m"
 }

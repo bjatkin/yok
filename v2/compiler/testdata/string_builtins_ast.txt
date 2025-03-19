@@ -2,14 +2,14 @@
     Assign(Identifier="GREET", Value=String(Value="\"hello world\"")),
     Assign(
         Identifier="GREET_LEN",
-        Value=ParamaterExpansion(Expression=ParamaterLenght(Paramater=Identifier(Token="GREET"))),
+        Value=ParamaterExpansion(Expression=ParamaterLenght(Paramater=Identifier(Token="GREET", Quoted=false))),
     ),
     Assign(
         Identifier="GREET_FRIEND",
         Value=ParamaterExpansion(
             Expression=ParamaterReplace(
                 ReplaceAll=false,
-                Paramater=Identifier(Token="GREET"),
+                Paramater=Identifier(Token="GREET", Quoted=false),
                 Find=String(Value="\"world\""),
                 Replace=String(Value="\"friend\""),
             ),
@@ -20,7 +20,7 @@
         Value=ParamaterExpansion(
             Expression=ParamaterReplace(
                 ReplaceAll=true,
-                Paramater=Identifier(Token="GREET"),
+                Paramater=Identifier(Token="GREET", Quoted=false),
                 Find=String(Value="\"l\""),
                 Replace=String(Value="\"i\""),
             ),
@@ -31,7 +31,7 @@
         Value=ParamaterExpansion(
             Expression=ParamaterRemoveFix(
                 RemovePrefix=true,
-                Paramater=Identifier(Token="GREET"),
+                Paramater=Identifier(Token="GREET", Quoted=false),
                 Remove=String(Value="\"hello \""),
             ),
         ),
@@ -41,7 +41,7 @@
         Value=ParamaterExpansion(
             Expression=ParamaterRemoveFix(
                 RemovePrefix=false,
-                Paramater=Identifier(Token="GREET"),
+                Paramater=Identifier(Token="GREET", Quoted=false),
                 Remove=String(Value="\" world\""),
             ),
         ),

@@ -42,7 +42,7 @@ func generateExpr(expr shast.Expr) string {
 
 		return expr.Command + " " + strings.Join(args, " ")
 	case *shast.Identifier:
-		if expr.AsString {
+		if expr.Quoted {
 			return "\"$" + expr.Value + "\""
 		}
 
@@ -60,6 +60,12 @@ func generateExpr(expr shast.Expr) string {
 	case *shast.ParamaterExpansion:
 		expression := generateParamaterExpr(expr.Expression)
 		return "${" + expression + "}"
+	case *shast.TestCommand:
+		test := generateExpr(expr.Expression)
+		return "[ " + test + " ]"
+	case *shast.CommandSub:
+		cmd := generateExpr(expr.Expression)
+		return "$(" + cmd + ")"
 	default:
 		panic(fmt.Sprintf("can not gen sh code, unknown expr type %T", expr))
 	}
@@ -118,8 +124,8 @@ func generateStmt(stmt shast.Stmt) codeBuilder {
 		expr := generateExpr(stmt.Expression)
 		return newCodeBuilder(expr)
 	case *shast.If:
-		test := generateStmt(stmt.Test)
-		ifUnit := newCodeUnitf("if %s; then", test.render())
+		test := generateExpr(stmt.Test)
+		ifUnit := newCodeUnitf("if %s; then", test)
 
 		for _, stmt := range stmt.Statements {
 			line := generateStmt(stmt)
@@ -129,8 +135,8 @@ func generateStmt(stmt shast.Stmt) codeBuilder {
 		ifBuilder := codeBuilder{}
 		ifBuilder.addUnit(ifUnit)
 		for _, elseIf := range stmt.ElseIfs {
-			test := generateStmt(elseIf.Test)
-			elseIfUnit := newCodeUnitf("elif %s; then", test.render())
+			test := generateExpr(elseIf.Test)
+			elseIfUnit := newCodeUnitf("elif %s; then", test)
 
 			bodyBuilder := generateStmts(stmt.Statements)
 			elseIfUnit.addChildren(bodyBuilder.units)
@@ -149,9 +155,6 @@ func generateStmt(stmt shast.Stmt) codeBuilder {
 		ifBuilder.addLine("fi")
 		return ifBuilder
 
-	case *shast.TestCommand:
-		expr := generateExpr(stmt.Expression)
-		return newCodeBuilder("[ " + expr + " ]")
 	default:
 		panic(fmt.Sprintf("can not gen sh code, unknown stmt type %T", stmt))
 	}

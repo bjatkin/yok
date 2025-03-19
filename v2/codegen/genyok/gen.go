@@ -31,7 +31,7 @@ func generateExpr(expr yokast.Expr, source []byte) string {
 	case *yokast.Identifier:
 		return expr.Token.Value(source)
 	case *yokast.Atom:
-		return expr.Value
+		return expr.Token.Value(source)
 	case *yokast.Call:
 		args := []string{}
 		for _, arg := range expr.Arguments {
@@ -41,7 +41,7 @@ func generateExpr(expr yokast.Expr, source []byte) string {
 		funcName := expr.Identifier.Token.Value(source)
 		return fmt.Sprintf("%s(%s)", funcName, strings.Join(args, ","))
 	case *yokast.String:
-		return expr.Value
+		return expr.Token.Value(source)
 	default:
 		panic(fmt.Sprintf("can not get yok code, unknown expr type %T", expr))
 	}
@@ -51,7 +51,7 @@ func generateStmt(stmt yokast.Stmt, indentDepth int, source []byte) string {
 	indent := strings.Repeat(indentToken, indentDepth)
 	switch stmt := stmt.(type) {
 	case *yokast.Comment:
-		return indent + stmt.Value
+		return indent + stmt.Token.Value(source)
 	case *yokast.If:
 		test := generateExpr(stmt.Test, source)
 		body := generateStmt(stmt.Body, indentDepth+1, source)

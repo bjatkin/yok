@@ -5,37 +5,51 @@
     NewLine(),
     IfStatement(
         Test=TestStatement(
-            Expression=InfixExpression(Operator="-gt", Left=Identifier(Token="X"), Right=String(Value="\"0\"")),
+            Expression=InfixExpression(
+                Operator="-gt",
+                Left=Identifier(Token="X", Quoted=true),
+                Right=String(Value="\"0\""),
+            ),
         ),
         Body=[
-            Execute(
-                Command="echo",
-                Arguments=[ String(Value="\"x is positive\"") ],
-                Redirects=[ ">&2" ],
+            StmtExpr(
+                Expression=Execute(
+                    Command="echo",
+                    Arguments=[ String(Value="\"x is positive\"") ],
+                    Redirects=[ ">&2" ],
+                ),
             ),
             IfStatement(
                 Test=TestStatement(
-                    Expression=InfixExpression(Operator="=", Left=Identifier(Token="Y"), Right=String(Value="\"20\"")),
+                    Expression=InfixExpression(
+                        Operator="=",
+                        Left=Identifier(Token="Y", Quoted=true),
+                        Right=String(Value="\"20\""),
+                    ),
                 ),
                 Body=[
-                    Execute(
-                        Command="echo",
-                        Arguments=[ String(Value="\"y is 20\"") ],
-                        Redirects=[ ">&2" ],
+                    StmtExpr(
+                        Expression=Execute(
+                            Command="echo",
+                            Arguments=[ String(Value="\"y is 20\"") ],
+                            Redirects=[ ">&2" ],
+                        ),
                     ),
                     IfStatement(
                         Test=TestStatement(
                             Expression=InfixExpression(
                                 Operator="!=",
-                                Left=Identifier(Token="Z"),
-                                Right=Identifier(Token="X"),
+                                Left=Identifier(Token="Z", Quoted=true),
+                                Right=Identifier(Token="X", Quoted=true),
                             ),
                         ),
                         Body=[
-                            Execute(
-                                Command="echo",
-                                Arguments=[ String(Value="\"z does not equal x\"") ],
-                                Redirects=[ ">&2" ],
+                            StmtExpr(
+                                Expression=Execute(
+                                    Command="echo",
+                                    Arguments=[ String(Value="\"z does not equal x\"") ],
+                                    Redirects=[ ">&2" ],
+                                ),
                             )
                         ],
                         ElseIfs=[],
@@ -48,28 +62,38 @@
         ],
         ElseIfs=[],
         ElseBody=[
-            Execute(
-                Command="echo",
-                Arguments=[ String(Value="\"x is negative or zero\"") ],
-                Redirects=[ ">&2" ],
+            StmtExpr(
+                Expression=Execute(
+                    Command="echo",
+                    Arguments=[ String(Value="\"x is negative or zero\"") ],
+                    Redirects=[ ">&2" ],
+                ),
             ),
             IfStatement(
                 Test=TestStatement(
-                    Expression=InfixExpression(Operator="!=", Left=Identifier(Token="Y"), Right=String(Value="\"20\"")),
+                    Expression=InfixExpression(
+                        Operator="!=",
+                        Left=Identifier(Token="Y", Quoted=true),
+                        Right=String(Value="\"20\""),
+                    ),
                 ),
                 Body=[
-                    Execute(
-                        Command="echo",
-                        Arguments=[ String(Value="\"y is not 20\"") ],
-                        Redirects=[ ">&2" ],
+                    StmtExpr(
+                        Expression=Execute(
+                            Command="echo",
+                            Arguments=[ String(Value="\"y is not 20\"") ],
+                            Redirects=[ ">&2" ],
+                        ),
                     )
                 ],
                 ElseIfs=[],
                 ElseBody=[
-                    Execute(
-                        Command="echo",
-                        Arguments=[ String(Value="\"y is still 20\"") ],
-                        Redirects=[ ">&2" ],
+                    StmtExpr(
+                        Expression=Execute(
+                            Command="echo",
+                            Arguments=[ String(Value="\"y is still 20\"") ],
+                            Redirects=[ ">&2" ],
+                        ),
                     )
                 ],
             )
@@ -78,43 +102,67 @@
     NewLine(),
     IfStatement(
         Test=TestStatement(
-            Expression=InfixExpression(Operator="-lt", Left=Identifier(Token="X"), Right=String(Value="\"0\"")),
+            Expression=InfixExpression(
+                Operator="-lt",
+                Left=Identifier(Token="X", Quoted=true),
+                Right=String(Value="\"0\""),
+            ),
         ),
         Body=[
-            Execute(
-                Command="echo",
-                Arguments=[ String(Value="\"x is negative\"") ],
-                Redirects=[ ">&2" ],
+            StmtExpr(
+                Expression=Execute(
+                    Command="echo",
+                    Arguments=[ String(Value="\"x is negative\"") ],
+                    Redirects=[ ">&2" ],
+                ),
             )
         ],
         ElseIfs=[
             Elif(
                 Test=TestStatement(
-                    Expression=InfixExpression(Operator="-gt", Left=Identifier(Token="X"), Right=String(Value="\"1\"")),
+                    Expression=InfixExpression(
+                        Operator="-gt",
+                        Left=Identifier(Token="X", Quoted=true),
+                        Right=String(Value="\"1\""),
+                    ),
                 ),
                 Body=[
-                    Execute(
-                        Command="echo",
-                        Arguments=[ String(Value="\"x is positive\"") ],
-                        Redirects=[ ">&2" ],
+                    StmtExpr(
+                        Expression=Execute(
+                            Command="echo",
+                            Arguments=[ String(Value="\"x is positive\"") ],
+                            Redirects=[ ">&2" ],
+                        ),
                     )
                 ],
             ),
             Elif(
                 Test=TestStatement(
-                    Expression=InfixExpression(Operator="=", Left=Identifier(Token="X"), Right=String(Value="\"1\"")),
+                    Expression=InfixExpression(
+                        Operator="=",
+                        Left=Identifier(Token="X", Quoted=true),
+                        Right=String(Value="\"1\""),
+                    ),
                 ),
                 Body=[
-                    Execute(
-                        Command="echo",
-                        Arguments=[ String(Value="\"x is one\"") ],
-                        Redirects=[ ">&2" ],
+                    StmtExpr(
+                        Expression=Execute(
+                            Command="echo",
+                            Arguments=[ String(Value="\"x is one\"") ],
+                            Redirects=[ ">&2" ],
+                        ),
                     )
                 ],
             )
         ],
         ElseBody=[
-            Execute(Command="echo", Arguments=[ String(Value="\"x is zero\"") ], Redirects=[ ">&2" ])
+            StmtExpr(
+                Expression=Execute(
+                    Command="echo",
+                    Arguments=[ String(Value="\"x is zero\"") ],
+                    Redirects=[ ">&2" ],
+                ),
+            )
         ],
     )
 ]

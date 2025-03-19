@@ -39,6 +39,11 @@ func TestParser_Parse(t *testing.T) {
 			sourceFile: "string_builtins.yok",
 			astFile:    "string_builtins_ast.txt",
 		},
+		{
+			name:       "nested expressiosn",
+			sourceFile: "nested_expressions.yok",
+			astFile:    "nested_expressions_ast.txt",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

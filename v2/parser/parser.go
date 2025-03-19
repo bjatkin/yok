@@ -137,16 +137,17 @@ func (p *Parser) parseStmt() yokast.Stmt {
 	switch p.peek().Type {
 	case token.Comment:
 		// we treat comments as statements because they need to show up in the generated code
-		comment := p.getValue(p.take())
+		commentToken := p.take()
 
 		if p.peek().Type != token.NewLine {
 			p.Errors = append(p.Errors, errors.New("comment did not end with a new line: "+p.getValue(p.peek())))
 			return nil
 		}
 
+		// take the trailining new line
 		_ = p.take()
 		return &yokast.Comment{
-			Value: comment,
+			Token: commentToken,
 		}
 	case token.NewLine:
 		// we treat empty new lines as statements because they need to show up in the generated code
@@ -363,7 +364,7 @@ func (p *Parser) parseStringLiteral() yokast.Expr {
 	}
 
 	return &yokast.String{
-		Value: p.getValue(p.take()),
+		Token: p.take(),
 	}
 }
 
@@ -379,7 +380,7 @@ func (p *Parser) parseAtom() yokast.Expr {
 	}
 
 	return &yokast.Atom{
-		Value: p.getValue(p.take()),
+		Token: p.take(),
 	}
 }
 
