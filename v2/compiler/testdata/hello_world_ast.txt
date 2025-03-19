@@ -3,9 +3,11 @@
     Assign(Identifier="SUBJECT", Value=String(Value="\"world\"")),
     NewLine(),
     Comment(Value="# say hello to the subject"),
-    Execute(
-        Command="echo",
-        Arguments=[ String(Value="\"Hello\""), Identifier(Token="SUBJECT", Quoted=false) ],
-        Redirects=[ ">&2" ],
+    StmtExpr(
+        Expression=Execute(
+            Command="echo",
+            Arguments=[ String(Value="\"Hello\""), Identifier(Token="SUBJECT", Quoted=false) ],
+            Redirects=[ ">&2" ],
+        ),
     )
 ]

@@ -502,6 +502,11 @@ func TestLexFile(t *testing.T) {
 			sourceFile: "string_builtins.yok",
 			tokenFile:  "string_builtins_tokens.txt",
 		},
+		{
+			name:       "nested expressions",
+			sourceFile: "nested_expressions.yok",
+			tokenFile:  "nested_expressions_tokens.txt",
+		},
 	}
 
 	for _, tt := range tests {

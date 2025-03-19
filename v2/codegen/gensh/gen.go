@@ -63,6 +63,9 @@ func generateExpr(expr shast.Expr) string {
 	case *shast.TestCommand:
 		test := generateExpr(expr.Expression)
 		return "[ " + test + " ]"
+	case *shast.CommandSub:
+		cmd := generateExpr(expr.Expression)
+		return "$(" + cmd + ")"
 	default:
 		panic(fmt.Sprintf("can not gen sh code, unknown expr type %T", expr))
 	}

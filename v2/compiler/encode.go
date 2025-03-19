@@ -37,7 +37,10 @@ func encodeNode(node shast.Node) repr.Value {
 			repr.NewField("Value", encodeNode(node.Value)),
 		)
 	case *shast.StmtExpr:
-		return encodeNode(node.Expression)
+		return repr.NewObject(
+			"StmtExpr",
+			repr.NewField("Expression", encodeNode(node.Expression)),
+		)
 	case *shast.String:
 		safeValue := strings.ReplaceAll(node.Value, "\"", "\\\"")
 		return repr.NewObject(
@@ -135,6 +138,12 @@ func encodeNode(node shast.Node) repr.Value {
 			repr.NewField("RemovePrefix", repr.Bool(node.RemovePrefix)),
 			repr.NewField("Paramater", paramater),
 			repr.NewField("Remove", remove),
+		)
+	case *shast.CommandSub:
+		expr := encodeNode(node.Expression)
+		return repr.NewObject(
+			"CommandSubstitution",
+			repr.NewField("Expression", expr),
 		)
 	default:
 		panic(fmt.Sprintf("can not encode sh node, unknown node type %T", node))

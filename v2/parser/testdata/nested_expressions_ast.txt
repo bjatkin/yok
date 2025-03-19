@@ -1,0 +1,47 @@
+[
+    Comment(Value="# valid nesting"),
+    Assign(Identifier=Token(Type="identifier", Pos=20, Value="name"), Value=String(Value="\"Jacob\"")),
+    FunctionCall(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=35, Value="print")),
+        Arguments=[
+            String(Value="\"Length of name is: \""),
+            FunctionCall(
+                Identifier=Identifier(Token=Token(Type="identifier", Pos=64, Value="len")),
+                Arguments=[ Identifier(Token=Token(Type="identifier", Pos=68, Value="name")) ],
+            )
+        ],
+    ),
+    NewLine(),
+    Comment(Value="# requires command substitution"),
+    FunctionCall(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=108, Value="print")),
+        Arguments=[
+            String(Value="\"hello\""),
+            FunctionCall(
+                Identifier=Identifier(Token=Token(Type="identifier", Pos=123, Value="echo")),
+                Arguments=[ String(Value="\"Alexis\"") ],
+            )
+        ],
+    ),
+    NewLine(),
+    Comment(Value="# nested paramater expansions"),
+    FunctionCall(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=170, Value="print")),
+        Arguments=[
+            FunctionCall(
+                Identifier=Identifier(Token=Token(Type="identifier", Pos=176, Value="len")),
+                Arguments=[
+                    FunctionCall(
+                        Identifier=Identifier(Token=Token(Type="identifier", Pos=180, Value="len")),
+                        Arguments=[
+                            FunctionCall(
+                                Identifier=Identifier(Token=Token(Type="identifier", Pos=184, Value="len")),
+                                Arguments=[ String(Value="\"hello\"") ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+    )
+]

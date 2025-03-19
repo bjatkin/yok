@@ -1,6 +1,7 @@
 package token
 
 import (
+	"fmt"
 	"unicode/utf8"
 )
 
@@ -12,6 +13,7 @@ const (
 	Invalid Type = iota
 	EOF
 	Identifier
+	IRIdentifier
 	Comment
 	NewLine
 
@@ -71,6 +73,7 @@ var stringerMap = map[Type]string{
 	Invalid:          "invalid",
 	EOF:              "eof",
 	Identifier:       "identifier",
+	IRIdentifier:     "ir_identifier",
 	Comment:          "comment",
 	NewLine:          "new_line",
 	LetKeyword:       "let",
@@ -181,6 +184,11 @@ func NewToken(t Type, pos, len int) Token {
 
 // Value is the string value of the token
 func (t Token) Value(source []byte) string {
+	// TODO: this is kinda a hack. I really want a better way to do this but it works for now
+	if t.Type == IRIdentifier {
+		return fmt.Sprintf("_TMP%d", t.Pos)
+	}
+
 	start := int(t.Pos)
 	return string(source[start : start+t.Len])
 }

@@ -130,6 +130,12 @@ type GroupExpr struct {
 	Expression Expr
 }
 
+// CommandSub represents a command substitution
+type CommandSub struct {
+	Expr
+	Expression Expr
+}
+
 // ParamaterExpr is a valid Expression that can appear in a ParameterExpansion expression
 type ParamaterExpr interface {
 	Node

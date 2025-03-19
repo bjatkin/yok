@@ -1,0 +1,9 @@
+# valid nesting
+let name = "Jacob"
+print("Length of name is: ", len(name))
+
+# requires command substitution
+print("hello", echo("Alexis"))
+
+# nested paramater expansions
+print(len(len(len("hello"))))

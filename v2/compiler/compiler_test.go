@@ -40,6 +40,11 @@ func TestCompiler_Compile(t *testing.T) {
 			sourceFile: "string_builtins.yok",
 			astFile:    "string_builtins_ast.txt",
 		},
+		{
+			name:       "nested expressions",
+			sourceFile: "nested_expressions.yok",
+			astFile:    "nested_expressions_ast.txt",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -61,7 +66,11 @@ func TestCompiler_Compile(t *testing.T) {
 			compiler := New(source)
 			shScript, err := compiler.Compile(yokScript)
 			if err != nil {
-				t.Fatal("Compiler.Compile() failed to compile from yok to sh ast", err)
+				t.Error("Compiler.Compile() failed to compile from yok to sh ast", err)
+				for _, err := range compiler.errors {
+					t.Error("\tcompliation error: ", err)
+				}
+				return
 			}
 
 			got := encodeScript(shScript)

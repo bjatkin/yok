@@ -1,6 +1,8 @@
 package compiler
 
 import (
+	"fmt"
+
 	"github.com/bjatkin/yok/ast/shast"
 	"github.com/bjatkin/yok/ast/yokast"
 	"github.com/bjatkin/yok/errors"
@@ -82,7 +84,7 @@ func compileLen(args []shast.Expr) (*shast.ParameterLength, error) {
 
 	identifier, ok := args[0].(*shast.Identifier)
 	if !ok {
-		return nil, errors.New("len() only supports identifiers")
+		return nil, errors.New(fmt.Sprintf("len() only supports identifiers, but got (%T)%#v", args[0], args[0]))
 	}
 
 	// TODO: fix this to support expressions other than identifiers

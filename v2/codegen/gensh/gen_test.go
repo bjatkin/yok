@@ -41,6 +41,11 @@ func TestGenerate(t *testing.T) {
 			yokFile: "string_builtins.yok",
 			shFile:  "string_builtins.sh",
 		},
+		{
+			name:    "nested expressions",
+			yokFile: "nested_expressions.yok",
+			shFile:  "nested_expressions.sh",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

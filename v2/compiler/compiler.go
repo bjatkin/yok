@@ -41,6 +41,10 @@ func (c *Compiler) addError(err error) {
 
 // Compile creates an shast.Script from the given yokast.Script
 func (c *Compiler) Compile(script *yokast.Script) (*shast.Script, error) {
+	// fix the yokast before trying to complie to sh AST
+	f := fixer{source: c.source}
+	script.Statements = f.walkStmts(script.Statements)
+
 	stmts := c.compileStatements(script.Statements)
 
 	if len(c.errors) > 0 {
@@ -160,6 +164,12 @@ func (c *Compiler) compileExpr(expr yokast.Expr) shast.Expr {
 		expr := c.compileExpr(e.Expression)
 
 		return &shast.GroupExpr{
+			Expression: expr,
+		}
+	case *yokast.NestedCall:
+		expr := c.compileExpr(e.Call)
+
+		return &shast.CommandSub{
 			Expression: expr,
 		}
 	default:
