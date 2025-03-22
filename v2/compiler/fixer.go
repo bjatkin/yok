@@ -56,36 +56,6 @@ func (f *fixer) fixExpr(expr yokast.Expr, depth int) ([]yokast.Stmt, yokast.Expr
 			e.Arguments[0] = target
 
 			return prefix, e
-		case "replace":
-			if len(e.Arguments) != 3 {
-				return nil, e
-			}
-
-			targetStmts, target := f.simplifyToIdent(e.Arguments[0], depth+1)
-			e.Arguments[0] = target
-			findStmts, find := f.simplifyToStringOrCommand(e.Arguments[1], depth+1)
-			e.Arguments[1] = find
-			replaceStmts, replace := f.simplifyToStringOrCommand(e.Arguments[2], depth+1)
-			e.Arguments[2] = replace
-
-			prefix := append(targetStmts, findStmts...)
-			prefix = append(prefix, replaceStmts...)
-			return prefix, e
-		case "replace_all":
-			if len(e.Arguments) != 3 {
-				return nil, e
-			}
-
-			targetStmts, target := f.simplifyToIdent(e.Arguments[0], depth+1)
-			e.Arguments[0] = target
-			findStmts, find := f.simplifyToStringOrCommand(e.Arguments[1], depth+1)
-			e.Arguments[1] = find
-			replaceStmts, replace := f.simplifyToStringOrCommand(e.Arguments[2], depth+1)
-			e.Arguments[2] = replace
-
-			prefix := append(targetStmts, findStmts...)
-			prefix = append(prefix, replaceStmts...)
-			return prefix, e
 		case "remove_suffix":
 			if len(e.Arguments) != 2 {
 				return nil, e

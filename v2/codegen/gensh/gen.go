@@ -76,19 +76,7 @@ func generateParamaterExpr(expr shast.ParamaterExpr) string {
 	case *shast.ParameterLength:
 		return "#" + expr.Paramater.Value
 	case *shast.ParamaterRemoveFix:
-		if e, ok := expr.Remove.(*shast.Identifier); ok {
-			fmt.Println("remove is an identifier: ", e.Value)
-		}
-		if e, ok := expr.Remove.(*shast.CommandSub); ok {
-			fmt.Println("remove is a command sub: ", e.Expression)
-		}
-
 		remove := generateExpr(expr.Remove)
-		// _, ok := expr.Remove.(*shast.String)
-		// if !ok {
-		// 	remove = fmt.Sprintf("$(echo -n %s)", remove)
-		// }
-
 		if expr.RemovePrefix {
 			return expr.Paramater.Value + "##" + remove
 		}
