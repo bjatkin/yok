@@ -202,7 +202,7 @@ func (p *Parser) parseAssignStmt() *yokast.Assign {
 	_ = p.take()
 
 	return &yokast.Assign{
-		Identifier: ident,
+		Identifier: &yokast.Identifier{Token: ident},
 		Value:      value,
 	}
 }
@@ -322,7 +322,9 @@ func (p *Parser) parseExpr(leftPrecedence precedence) yokast.Expr {
 	left := prefix()
 
 	for p.peek().Type != token.EOF {
-		if p.peek().Type == token.NewLine {
+		tokenType := p.peek().Type
+		if tokenType == token.NewLine ||
+			tokenType == token.Comma {
 			break
 		}
 
@@ -332,11 +334,8 @@ func (p *Parser) parseExpr(leftPrecedence precedence) yokast.Expr {
 
 		infix, ok := p.infixParseFn[p.peek().Type]
 		if !ok {
-			return left
+			break
 		}
-
-		// // take the infix operator since that's implied by the infix parse function
-		// _ = p.lexer.take()
 
 		left = infix(left)
 	}
@@ -426,8 +425,6 @@ func (p *Parser) parseIdentifier() yokast.Expr {
 //
 // print("hello world")
 func (p *Parser) parseCall(ident yokast.Expr) yokast.Expr {
-	// need to take the initial '('
-	_ = p.take()
 
 	identifier, ok := ident.(*yokast.Identifier)
 	if !ok {
@@ -435,10 +432,14 @@ func (p *Parser) parseCall(ident yokast.Expr) yokast.Expr {
 		return nil
 	}
 
+	// need to take the initial '('
+	_ = p.take()
+
 	args := []yokast.Expr{}
-	for {
+	for p.peek().Type != token.EOF {
 		// just skip new lines when parsing arguments
 		if p.peek().Type == token.NewLine {
+			_ = p.take()
 			continue
 		}
 
@@ -450,8 +451,20 @@ func (p *Parser) parseCall(ident yokast.Expr) yokast.Expr {
 
 		args = append(args, expr)
 
+		expectNextArg := false
 		if p.peek().Type == token.Comma {
 			_ = p.take()
+			expectNextArg = true
+		}
+
+		if p.peek().Type == token.NewLine {
+			_ = p.take()
+			if p.peek().Type == token.CloseParen {
+				expectNextArg = false
+			}
+		}
+
+		if expectNextArg {
 			continue
 		}
 

@@ -372,22 +372,31 @@ func matchAtomLiteral(chars []byte, pos int) (token.Token, bool) {
 
 	i := 1
 	for ; i < len(chars); i++ {
+		char := chars[i]
 		// valid special characters that can show up in an atom. Most of these are supported
 		// so you can use atoms for basic file paths
-		if chars[i] == '/' ||
-			chars[i] == '.' ||
-			chars[i] == '_' ||
-			chars[i] == '(' ||
-			chars[i] == ')' {
+		if char == '/' ||
+			char == '.' ||
+			char == '_' ||
+			char == '-' {
 			continue
 		}
 
 		// this byte is an upper or lower case letter
-		if isAlpha(chars[i]) || isNumeric(chars[i]) {
+		if isAlpha(char) || isNumeric(char) {
 			continue
 		}
 
-		if chars[i] == ' ' || chars[i] == '\r' || chars[i] == '\n' {
+		if char == ' ' ||
+			char == '\r' ||
+			char == '\n' ||
+			char == ',' ||
+			char == ')' ||
+			char == '(' ||
+			char == '}' ||
+			char == '{' ||
+			char == ']' ||
+			char == '[' {
 			break
 		}
 

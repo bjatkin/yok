@@ -1,6 +1,18 @@
 let greet = "hello world"
 let greet_len = len(greet)
-let greet_friend = replace(greet, "world", "friend")
-let strange_greeting = replace_all(greet, "l", "i")
 let place = remove_prefix(greet, "hello ")
+print(place)
 let short_greet = remove_suffix(greet, " world")
+print(short_greet)
+
+# use literal instead of identifier
+let state_len = len("new york")
+
+# use call instead of identifier
+let state_len = len(echo("new mexico"))
+
+# use identifiers for remove fix
+let t = "test"
+let i = "ing"
+print(remove_prefix("testing", t))
+print(remove_suffix("testing", i))

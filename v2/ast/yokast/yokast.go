@@ -35,7 +35,7 @@ type NewLine struct {
 // Assign is a let statement
 type Assign struct {
 	Stmt
-	Identifier token.Token
+	Identifier *Identifier
 	Value      Expr
 }
 
@@ -72,7 +72,23 @@ type Expr interface {
 // String is a string literal
 type String struct {
 	Expr
+	value string
 	Token token.Token
+}
+
+func NewInternalString(value string, token token.Token) *String {
+	return &String{
+		value: value,
+		Token: token,
+	}
+}
+
+func (s *String) Value(source []byte) string {
+	if s.value != "" {
+		return s.value
+	}
+
+	return s.Token.Value(source)
 }
 
 // Atom is an atom
@@ -91,7 +107,24 @@ type Call struct {
 // Identifier is a yok identifier
 type Identifier struct {
 	Expr
+	// only used for internal complier itendifier names, otherwise the token should be used
+	name  string
 	Token token.Token
+}
+
+func NewInternalIdentifier(name string, token token.Token) *Identifier {
+	return &Identifier{
+		name:  name,
+		Token: token,
+	}
+}
+
+func (i *Identifier) Name(source []byte) string {
+	if i.name != "" {
+		return i.name
+	}
+
+	return i.Token.Value(source)
 }
 
 // InfixExpr is a yok infix expression

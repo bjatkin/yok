@@ -62,7 +62,7 @@ func encodeNode(node yokast.Node, source []byte) repr.Value {
 	case *yokast.NewLine:
 		return repr.NewObject("NewLine")
 	case *yokast.Assign:
-		identifier := encodeToken(node.Identifier, source)
+		identifier := encodeNode(node.Identifier, source)
 		value := encodeNode(node.Value, source)
 		return repr.NewObject(
 			"Assign",
@@ -72,7 +72,7 @@ func encodeNode(node yokast.Node, source []byte) repr.Value {
 	case *yokast.StmtExpr:
 		return encodeNode(node.Expression, source)
 	case *yokast.String:
-		safeValue := strings.ReplaceAll(node.Token.Value(source), "\"", "\\\"")
+		safeValue := strings.ReplaceAll(node.Value(source), "\"", "\\\"")
 		return repr.NewObject(
 			"String",
 			repr.NewField("Value", repr.String(safeValue)),

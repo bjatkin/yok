@@ -1,6 +1,9 @@
 [
     Comment(Value="# set the subject name"),
-    Assign(Identifier=Token(Type="identifier", Pos=28, Value="subject"), Value=Atom(Value=":world")),
+    Assign(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=28, Value="subject")),
+        Value=Atom(Value=":world"),
+    ),
     NewLine(),
     Comment(Value="# say hello to the subject"),
     FunctionCall(

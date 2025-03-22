@@ -6,11 +6,6 @@ print("full name: ", full_name)
 let name_len = len(full_name)
 print("name len: ", name_len)
 
-let greet = "Hello"
-# we use <start:end> here to preserve [start:end] for arrays if we ever add them
-# start or end can be omitted if they are 0 or len(str) respectively
-let sub_string = greet<:4>
-
 let greet_world = "{greet} World"
 print(greet_world)
 

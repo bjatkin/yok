@@ -1,6 +1,9 @@
 [
     Comment(Value="# valid nesting"),
-    Assign(Identifier=Token(Type="identifier", Pos=20, Value="name"), Value=String(Value="\"Jacob\"")),
+    Assign(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=20, Value="name")),
+        Value=String(Value="\"Jacob\""),
+    ),
     FunctionCall(
         Identifier=Identifier(Token=Token(Type="identifier", Pos=35, Value="print")),
         Arguments=[
@@ -24,22 +27,67 @@
         ],
     ),
     NewLine(),
-    Comment(Value="# nested paramater expansions"),
+    Comment(Value="# requires many levels of command substitution"),
     FunctionCall(
-        Identifier=Identifier(Token=Token(Type="identifier", Pos=170, Value="print")),
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=187, Value="print")),
         Arguments=[
+            String(Value="\"go bin:\""),
             FunctionCall(
-                Identifier=Identifier(Token=Token(Type="identifier", Pos=176, Value="len")),
+                Identifier=Identifier(Token=Token(Type="identifier", Pos=204, Value="echo")),
                 Arguments=[
                     FunctionCall(
-                        Identifier=Identifier(Token=Token(Type="identifier", Pos=180, Value="len")),
+                        Identifier=Identifier(Token=Token(Type="identifier", Pos=209, Value="ls")),
+                        Arguments=[
+                            Atom(Value=":-la"),
+                            FunctionCall(
+                                Identifier=Identifier(Token=Token(Type="identifier", Pos=218, Value="which")),
+                                Arguments=[ Atom(Value=":go") ],
+                            )
+                        ],
+                    )
+                ],
+            )
+        ],
+    ),
+    NewLine(),
+    Comment(Value="# nested paramater expansions"),
+    FunctionCall(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=263, Value="print")),
+        Arguments=[
+            FunctionCall(
+                Identifier=Identifier(Token=Token(Type="identifier", Pos=269, Value="len")),
+                Arguments=[
+                    FunctionCall(
+                        Identifier=Identifier(Token=Token(Type="identifier", Pos=273, Value="len")),
                         Arguments=[
                             FunctionCall(
-                                Identifier=Identifier(Token=Token(Type="identifier", Pos=184, Value="len")),
+                                Identifier=Identifier(Token=Token(Type="identifier", Pos=277, Value="len")),
                                 Arguments=[ String(Value="\"hello\"") ],
                             )
                         ],
                     )
+                ],
+            )
+        ],
+    ),
+    Assign(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=297, Value="exclaim")),
+        Value=String(Value="\"¿What! What! are you doing!?\""),
+    ),
+    FunctionCall(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=339, Value="print")),
+        Arguments=[
+            FunctionCall(
+                Identifier=Identifier(Token=Token(Type="identifier", Pos=350, Value="remove_suffix")),
+                Arguments=[
+                    FunctionCall(
+                        Identifier=Identifier(Token=Token(Type="identifier", Pos=373, Value="remove_prefix")),
+                        Arguments=[
+                            Identifier(Token=Token(Type="identifier", Pos=400, Value="exclaim")),
+                            String(Value="\"¿\"")
+                        ],
+                    ),
+                    String(Value="\"?\"")
                 ],
             )
         ],

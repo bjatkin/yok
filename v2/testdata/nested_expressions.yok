@@ -5,5 +5,18 @@ print("Length of name is: ", len(name))
 # requires command substitution
 print("hello", echo("Alexis"))
 
+# requires many levels of command substitution
+print("go bin:", echo(ls(:-la, which(:go))))
+
 # nested paramater expansions
 print(len(len(len("hello"))))
+let exclaim = "¿What! What! are you doing!?"
+print(
+    remove_suffix(
+        remove_prefix(
+            exclaim,
+            "¿",
+        ),
+        "?",
+    ),
+)

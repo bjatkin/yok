@@ -119,17 +119,6 @@ func encodeNode(node shast.Node) repr.Value {
 			"ParamaterLenght",
 			repr.NewField("Paramater", paramater),
 		)
-	case *shast.ParamaterReplace:
-		paramater := encodeNode(node.Paramater)
-		find := encodeNode(node.Find)
-		replace := encodeNode(node.Replace)
-		return repr.NewObject(
-			"ParamaterReplace",
-			repr.NewField("ReplaceAll", repr.Bool(node.ReplaceAll)),
-			repr.NewField("Paramater", paramater),
-			repr.NewField("Find", find),
-			repr.NewField("Replace", replace),
-		)
 	case *shast.ParamaterRemoveFix:
 		paramater := encodeNode(node.Paramater)
 		remove := encodeNode(node.Remove)

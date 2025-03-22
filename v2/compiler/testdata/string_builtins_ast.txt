@@ -5,28 +5,6 @@
         Value=ParamaterExpansion(Expression=ParamaterLenght(Paramater=Identifier(Token="GREET", Quoted=false))),
     ),
     Assign(
-        Identifier="GREET_FRIEND",
-        Value=ParamaterExpansion(
-            Expression=ParamaterReplace(
-                ReplaceAll=false,
-                Paramater=Identifier(Token="GREET", Quoted=false),
-                Find=String(Value="\"world\""),
-                Replace=String(Value="\"friend\""),
-            ),
-        ),
-    ),
-    Assign(
-        Identifier="STRANGE_GREETING",
-        Value=ParamaterExpansion(
-            Expression=ParamaterReplace(
-                ReplaceAll=true,
-                Paramater=Identifier(Token="GREET", Quoted=false),
-                Find=String(Value="\"l\""),
-                Replace=String(Value="\"i\""),
-            ),
-        ),
-    ),
-    Assign(
         Identifier="PLACE",
         Value=ParamaterExpansion(
             Expression=ParamaterRemoveFix(
@@ -34,6 +12,13 @@
                 Paramater=Identifier(Token="GREET", Quoted=false),
                 Remove=String(Value="\"hello \""),
             ),
+        ),
+    ),
+    StmtExpr(
+        Expression=Execute(
+            Command="echo",
+            Arguments=[ Identifier(Token="PLACE", Quoted=false) ],
+            Redirects=[ ">&2" ],
         ),
     ),
     Assign(
@@ -44,6 +29,80 @@
                 Paramater=Identifier(Token="GREET", Quoted=false),
                 Remove=String(Value="\" world\""),
             ),
+        ),
+    ),
+    StmtExpr(
+        Expression=Execute(
+            Command="echo",
+            Arguments=[ Identifier(Token="SHORT_GREET", Quoted=false) ],
+            Redirects=[ ">&2" ],
+        ),
+    ),
+    NewLine(),
+    Comment(Value="# use literal instead of identifier"),
+    Assign(Identifier="_TMP1", Value=String(Value="\"new york\"")),
+    Assign(
+        Identifier="STATE_LEN",
+        Value=ParamaterExpansion(Expression=ParamaterLenght(Paramater=Identifier(Token="_TMP1", Quoted=false))),
+    ),
+    NewLine(),
+    Comment(Value="# use call instead of identifier"),
+    Assign(
+        Identifier="_TMP2",
+        Value=CommandSubstitution(
+            Expression=Execute(Command="echo", Arguments=[ String(Value="\"new mexico\"") ], Redirects=[]),
+        ),
+    ),
+    Assign(
+        Identifier="STATE_LEN",
+        Value=ParamaterExpansion(Expression=ParamaterLenght(Paramater=Identifier(Token="_TMP2", Quoted=false))),
+    ),
+    NewLine(),
+    Comment(Value="# use identifiers for remove fix"),
+    Assign(Identifier="T", Value=String(Value="\"test\"")),
+    Assign(Identifier="I", Value=String(Value="\"ing\"")),
+    Assign(Identifier="_TMP3", Value=String(Value="\"testing\"")),
+    StmtExpr(
+        Expression=Execute(
+            Command="echo",
+            Arguments=[
+                ParamaterExpansion(
+                    Expression=ParamaterRemoveFix(
+                        RemovePrefix=true,
+                        Paramater=Identifier(Token="_TMP3", Quoted=false),
+                        Remove=CommandSubstitution(
+                            Expression=Execute(
+                                Command="echo",
+                                Arguments=[ String(Value="-n"), Identifier(Token="T", Quoted=false) ],
+                                Redirects=[],
+                            ),
+                        ),
+                    ),
+                )
+            ],
+            Redirects=[ ">&2" ],
+        ),
+    ),
+    Assign(Identifier="_TMP4", Value=String(Value="\"testing\"")),
+    StmtExpr(
+        Expression=Execute(
+            Command="echo",
+            Arguments=[
+                ParamaterExpansion(
+                    Expression=ParamaterRemoveFix(
+                        RemovePrefix=false,
+                        Paramater=Identifier(Token="_TMP4", Quoted=false),
+                        Remove=CommandSubstitution(
+                            Expression=Execute(
+                                Command="echo",
+                                Arguments=[ String(Value="-n"), Identifier(Token="I", Quoted=false) ],
+                                Redirects=[],
+                            ),
+                        ),
+                    ),
+                )
+            ],
+            Redirects=[ ">&2" ],
         ),
     )
 ]

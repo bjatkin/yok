@@ -154,15 +154,6 @@ type ParameterLength struct {
 	Paramater *Identifier
 }
 
-// ParameterReplace is a ParamaterExpr used to do a find and replace on the given paramater
-type ParamaterReplace struct {
-	ParamaterExpr
-	ReplaceAll bool
-	Paramater  *Identifier
-	Find       Expr
-	Replace    Expr
-}
-
 // ParamaterRemoveFix is a ParamaterExpr used to remove the prefix or suffix of a string
 type ParamaterRemoveFix struct {
 	ParamaterExpr

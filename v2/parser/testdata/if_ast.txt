@@ -1,7 +1,16 @@
 [
-    Assign(Identifier=Token(Type="identifier", Pos=4, Value="x"), Value=Atom(Value=":10")),
-    Assign(Identifier=Token(Type="identifier", Pos=17, Value="y"), Value=Atom(Value=":20")),
-    Assign(Identifier=Token(Type="identifier", Pos=30, Value="z"), Value=Atom(Value=":30")),
+    Assign(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=4, Value="x")),
+        Value=Atom(Value=":10"),
+    ),
+    Assign(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=17, Value="y")),
+        Value=Atom(Value=":20"),
+    ),
+    Assign(
+        Identifier=Identifier(Token=Token(Type="identifier", Pos=30, Value="z")),
+        Value=Atom(Value=":30"),
+    ),
     NewLine(),
     IfStatement(
         Test=InfixExpression(

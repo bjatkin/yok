@@ -397,6 +397,15 @@ func Test_matchAtomLiteral(t *testing.T) {
 			wantOk: true,
 		},
 		{
+			name: "atom followed by close paren",
+			args: args{
+				chars: []byte(":go)"),
+				pos:   243,
+			},
+			want:   token.Token{Type: token.Atom, Pos: 243, Len: 3},
+			wantOk: true,
+		},
+		{
 			name: "valid atom",
 			args: args{
 				chars: []byte(":success"),

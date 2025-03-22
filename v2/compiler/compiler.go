@@ -77,7 +77,7 @@ func (c *Compiler) compileStmt(stmt yokast.Stmt) shast.Stmt {
 			Value: s.Token.Value(c.source),
 		}
 	case *yokast.Assign:
-		identifier := s.Identifier.Value(c.source)
+		identifier := s.Identifier.Name(c.source)
 		identifier = strings.ToUpper(identifier)
 
 		value := c.compileExpr(s.Value)
@@ -133,7 +133,7 @@ func (c *Compiler) compileStmt(stmt yokast.Stmt) shast.Stmt {
 func (c *Compiler) compileExpr(expr yokast.Expr) shast.Expr {
 	switch e := expr.(type) {
 	case *yokast.String:
-		value := e.Token.Value(c.source)
+		value := e.Value(c.source)
 		return &shast.String{Value: value}
 	case *yokast.Atom:
 		value := e.Token.Value(c.source)
@@ -142,7 +142,7 @@ func (c *Compiler) compileExpr(expr yokast.Expr) shast.Expr {
 
 		return &shast.String{Value: value}
 	case *yokast.Identifier:
-		value := e.Token.Value(c.source)
+		value := e.Name(c.source)
 		value = strings.ToUpper(value)
 
 		return &shast.Identifier{Value: value}
